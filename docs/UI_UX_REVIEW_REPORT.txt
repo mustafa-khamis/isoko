@@ -1,0 +1,10 @@
+UI/UX Review Report
+===================
+Status: COMPLETE
+
+Enhancements:
+1. Re-structured AuthModal to directly expose the email sign-in/sign-up form with Google OAuth positioned prominently at the top.
+2. Removed the multi-step "Welcome" screen hurdle.
+3. Cleaned up the Home layout to immediately present the active listings without filler content.
+4. Added local preview functionality for Images on CreateListing before they are uploaded.
+5. Prevented visual shifts by ensuring Auth Modal matches mobile layout guidelines strictly and closes intelligently upon auth.

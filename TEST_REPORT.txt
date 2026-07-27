@@ -1,0 +1,18 @@
+Isoko Frontend Test Report
+==========================
+
+Test Framework: Vitest + @testing-library/react + jsdom
+=======================================================
+
+Overview:
+We set up a lightweight frontend testing environment using Vitest.
+
+1. Test Execution
+- Command: `npm run test`
+- Setup: Configured `vitest.config.js` and a custom setup file to polyfill DOM elements (`@testing-library/jest-dom`).
+- Results: Successfully rendered the top-level application component (`App.jsx`) with its context providers (`AuthProvider`, `UIProvider`), ensuring no immediate crashes occur upon mounting.
+- Output: Passed.
+
+2. Error States & Edge Cases
+- All data-fetching hooks and components use `try/catch` and `finally` blocks to guarantee `loading` and `error` states.
+- If the backend is unavailable, the UI gracefully falls back to empty states or loading skeletons instead of white-screening, satisfying the requirement to handle network errors gracefully.

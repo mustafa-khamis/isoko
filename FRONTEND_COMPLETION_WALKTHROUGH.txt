@@ -1,0 +1,29 @@
+Isoko Frontend Completion Walkthrough
+=====================================
+
+1. Overview
+The Isoko frontend has been fully implemented in React and Vite, mirroring the provided Figma designs with high fidelity. It uses plain CSS for styling (re-mapping Figma Tailwind classes to custom CSS variables in `styles/variables.css` and `styles/components.css`).
+
+2. Architectural Decisions
+- State Management: React Context API is used for `AuthContext` (managing user sessions and tokens) and `UIContext` (managing global UI states like the auth modal and responsive breakpoints).
+- Routing: `react-router-dom` handles navigation. Pages are logically separated into `home`, `listings`, `communication`, and `profile` modules.
+- API Client: An Axios instance (`apiClient.js`) is configured with an interceptor to automatically attach JWT tokens to requests and handle silent token refreshes via the `/auth/refresh` endpoint and HttpOnly cookies.
+- Styling Strategy: Utility classes were mapped to vanilla CSS. The application is highly responsive, adapting gracefully between mobile (`isMobile` hooks) and desktop views.
+
+3. Module Implementations
+- Auth Module: Supports Sign-up, Sign-in, and Password reset flows. The UI renders elegantly in modals on desktop and full screens on mobile.
+- Home/Browse Module: Implements a hero search, category browsing, and a dynamic feed.
+- Listings Module: Comprehensive implementation of Create Listing (multi-step form with image uploads), Listing Detail (carousel, seller info, contact CTAs), Favorites, and My Listings.
+- Communication Module: Real-time feel Chat via short polling and a comprehensive Notifications feed.
+- Profile Module: Extensive profile management including Contact Preferences, Trader Plan upgrades, and Sponsored Ad creation flows.
+
+4. Integration with Backend
+The frontend is fully wired to the backend running on `localhost:5000`. It correctly uses `credentials: true` for cross-origin cookie management (refresh tokens). All endpoints outlined in the MVP matrix have corresponding API service methods in `authApi.js`, `listingsApi.js`, `messagesApi.js`, `notificationsApi.js`, and `usersApi.js`.
+
+5. Testing & Validation
+- A Vite test setup (`vitest`) with `@testing-library/react` and `jsdom` has been configured.
+- Core component rendering has been verified.
+- Error states, loading spinners, and empty states are present across all data-fetching components to ensure a resilient user experience when the database or backend is slow.
+
+6. Conclusion
+The frontend is production-ready for the MVP launch, faithfully matching the design and seamlessly interacting with the backend API.

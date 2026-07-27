@@ -1,0 +1,319 @@
+/* ListingCard Styles */
+
+.listing-price-contact {
+  color: var(--color-brand-700);
+  font-weight: 700;
+  font-size: 1rem;
+}
+
+.listing-price-container {
+  display: flex;
+  align-items: baseline;
+  gap: 0.375rem;
+  flex-wrap: wrap;
+}
+
+.listing-price {
+  color: var(--color-ink-950);
+  font-weight: 700;
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.listing-price-negotiable {
+  color: var(--color-ink-400);
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+/* List Variant */
+.listing-card-list {
+  width: 100%;
+  display: flex;
+  gap: var(--spacing-3);
+  background-color: var(--color-surface);
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--color-ink-200);
+  padding: var(--spacing-3);
+  text-align: left;
+  transition: all 0.15s;
+}
+
+.listing-card-list:hover {
+  border-color: var(--color-ink-300);
+  box-shadow: var(--shadow-sm);
+}
+
+.listing-card-list-img-wrapper {
+  width: 6rem;
+  height: 6rem;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  background-color: var(--color-ink-100);
+  flex-shrink: 0;
+}
+
+.listing-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.listing-card-list-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.listing-title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-ink-800);
+  line-height: 1.3;
+}
+
+.listing-price-wrapper {
+  margin-top: 0.25rem;
+}
+
+.listing-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.375rem;
+  color: var(--color-ink-400);
+  font-size: 0.75rem;
+}
+
+.listing-meta-item {
+  display: flex;
+  align-items: center;
+  gap: 0.125rem;
+}
+
+.listing-meta-dot {
+  /* Separator */
+}
+
+.listing-fav-btn-list {
+  align-self: flex-start;
+  padding: 0.375rem;
+  border-radius: var(--radius-full);
+  transition: colors 0.15s;
+  color: var(--color-ink-300);
+}
+
+.listing-fav-btn-list:hover {
+  color: var(--color-ink-500);
+}
+
+.listing-fav-btn-list.saved {
+  color: var(--color-brand-600);
+}
+
+/* Grid Variant */
+.listing-card-grid {
+  width: 100%;
+  background-color: var(--color-surface);
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--color-ink-200);
+  overflow: hidden;
+  text-align: left;
+  transition: all 0.2s;
+  display: flex;
+  flex-direction: column;
+}
+
+.listing-card-grid:hover {
+  border-color: var(--color-ink-300);
+  box-shadow: var(--shadow-md);
+}
+
+.listing-card-img-container {
+  position: relative;
+  overflow: hidden;
+  background-color: var(--color-ink-100);
+  aspect-ratio: 4 / 3;
+}
+
+.listing-img-grid {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s;
+}
+
+.listing-card-grid:hover .listing-img-grid {
+  transform: scale(1.02);
+}
+
+.listing-badges {
+  position: absolute;
+  top: 0.5rem;
+  left: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.listing-badge-promoted {
+  display: flex;
+  align-items: center;
+  gap: 0.125rem;
+  background-color: #f59e0b; /* amber-500 */
+  color: white;
+  font-size: 10px;
+  font-weight: 600;
+  padding: 0.125rem 0.375rem;
+  border-radius: var(--radius-md);
+}
+
+.listing-badge-new {
+  background-color: var(--color-brand-600);
+  color: white;
+  font-size: 10px;
+  font-weight: 600;
+  padding: 0.125rem 0.375rem;
+  border-radius: var(--radius-md);
+  align-self: flex-start;
+}
+
+.listing-fav-btn-grid {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: var(--radius-full);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(4px);
+  transition: all 0.15s;
+  background-color: rgba(255, 255, 255, 0.8);
+  color: var(--color-ink-400);
+}
+
+.listing-fav-btn-grid:hover {
+  background-color: white;
+  color: var(--color-ink-700);
+}
+
+.listing-fav-btn-grid.saved {
+  background-color: var(--color-brand-600);
+  color: white;
+}
+
+.listing-badge-seller {
+  position: absolute;
+  bottom: 0.5rem;
+  left: 0.5rem;
+}
+
+.listing-badge-seller span {
+  background-color: rgba(255, 255, 255, 0.9);
+  color: var(--color-brand-700);
+  font-size: 9px;
+  font-weight: 700;
+  padding: 0.125rem 0.375rem;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--color-brand-200);
+}
+
+.listing-card-info {
+  padding: var(--spacing-3);
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  flex: 1;
+}
+
+.listing-card-grid.compact .listing-card-info {
+  padding: var(--spacing-2);
+}
+
+.listing-card-grid.compact .listing-title {
+  font-size: 0.75rem;
+}
+
+.mt-auto {
+  margin-top: auto;
+}
+.truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.shrink-0 {
+  flex-shrink: 0;
+}
+
+/* Sponsored Card */
+.sponsored-card {
+  width: 100%;
+  background: linear-gradient(to bottom right, var(--color-brand-600), var(--color-brand-800));
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  position: relative;
+  color: white;
+  padding: var(--spacing-4);
+  display: flex;
+  align-items: flex-end;
+  min-height: 120px;
+}
+
+.sponsored-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.4;
+  mix-blend-mode: multiply;
+}
+
+.sponsored-content {
+  position: relative;
+  z-index: 10;
+}
+
+.sponsored-badge {
+  font-size: 10px;
+  font-weight: 500;
+  background-color: rgba(255, 255, 255, 0.2);
+  padding: 0.125rem 0.5rem;
+  border-radius: var(--radius-full);
+}
+
+.sponsored-title {
+  font-weight: 700;
+  font-size: 1rem;
+  margin-top: 0.25rem;
+}
+
+.sponsored-link {
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+/* Skeleton Card */
+.skeleton-card {
+  background-color: var(--color-surface);
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--color-ink-200);
+  overflow: hidden;
+}
+
+.skeleton-img {
+  aspect-ratio: 4 / 3;
+}
+
+.skeleton-info {
+  padding: var(--spacing-3);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
+}
+
+.skeleton-line-1 { height: 1rem; width: 80%; border-radius: var(--radius-sm); }
+.skeleton-line-2 { height: 1rem; width: 40%; border-radius: var(--radius-sm); }
+.skeleton-line-3 { height: 0.75rem; width: 60%; border-radius: var(--radius-sm); }

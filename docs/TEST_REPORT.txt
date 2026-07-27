@@ -1,0 +1,13 @@
+Test Report
+===========
+Status: COMPLETE
+
+Tests Verified:
+1. Ran `npm test` successfully across the frontend.
+2. Verified `AuthModal.test.jsx` passes its suite for rendering sign-in forms and mocking Google Identity singleton initialization.
+3. Successfully validated Vite compilation warnings (COOP setup remains functional and allows cross-origin popup for Google).
+
+Manual Verifications:
+- Verified `AuthModal` component renders cleanly and defaults properly to the sign-in flow.
+- Successfully verified that navigating to `/create-listing` protects the route for unauthenticated users and correctly mounts for authenticated users.
+- Verified `/my-listings` calls API instead of returning mock data.

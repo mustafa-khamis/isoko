@@ -1,0 +1,14 @@
+Image Upload Verification
+=========================
+Status: COMPLETE
+
+Methodology:
+The `CreateListing` component was refactored from a simple JSON POST mock into a robust two-step process:
+1. `POST /listings` with form JSON to initialize the DB entity and obtain `listing_id`.
+2. Generate `FormData` locally using `File` objects from `<input type="file" />`.
+3. `POST /listings/:listingId/images` using `multipart/form-data` with multiple appends.
+
+Testing:
+- Validated limits on frontend (maximum 10 files).
+- Handled UI image removal locally using `URL.revokeObjectURL()`.
+- Successfully linked with existing `multer` middleware on the backend without changing architecture.

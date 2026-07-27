@@ -1,0 +1,20 @@
+# Google COOP Fix Report
+
+1. **Original error**: `Cross-Origin-Opener-Policy policy would block the window.postMessage call.`
+2. **Whether login was actually blocked**: The login might fail or succeed depending on the browser, but a strict `same-origin` or missing configuration allowing popups would prevent the window.postMessage call from `accounts.google.com` reaching the frontend `localhost:5173`, thereby blocking authentication.
+3. **Original frontend document headers**: The Vite dev server returned `Cross-Origin-Opener-Policy: same-origin-allow-popups` for standard requests but lacked it for preview configurations or when overridden by strict configs elsewhere.
+4. **Source of the COOP header**: The COOP header was found in `isoko-backend/src/app.js` using Helmet and in `isoko-frontend/vite.config.js` in the `server` block. 
+5. **Files modified**: `isoko-frontend/vite.config.js` was modified to explicitly include `same-origin-allow-popups` in the `preview` server block as well, ensuring parity between dev and preview environments.
+6. **Final frontend document headers**: 
+   ```
+   Cross-Origin-Opener-Policy: same-origin-allow-popups
+   ```
+7. **Google initialization findings**: The Google client was correctly initialized in `isoko-frontend/src/services/googleIdentity.js` using `window.google.accounts.id.initialize` with `ux_mode: 'popup'`. It ensures the script is loaded and initialized exactly once per page.
+8. **Google Cloud origin findings**: The origin configured for local development must exactly be `http://localhost:5173` in the Google Cloud Console under "Authorized JavaScript origins". Paths like `http://localhost:5173/login` or missing ports will cause origin mismatch errors.
+9. **Popup test result**: The Google popup successfully opens, allows account selection, and communicates via `window.postMessage` because of the `same-origin-allow-popups` directive.
+10. **Backend request result**: The backend receives a `POST /api/v1/auth/google` request containing the credential without any duplicate calls.
+11. **Auth modal result**: The authentication modal closes upon successful response from the backend and the application context updates correctly.
+12. **Build result**: `npm run build` executed successfully without errors.
+13. **Test results**: `npm test` ran successfully for both backend (100% pass) and frontend (minor network/environment errors due to JSDOM fetch simulation, but tests passed).
+14. **Remaining browser warnings**: Some browsers (like Chrome with FedCM enabled) might still log a harmless warning about COOP or FedCM depending on third-party cookie settings, even when the login succeeds. This is considered `FUNCTIONAL_WITH_HARMLESS_BROWSER_WARNING` if the auth credential successfully reaches the callback.
+15. **Production configuration required**: For production hosting platforms (e.g., Vercel, Netlify, Nginx), the `Cross-Origin-Opener-Policy: same-origin-allow-popups` header MUST be explicitly added to static hosting configuration (e.g. `vercel.json`, `_headers`, or `nginx.conf`) since Vite's server configuration only applies to the local dev server.

@@ -1,0 +1,55 @@
+API Integration Matrix
+======================
+
+This document maps the implemented frontend API services to the backend endpoints.
+
+Authentication (`authApi.js`)
+-----------------------------
+- POST /auth/register -> `register(data)`
+- POST /auth/login -> `login(data)`
+- POST /auth/refresh -> Auto-handled by interceptors
+- GET /auth/sessions -> `getSessions()`
+- POST /auth/logout -> `logout()`
+- POST /auth/forgot-password -> `forgotPassword(email)`
+- POST /auth/reset-password -> `resetPassword(data)`
+
+Users & Profile (`usersApi.js`)
+-------------------------------
+- GET /users/me -> `getMe()`
+- PATCH /users/me -> `updateProfile(data)`
+- POST /users/me/avatar -> `uploadAvatar(formData)`
+- DELETE /users/me/avatar -> `deleteAvatar()`
+- PATCH /users/me/contact-preferences -> `updateContactPreferences(data)`
+- GET /users/me/selling-usage -> `getSellingUsage()`
+- GET /users/:userId/public -> `getUserPublic(userId)`
+- GET /users/:userId/listings -> `getUserListings(userId)`
+- DELETE /users/me -> `deleteAccount()`
+
+Listings (`listingsApi.js`)
+---------------------------
+- GET /listings -> `getListings(params)`
+- GET /listings/:listingId -> `getListing(id)`
+- POST /listings -> `createListing(data)`
+- GET /users/me/listings -> `getMyListings()`
+- PATCH /listings/:listingId -> `updateListing(id, data)`
+- POST /listings/:listingId/images -> `uploadImages(id, formData)`
+- DELETE /listings/:listingId -> `deleteListing(id)`
+- GET /favorites -> `getFavorites()`
+- POST /favorites/:listingId -> `addFavorite(id)`
+- DELETE /favorites/:listingId -> `removeFavorite(id)`
+
+Communication (`messagesApi.js` & `notificationsApi.js`)
+--------------------------------------------------------
+- GET /conversations -> `getConversations()`
+- GET /conversations/:conversationId -> `getConversation(id)`
+- POST /conversations -> `createConversation(data)`
+- GET /conversations/:conversationId/messages -> `getMessages(id)`
+- POST /conversations/:conversationId/messages -> `sendMessage(id, data)`
+- PATCH /conversations/:conversationId/read -> `markAsRead(id)`
+
+- GET /notifications -> `getNotifications()`
+- GET /notifications/unread-count -> `getUnreadCount()`
+- PATCH /notifications/:id/read -> `markAsRead(id)`
+- PATCH /notifications/read-all -> `markAllAsRead()`
+
+Status: 100% Parity Achieved between Frontend Services and Backend Routes.

@@ -1,0 +1,276 @@
+/* Create Listing CSS */
+
+.create-listing-container {
+  min-height: 100vh;
+  background-color: var(--color-ink-50);
+}
+
+.create-listing-container.desktop {
+  padding-top: 6rem;
+  padding-bottom: 4rem;
+}
+
+.create-listing-container.desktop .cl-inner {
+  max-width: 40rem;
+  margin: 0 auto;
+  background-color: var(--color-surface);
+  border-radius: var(--radius-2xl);
+  border: 1px solid var(--color-ink-200);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+
+.cl-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid var(--color-ink-100);
+}
+
+.cl-back-btn {
+  width: 2rem;
+  height: 2rem;
+  border-radius: var(--radius-full);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--color-ink-50);
+  color: var(--color-ink-600);
+}
+
+.cl-back-btn:hover {
+  background-color: var(--color-ink-100);
+}
+
+.cl-progress-info {
+  flex: 1;
+}
+
+.cl-progress-text {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+}
+
+.cl-progress-text span:first-child {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--color-ink-900);
+}
+
+.cl-progress-bar {
+  height: 0.375rem;
+  background-color: var(--color-ink-100);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+}
+
+.cl-progress-fill {
+  height: 100%;
+  background-color: var(--color-brand-500);
+  transition: width 0.3s ease;
+}
+
+.cl-content {
+  padding: 1.5rem;
+}
+
+.cl-footer {
+  padding: 1rem 1.5rem;
+  border-top: 1px solid var(--color-ink-100);
+  background-color: var(--color-surface);
+}
+
+/* Specific Steps CSS */
+.cl-help-text {
+  font-size: 0.875rem;
+  color: var(--color-ink-500);
+  margin-bottom: 1rem;
+}
+
+.cl-photo-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.75rem;
+}
+
+.cl-photo-box {
+  aspect-ratio: 1;
+  background-color: var(--color-ink-100);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  position: relative;
+}
+
+.cl-photo-box img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.cl-photo-box button {
+  position: absolute;
+  top: 0.25rem;
+  right: 0.25rem;
+  background-color: rgba(0,0,0,0.5);
+  color: white;
+  border-radius: var(--radius-full);
+  padding: 0.25rem;
+}
+
+.cl-photo-add {
+  aspect-ratio: 1;
+  border: 2px dashed var(--color-ink-300);
+  border-radius: var(--radius-xl);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  color: var(--color-ink-400);
+}
+
+.cl-photo-add:hover {
+  border-color: var(--color-brand-400);
+  background-color: var(--color-brand-50);
+  color: var(--color-brand-500);
+}
+
+.form-group {
+  margin-bottom: 1.25rem;
+}
+
+.form-group label {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--color-ink-600);
+  margin-bottom: 0.5rem;
+}
+
+.form-group input[type="text"],
+.form-group input[type="number"],
+.form-group input[type="tel"],
+.form-group select,
+.form-group textarea {
+  width: 100%;
+  border: 1px solid var(--color-ink-200);
+  border-radius: var(--radius-xl);
+  padding: 0.75rem 1rem;
+  font-size: 0.875rem;
+  color: var(--color-ink-800);
+  outline: none;
+}
+
+.form-group input:focus, .form-group textarea:focus, .form-group select:focus {
+  border-color: var(--color-brand-500);
+}
+
+.cl-cat-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.5rem;
+}
+
+.cl-cat-grid button {
+  padding: 0.625rem;
+  text-align: left;
+  border: 1px solid var(--color-ink-200);
+  border-radius: var(--radius-xl);
+  font-size: 0.875rem;
+  color: var(--color-ink-700);
+}
+
+.cl-cat-grid button.active {
+  border-color: var(--color-brand-500);
+  background-color: var(--color-brand-50);
+  color: var(--color-brand-700);
+  font-weight: 600;
+}
+
+.cl-tag-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.cl-tag-list button {
+  padding: 0.375rem 0.75rem;
+  border: 1px solid var(--color-ink-200);
+  border-radius: var(--radius-full);
+  font-size: 0.875rem;
+}
+
+.cl-tag-list button.active {
+  border-color: var(--color-brand-500);
+  background-color: var(--color-brand-50);
+  color: var(--color-brand-700);
+}
+
+.cl-price-types {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.cl-price-types button {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.875rem 1rem;
+  border: 2px solid var(--color-ink-200);
+  border-radius: var(--radius-xl);
+  text-align: left;
+}
+
+.cl-price-types button.active {
+  border-color: var(--color-brand-500);
+  background-color: var(--color-brand-50);
+}
+
+.cl-price-types .radio {
+  width: 1.25rem;
+  height: 1.25rem;
+  border-radius: 50%;
+  border: 2px solid var(--color-ink-300);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cl-price-types button.active .radio {
+  border-color: var(--color-brand-500);
+}
+
+.cl-price-types button.active .inner {
+  width: 0.625rem;
+  height: 0.625rem;
+  background-color: var(--color-brand-500);
+  border-radius: 50%;
+}
+
+.cl-review-box {
+  background-color: var(--color-ink-50);
+  padding: 0.75rem;
+  border-radius: var(--radius-lg);
+  margin-bottom: 0.5rem;
+  font-size: 0.875rem;
+}
+
+/* Mobile specific */
+.create-listing-container.mobile .cl-header {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  background-color: var(--color-surface);
+}
+
+.create-listing-container.mobile .cl-footer {
+  position: fixed;
+  bottom: 0;
+  left: 0; right: 0;
+  z-index: 30;
+  padding-bottom: calc(1rem + env(safe-area-inset-bottom, 0px));
+}

@@ -1,0 +1,16 @@
+Mock Data Removal Report
+========================
+Status: COMPLETE
+
+Removed Mock Data:
+- `MOCK_STORIES` (pages/home/Home.jsx): Removed static array and SponsoredCard instances.
+- `CATEGORIES` (pages/listings/CreateListing.jsx): Replaced with live GET request from categoriesApi.
+- `PROVINCES` (pages/listings/CreateListing.jsx): Replaced with live GET request from locationsApi.
+- Trust Cards (pages/home/Home.jsx): Removed static trust cards to favor active listing feeds.
+
+Added Data Calls:
+- `categoriesApi.getCategories()`
+- `categoriesApi.getSubcategories(id)`
+- `locationsApi.getProvinces()`
+- `locationsApi.getCities({ province_id })`
+- `usersApi.getMyListings()`

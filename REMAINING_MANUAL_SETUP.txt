@@ -1,0 +1,22 @@
+Isoko Remaining Manual Setup
+============================
+
+Everything is fully implemented in code, but the following operational pieces will require manual setup before a production release:
+
+1. Deployment Hosting
+- Set up a production environment (e.g., Vercel, Netlify, or AWS) for the Vite frontend.
+- Configure backend hosting (e.g., Render, Railway, or AWS EC2) for the Node.js Express server.
+- Ensure that the frontend's `VITE_API_URL` points to the production backend, and the backend's `CORS_ORIGIN` points to the production frontend domain.
+
+2. Production Database
+- A Supabase project needs to be created.
+- Run the SQL migrations from `isoko-backend/supabase/migrations/` on the production database.
+- Insert production data or run the seed files if initial categories/data are needed.
+- Update `DATABASE_URL` in the production backend environment.
+
+3. Image Storage (Cloudinary/S3)
+- The MVP is using the local disk or mock URLs for image uploads. To scale, configure a cloud storage provider (like AWS S3 or Cloudinary) in the backend to store user avatars and listing images permanently.
+
+4. Domain & SSL
+- Register a domain name for the frontend and backend.
+- Ensure SSL/HTTPS is enabled. This is crucial because HTTP-only cookies (`refresh_token`) require the `Secure` flag in production.

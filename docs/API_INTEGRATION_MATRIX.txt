@@ -1,0 +1,13 @@
+API Integration Matrix
+======================
+Status: COMPLETE
+
+Component                  | API Service Endpoint                             | Method | Status
+---------------------------|--------------------------------------------------|--------|-------
+AuthModal                  | authApi.login, register, reset                   | POST   | Active
+Home                       | listingsApi.getListings                          | GET    | Active
+CreateListing (Data)       | categoriesApi.getCategories, locationsApi        | GET    | Active
+CreateListing (Action)     | listingsApi.createListing                        | POST   | Active
+CreateListing (Images)     | listingsApi.uploadListingImages (multipart)      | POST   | Active
+MyListings                 | usersApi.getMyListings                           | GET    | Active
+Profile                    | useAuth (Session storage from initial login)     | GET    | Active

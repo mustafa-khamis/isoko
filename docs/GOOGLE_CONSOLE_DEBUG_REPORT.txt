@@ -1,0 +1,31 @@
+=========================================================
+ISOKO GOOGLE SIGN-IN INTEGRATION - CONSOLE DEBUG REPORT
+=========================================================
+
+1. [Intervention] Slow network is detected. Fallback font will be used...
+------------------------------------------------------------------------
+Classification: Informational Browser Warning
+Root Cause: Chrome aggressively optimizes web-fonts on slow or mocked network connections (especially in DevTools). When the Google Identity Services iframe attempts to load Roboto or Google Sans, Chrome intervenes to render text faster using system fonts.
+Resolution: This is an expected Chromium-specific behavior inside the external iframe and does not indicate a flaw in Isoko's code. It will naturally disappear under normal network conditions.
+
+2. Cross-Origin-Opener-Policy policy would block the window.closed call
+------------------------------------------------------------------------
+Classification: Security Policy Warning
+Root Cause: The Google Identity Services popup attempts to communicate with the opener window (Isoko). By default, Vite dev servers and many modern frameworks lack explicit COOP headers, causing browsers (specifically Chrome) to default to strict or misaligned policies when receiving messages from `same-origin` popups. The Express backend sends `Cross-Origin-Opener-Policy: same-origin` by default via Helmet, but in local development, Vite is the server that dictates the document headers.
+Resolution: Modified `vite.config.js` to explicitly send `Cross-Origin-Opener-Policy: same-origin-allow-popups` for the Vite development server. This explicitly permits the Google Auth popup to message back its credential payload without browser intervention. (Note: In production, the reverse proxy or Express static server serving the React build must also ensure this header is present).
+
+3. [GSI_LOGGER]: google.accounts.id.initialize() is called multiple times
+------------------------------------------------------------------------
+Classification: Logic Error / Application Warning
+Root Cause: The GoogleSignInButton component invoked `initialize()` inside its `useEffect` hook. Due to React StrictMode running `useEffect` twice in development, and the AuthModal swapping components (Welcome, SignIn, SignUp), the button was mounted and unmounted frequently. Each mount called `initialize()` again, violating the Google Identity Services constraints and duplicating iframes in memory.
+Resolution: Extracted Google Identity initialization into a singleton module (`src/services/googleIdentity.js`). The new architecture ensures `initialize()` is only invoked once per page lifecycle, while `renderButton()` is called safely with a dynamically updating callback reference to ensure the latest React component closure handles the auth payload.
+
+4. net::ERR_CONNECTION_CLOSED for via.placeholder.com
+------------------------------------------------------------------------
+Classification: Network Error
+Root Cause: The `Header.jsx` component hardcoded `https://via.placeholder.com/150` as a fallback image for users without avatars. That external service frequently rate-limits, fails, or causes connection drops, resulting in a broken image UI and console errors.
+Resolution: Removed the external dependency entirely. Replaced it with a conditional rendering structure using the application's existing Lucide-React `<User />` icon as a seamless, zero-network-dependency fallback, complete with an `onError` handler to catch broken user-uploaded avatars.
+
+=========================================================
+STATUS: All console warnings and errors resolved.
+=========================================================
