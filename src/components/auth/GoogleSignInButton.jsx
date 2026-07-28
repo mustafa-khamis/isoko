@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { continueWithGoogle } from "../../services/authApi";
 import { useAuth } from "../../context/AuthContext";
 import { initializeAndRenderGoogleButton } from "../../services/googleIdentity";
+import "./GoogleSignInButton.css";
 
 export default function GoogleSignInButton({ onSuccess }) {
   const buttonRef = useRef(null);

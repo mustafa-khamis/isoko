@@ -1,10 +1,9 @@
 /* Header Styles */
 .header {
-  position: fixed;
+  position: sticky;
   top: 0;
-  left: 0;
-  right: 0;
   z-index: 40;
+  width: 100%;
   background-color: var(--color-surface);
   border-bottom: 1px solid var(--color-ink-200);
 }
@@ -45,7 +44,7 @@
   font-weight: 800;
   color: var(--color-ink-950);
   font-size: 1.25rem;
-  letter-spacing: -0.025em;
+  letter-spacing: 0;
 }
 
 .header-search-container {
@@ -65,7 +64,7 @@
   transition: all 0.15s;
 }
 
-.header-search-box.focused {
+.header-search-box--focused {
   border-color: var(--color-brand-500);
   box-shadow: 0 0 0 2px var(--color-brand-100);
   background-color: var(--color-surface);
@@ -84,6 +83,17 @@
   color: var(--color-ink-400);
 }
 
+.header-search-clear-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-ink-400);
+}
+
+.header-search-clear-button:hover {
+  color: var(--color-ink-700);
+}
+
 .header-location-btn {
   display: flex;
   align-items: center;
@@ -94,7 +104,7 @@
   border: 1px solid var(--color-ink-200);
   border-radius: var(--radius-xl);
   padding: 0.625rem var(--spacing-3);
-  transition: colors 0.2s;
+  transition: color 0.2s, border-color 0.2s;
 }
 
 .header-location-btn:hover {
@@ -141,6 +151,36 @@
   border-color: var(--color-brand-400);
 }
 
+.header-avatar-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.header-avatar-fallback {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--color-ink-200);
+  color: var(--color-ink-600);
+}
+
+.header-avatar-fallback--hidden {
+  display: none;
+}
+
+.header-notification-dot {
+  position: absolute;
+  top: 0.375rem;
+  right: 0.375rem;
+  width: 0.5rem;
+  height: 0.5rem;
+  background-color: var(--color-brand-500);
+  border-radius: var(--radius-full);
+}
+
 .header-sell-btn {
   display: flex;
   align-items: center;
@@ -181,6 +221,11 @@
   gap: 0.25rem;
   overflow-x: auto;
   padding: 0.25rem 0;
+  scrollbar-width: none;
+}
+
+.header-categories-scroll::-webkit-scrollbar {
+  display: none;
 }
 
 .category-tab {
@@ -199,104 +244,29 @@
   background-color: var(--color-ink-50);
 }
 
-.category-tab.active {
+.category-tab--active {
   background-color: var(--color-brand-50);
   color: var(--color-brand-700);
   font-weight: 600;
 }
 
-/* Bottom Nav */
-.bottom-nav {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  z-index: 40;
-  background-color: var(--color-surface);
-  border-top: 1px solid var(--color-ink-200);
-  padding-bottom: env(safe-area-inset-bottom);
-}
-
-.bottom-nav-inner {
+.header-location-btn--desktop {
   display: flex;
-  align-items: center;
-  height: 4rem;
-  padding: 0 0.5rem;
 }
 
-.bottom-nav-btn {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 0.125rem;
-  height: 100%;
-  position: relative;
-  color: var(--color-ink-400);
+.header-logo-btn:focus-visible,
+.header-search-clear-button:focus-visible,
+.header-location-btn:focus-visible,
+.header-icon-btn:focus-visible,
+.header-avatar-btn:focus-visible,
+.header-sell-btn:focus-visible,
+.category-tab:focus-visible {
+  outline: 2px solid var(--color-brand-500);
+  outline-offset: 2px;
 }
 
-.bottom-nav-btn.active {
-  color: var(--color-brand-600);
-}
-
-.bottom-nav-label {
-  font-size: 0.625rem;
-  font-weight: 500;
-}
-
-.bottom-nav-sell-wrapper {
-  flex: 1;
-  display: flex;
-  justify-content: center;
-}
-
-.bottom-nav-sell-btn {
-  width: 3.5rem;
-  height: 3.5rem;
-  background-color: var(--color-brand-600);
-  border-radius: var(--radius-2xl);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 0.125rem;
-  transition: background-color 0.15s;
-  box-shadow: 0 10px 15px -3px var(--color-brand-200);
-  margin-top: -1.25rem;
-  color: white;
-}
-
-.bottom-nav-sell-btn:hover {
-  background-color: var(--color-brand-700);
-}
-
-.bottom-nav-sell-btn:active {
-  background-color: var(--color-brand-800);
-}
-
-.badge {
-  position: absolute;
-  top: -0.25rem;
-  right: -0.375rem;
-  width: 1rem;
-  height: 1rem;
-  background-color: var(--color-brand-500);
-  color: white;
-  font-size: 9px;
-  font-weight: 700;
-  border-radius: var(--radius-full);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.notification-dot {
-  position: absolute;
-  top: 0.375rem;
-  right: 0.375rem;
-  width: 0.5rem;
-  height: 0.5rem;
-  background-color: var(--color-brand-500);
-  border-radius: var(--radius-full);
+@media (max-width: 768px) {
+  .header-location-btn--desktop {
+    display: none;
+  }
 }

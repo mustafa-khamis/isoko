@@ -4,6 +4,7 @@ import { useAuth } from '../../context/AuthContext';
 import { useUI } from '../../context/UIContext';
 import { authApi } from '../../services/authApi';
 import GoogleSignInButton from './GoogleSignInButton';
+import './AuthModal.css';
 
 export default function AuthModal({ onClose, reason, initialMode = 'signin' }) {
   const { login } = useAuth();
@@ -236,7 +237,7 @@ export default function AuthModal({ onClose, reason, initialMode = 'signin' }) {
           </div>
           <span>isoko</span>
         </div>
-        <div style={{width: 32}} />
+        <div className="auth-header__spacer" aria-hidden="true" />
       </div>
 
       <div className="auth-body">
@@ -288,9 +289,9 @@ function FieldError({ msg }) {
 
 function SignUpForm({ name, email, password, showPass, errors, loading, onName, onEmail, onPass, onTogglePass, onSubmit, onSwitch, onClose }) {
   return (
-    <div className="animate-fade-in">
+    <div className="auth-panel">
       <h1 className="auth-title">Create your account</h1>
-      <p className="auth-subtitle text-left">Only your name, email, and password — that's it.</p>
+      <p className="auth-subtitle auth-subtitle--left">Only your name, email, and password — that's it.</p>
       <GoogleSignInButton onSuccess={onClose} />
       <Divider />
       <div className="auth-form">
@@ -322,7 +323,7 @@ function SignUpForm({ name, email, password, showPass, errors, loading, onName, 
           <FieldError msg={errors.password} />
         </div>
         <button onClick={onSubmit} disabled={loading} className="auth-btn-primary">
-          {loading && <Loader2 size={16} className="animate-spin" />}
+          {loading && <Loader2 size={16} className="auth-spinner" />}
           Create account
         </button>
         <p className="auth-footer-text">
@@ -335,9 +336,9 @@ function SignUpForm({ name, email, password, showPass, errors, loading, onName, 
 
 function SignInForm({ email, password, showPass, errors, loading, onEmail, onPass, onTogglePass, onSubmit, onSwitch, onForgot, onClose }) {
   return (
-    <div className="animate-fade-in">
+    <div className="auth-panel">
       <h1 className="auth-title">Welcome back</h1>
-      <p className="auth-subtitle text-left">Sign in to your Isoko account.</p>
+      <p className="auth-subtitle auth-subtitle--left">Sign in to your Isoko account.</p>
       <GoogleSignInButton onSuccess={onClose} />
       <Divider />
       <div className="auth-form">
@@ -350,8 +351,8 @@ function SignInForm({ email, password, showPass, errors, loading, onEmail, onPas
           <FieldError msg={errors.email} />
         </div>
         <div>
-          <div style={{display:'flex', justifyContent:'space-between', marginBottom:'0.375rem'}}>
-            <label className="auth-label" style={{marginBottom: 0}}>Password</label>
+          <div className="auth-password-heading">
+            <label className="auth-label auth-label--flush">Password</label>
             <button onClick={onForgot} className="auth-forgot-btn">Forgot password?</button>
           </div>
           <div className="auth-input-group">
@@ -364,7 +365,7 @@ function SignInForm({ email, password, showPass, errors, loading, onEmail, onPas
           <FieldError msg={errors.password} />
         </div>
         <button onClick={onSubmit} disabled={loading} className="auth-btn-primary">
-          {loading && <Loader2 size={16} className="animate-spin" />}
+          {loading && <Loader2 size={16} className="auth-spinner" />}
           Sign in
         </button>
         <p className="auth-footer-text">
@@ -388,7 +389,7 @@ function OtpScreen({ email, otp, setOtp, loading, resendSeconds, onResend, onSub
     if (e.key === 'Backspace' && !otp[i] && i > 0) refs.current[i - 1]?.focus();
   };
   return (
-    <div className="animate-fade-in text-center">
+    <div className="auth-panel auth-panel--centered">
       <div className="auth-otp-icon"><Mail size={28} /></div>
       <h1 className="auth-title">Check your email</h1>
       <p className="auth-subtitle">We sent a 6-digit code to <b>{email}</b>.</p>
@@ -398,9 +399,9 @@ function OtpScreen({ email, otp, setOtp, loading, resendSeconds, onResend, onSub
         ))}
       </div>
       <button onClick={onSubmit} disabled={loading || otp.join('').length !== 6} className="auth-btn-primary">
-        {loading && <Loader2 size={16} className="animate-spin" />} Verify email
+        {loading && <Loader2 size={16} className="auth-spinner" />} Verify email
       </button>
-      <div className="auth-resend-text mt-4">
+      <div className="auth-resend-text auth-resend-text--spaced">
         {resendSeconds > 0 ? <span>Resend in {resendSeconds}s</span> : <button onClick={onResend}>Resend code</button>}
       </div>
     </div>
@@ -409,9 +410,9 @@ function OtpScreen({ email, otp, setOtp, loading, resendSeconds, onResend, onSub
 
 function ForgotPassword({ email, onEmail, onSend, loading, onBack }) {
   return (
-    <div className="animate-fade-in">
+    <div className="auth-panel">
       <h1 className="auth-title">Reset password</h1>
-      <p className="auth-subtitle text-left">Enter your email address and we'll send a reset code.</p>
+      <p className="auth-subtitle auth-subtitle--left">Enter your email address and we'll send a reset code.</p>
       <div className="auth-form">
         <div>
           <label className="auth-label">Email</label>
@@ -421,7 +422,7 @@ function ForgotPassword({ email, onEmail, onSend, loading, onBack }) {
           </div>
         </div>
         <button onClick={onSend} disabled={loading} className="auth-btn-primary">
-          {loading && <Loader2 size={16} className="animate-spin" />} Send reset code
+          {loading && <Loader2 size={16} className="auth-spinner" />} Send reset code
         </button>
         <button onClick={onBack} className="auth-back-link">← Back to sign in</button>
       </div>
@@ -448,14 +449,14 @@ function ResetPassword({ resetOtp, setResetOtp, onReset, loading, email }) {
   };
 
   return (
-    <div className="animate-fade-in">
+    <div className="auth-panel">
       <h1 className="auth-title">Set new password</h1>
-      <p className="auth-subtitle text-left">Enter the 6-digit code sent to <b>{email}</b> and choose a new password.</p>
+      <p className="auth-subtitle auth-subtitle--left">Enter the 6-digit code sent to <b>{email}</b> and choose a new password.</p>
       <div className="auth-form">
         {/* OTP code entry */}
         <div>
           <label className="auth-label">Reset code</label>
-          <div className="auth-otp-inputs" style={{justifyContent:'flex-start', gap:'8px'}}>
+          <div className="auth-otp-inputs auth-otp-inputs--left">
             {resetOtp.map((digit, i) => (
               <input key={i} ref={el => refs.current[i] = el} type="text" inputMode="numeric" maxLength={1} value={digit} onChange={e => handleChange(i, e.target.value)} onKeyDown={e => handleKeyDown(i, e)} className="auth-otp-input" />
             ))}
@@ -476,7 +477,7 @@ function ResetPassword({ resetOtp, setResetOtp, onReset, loading, email }) {
           </div>
         </div>
         <button onClick={() => onReset(password)} disabled={loading || !match} className="auth-btn-primary">
-          {loading && <Loader2 size={16} className="animate-spin" />} Update password
+          {loading && <Loader2 size={16} className="auth-spinner" />} Update password
         </button>
       </div>
     </div>
@@ -485,11 +486,11 @@ function ResetPassword({ resetOtp, setResetOtp, onReset, loading, email }) {
 
 function SuccessScreen({ onContinue }) {
   return (
-    <div className="animate-fade-in text-center">
+    <div className="auth-panel auth-panel--centered">
       <div className="auth-success-icon"><CheckCircle size={40} /></div>
       <h1 className="auth-title">Email verified!</h1>
       <p className="auth-subtitle">Your account is ready. Sign in to continue.</p>
-      <button onClick={onContinue} className="auth-btn-primary mt-6">Sign In</button>
+      <button onClick={onContinue} className="auth-btn-primary auth-btn-primary--spaced">Sign In</button>
     </div>
   );
 }

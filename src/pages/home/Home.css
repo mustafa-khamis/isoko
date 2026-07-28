@@ -22,7 +22,7 @@
   color: var(--color-ink-950);
   line-height: 1.2;
   margin-bottom: 0.25rem;
-  letter-spacing: -0.025em;
+  letter-spacing: 0;
 }
 
 .home-hero-subtitle {
@@ -214,6 +214,21 @@
   gap: 1rem;
 }
 
+.home-listings-state {
+  padding: var(--spacing-8);
+  text-align: center;
+  border-radius: var(--radius-xl);
+}
+
+.home-listings-state--error {
+  color: var(--color-danger);
+  background-color: var(--color-ink-50);
+}
+
+.home-listings-state--empty {
+  color: var(--color-ink-500);
+}
+
 .sell-cta-banner {
   margin-top: 2rem;
   border-radius: var(--radius-2xl);
@@ -276,4 +291,28 @@
   .sell-cta-btn {
     width: auto;
   }
+}
+
+.home-browse-more {
+  display: flex;
+  justify-content: center;
+  margin-top: var(--spacing-8);
+}
+
+.home-browse-more__button {
+  padding: var(--spacing-3) var(--spacing-4);
+  border: 1px solid var(--color-ink-200);
+  border-radius: var(--radius-lg);
+  color: var(--color-ink-700);
+  font-weight: 600;
+  transition: background-color .2s;
+}
+
+.home-browse-more__button:hover {
+  background: var(--color-ink-50);
+}
+
+.home-browse-more__button:focus-visible {
+  outline: 2px solid var(--color-brand-500);
+  outline-offset: 2px;
 }

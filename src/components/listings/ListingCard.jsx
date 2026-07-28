@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useUI } from '../../context/UIContext';
 import { formatRWF, timeAgo } from '../../utils/formatters';
+import './ListingCard.css';
 
 export function PriceBadge({ price, priceType }) {
   if (priceType === 'contact') {
@@ -32,7 +33,7 @@ export default function ListingCard({ listing, compact = false, variant = 'grid'
     toggleFavorite(listing.id);
   };
 
-  const handleClick = () => navigate(`/listings/${listing.id}`);
+  const handleClick = () => navigate(`/listing/${listing.id}`);
 
   // Need a fallback image if listing.images is missing or empty
   const imageUrl = listing.images && listing.images.length > 0 
@@ -52,7 +53,7 @@ export default function ListingCard({ listing, compact = false, variant = 'grid'
           />
         </div>
         <div className="listing-card-list-content">
-          <p className="listing-title line-clamp-2">{listing.title}</p>
+          <p className="listing-title listing-title--clamped">{listing.title}</p>
           <div className="listing-price-wrapper">
             <PriceBadge price={listing.price} priceType={listing.priceType} />
           </div>
@@ -68,7 +69,7 @@ export default function ListingCard({ listing, compact = false, variant = 'grid'
         </div>
         <button
           onClick={handleFavorite}
-          className={`listing-fav-btn-list ${saved ? 'saved' : ''}`}
+          className={`listing-fav-btn-list ${saved ? 'listing-fav-btn-list--saved' : ''}`}
         >
           <Heart size={16} fill={saved ? 'currentColor' : 'none'} />
         </button>
@@ -77,7 +78,7 @@ export default function ListingCard({ listing, compact = false, variant = 'grid'
   }
 
   return (
-    <button onClick={handleClick} className={`listing-card-grid ${compact ? 'compact' : ''}`}>
+    <button onClick={handleClick} className={`listing-card-grid ${compact ? 'listing-card-grid--compact' : ''}`}>
       <div className="listing-card-img-container">
         <img
           src={imageUrl}
@@ -100,7 +101,7 @@ export default function ListingCard({ listing, compact = false, variant = 'grid'
 
         <button
           onClick={handleFavorite}
-          className={`listing-fav-btn-grid ${saved ? 'saved' : ''}`}
+          className={`listing-fav-btn-grid ${saved ? 'listing-fav-btn-grid--saved' : ''}`}
         >
           <Heart size={14} fill={saved ? 'currentColor' : 'none'} />
         </button>
@@ -115,19 +116,19 @@ export default function ListingCard({ listing, compact = false, variant = 'grid'
       </div>
 
       <div className="listing-card-info">
-        <p className="listing-title line-clamp-2">
+        <p className="listing-title listing-title--clamped">
           {listing.title}
         </p>
         <PriceBadge price={listing.price} priceType={listing.priceType} />
-        <div className="listing-meta mt-auto">
+        <div className="listing-meta listing-meta--pushed">
           {listing.location && (
             <>
-              <MapPin size={12} className="shrink-0" />
-              <span className="truncate">{typeof listing.location === 'object' ? listing.location.city : listing.location}</span>
+              <MapPin size={12} className="listing-meta-icon" />
+              <span className="listing-location-text">{typeof listing.location === 'object' ? listing.location.city : listing.location}</span>
               <span className="listing-meta-dot">·</span>
             </>
           )}
-          <span className="shrink-0">{timeAgo(listing.created_at || listing.postedAt || new Date())}</span>
+          <span className="listing-time-text">{timeAgo(listing.created_at || listing.postedAt || new Date())}</span>
         </div>
       </div>
     </button>
@@ -150,11 +151,11 @@ export function SponsoredCard({ story }) {
 export function SkeletonCard() {
   return (
     <div className="skeleton-card">
-      <div className="skeleton-img skeleton" />
+      <div className="skeleton-img listing-skeleton" />
       <div className="skeleton-info">
-        <div className="skeleton-line-1 skeleton" />
-        <div className="skeleton-line-2 skeleton" />
-        <div className="skeleton-line-3 skeleton" />
+        <div className="skeleton-line-1 listing-skeleton" />
+        <div className="skeleton-line-2 listing-skeleton" />
+        <div className="skeleton-line-3 listing-skeleton" />
       </div>
     </div>
   );

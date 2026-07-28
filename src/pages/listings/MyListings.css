@@ -1,0 +1,482 @@
+.my-listings-page {
+  min-height: 100%;
+  background: var(--color-ink-50);
+}
+
+.my-listings-header {
+  border-bottom: 1px solid var(--color-ink-100);
+  background: var(--color-surface);
+}
+
+.my-listings-header--sticky {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+}
+
+.my-listings-header__inner {
+  padding-inline: var(--spacing-4);
+}
+
+.my-listings-header__inner--desktop,
+.my-listings-content--desktop {
+  max-width: 1200px;
+  margin-inline: auto;
+}
+
+.my-listings-heading-row {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
+  padding-block: var(--spacing-4);
+}
+
+.my-listings-back-button {
+  width: 2rem;
+  height: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-full);
+  color: var(--color-ink-600);
+}
+
+.my-listings-back-button:hover {
+  background: var(--color-ink-100);
+}
+
+.my-listings-title {
+  color: var(--color-ink-950);
+  font-size: 1.125rem;
+  font-weight: 700;
+}
+
+.my-listings-create-button,
+.my-listings-empty__button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.375rem;
+  border-radius: var(--radius-xl);
+  background: var(--color-brand-600);
+  color: white;
+  font-weight: 600;
+  transition: background-color 0.2s;
+}
+
+.my-listings-create-button {
+  margin-left: auto;
+  padding: var(--spacing-2) var(--spacing-3);
+  font-size: 0.75rem;
+}
+
+.my-listings-create-button:hover,
+.my-listings-empty__button:hover {
+  background: var(--color-brand-700);
+}
+
+.my-listings-quota {
+  margin-bottom: var(--spacing-3);
+  padding: var(--spacing-3);
+  border: 1px solid var(--color-ink-200);
+  border-radius: var(--radius-xl);
+  background: var(--color-ink-50);
+}
+
+.my-listings-quota__summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-2);
+  margin-bottom: 0.375rem;
+}
+
+.my-listings-quota__label {
+  color: var(--color-ink-600);
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.my-listings-quota__upgrade {
+  flex-shrink: 0;
+  color: var(--color-brand-600);
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.my-listings-quota__track {
+  height: 0.375rem;
+  overflow: hidden;
+  border-radius: var(--radius-full);
+  background: var(--color-ink-200);
+}
+
+.my-listings-quota__fill {
+  width: 25%;
+  height: 100%;
+  border-radius: var(--radius-full);
+  background: var(--color-brand-500);
+}
+
+.my-listings-tabs {
+  display: flex;
+  gap: var(--spacing-1);
+  overflow-x: auto;
+  padding-bottom: 1px;
+  scrollbar-width: none;
+}
+
+.my-listings-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.my-listings-tab {
+  flex-shrink: 0;
+  padding: var(--spacing-2) var(--spacing-3);
+  border: 1px solid transparent;
+  border-radius: var(--radius-lg);
+  color: var(--color-ink-500);
+  font-size: 0.75rem;
+  font-weight: 600;
+  white-space: nowrap;
+  transition: color 0.2s, background-color 0.2s, border-color 0.2s;
+}
+
+.my-listings-tab:hover {
+  background: var(--color-ink-50);
+  color: var(--color-ink-900);
+}
+
+.my-listings-tab--active {
+  border-color: var(--color-brand-200);
+  background: var(--color-brand-50);
+  color: var(--color-brand-700);
+}
+
+.my-listings-tab__count {
+  margin-left: 0.125rem;
+  opacity: 0.6;
+}
+
+.my-listings-content {
+  padding-bottom: var(--spacing-6);
+}
+
+.my-listings-content--mobile {
+  padding: var(--spacing-4) var(--spacing-3) var(--spacing-6);
+}
+
+.my-listings-content--desktop {
+  padding: var(--spacing-6) var(--spacing-4);
+}
+
+.my-listings-loading {
+  padding-block: 2.5rem;
+  text-align: center;
+}
+
+.my-listings-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-3);
+}
+
+.my-listing-card {
+  overflow: hidden;
+  border: 1px solid var(--color-ink-200);
+  border-radius: var(--radius-xl);
+  background: var(--color-surface);
+}
+
+.my-listing-card__main {
+  display: flex;
+  gap: var(--spacing-3);
+  padding: var(--spacing-3);
+}
+
+.my-listing-card__image-frame {
+  width: 5rem;
+  height: 5rem;
+  flex-shrink: 0;
+  overflow: hidden;
+  border-radius: var(--radius-lg);
+  background: var(--color-ink-100);
+}
+
+.my-listing-card__image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.my-listing-card__content {
+  min-width: 0;
+  flex: 1;
+}
+
+.my-listing-card__title-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--spacing-2);
+}
+
+.my-listing-card__title {
+  display: -webkit-box;
+  min-width: 0;
+  overflow: hidden;
+  color: var(--color-ink-800);
+  font-size: 0.875rem;
+  font-weight: 600;
+  line-height: 1.375;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.my-listing-status {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-1);
+  flex-shrink: 0;
+  padding: 0.125rem 0.375rem;
+  border: 1px solid;
+  border-radius: var(--radius-full);
+  font-size: 0.625rem;
+  font-weight: 600;
+}
+
+.my-listing-status--active {
+  border-color: var(--color-brand-200);
+  background: var(--color-brand-50);
+  color: var(--color-brand-700);
+}
+
+.my-listing-status--pending {
+  border-color: #fde68a;
+  background: #fffbeb;
+  color: #b45309;
+}
+
+.my-listing-status--rejected {
+  border-color: #fecaca;
+  background: #fef2f2;
+  color: #b91c1c;
+}
+
+.my-listing-status--sold {
+  border-color: var(--color-ink-300);
+  background: var(--color-ink-100);
+  color: var(--color-ink-600);
+}
+
+.my-listing-status--hidden {
+  border-color: var(--color-ink-200);
+  background: var(--color-ink-100);
+  color: var(--color-ink-500);
+}
+
+.my-listing-status--expired {
+  border-color: #fed7aa;
+  background: #fff7ed;
+  color: #c2410c;
+}
+
+.my-listing-card__price {
+  margin-top: var(--spacing-1);
+}
+
+.my-listing-card__price-value {
+  color: var(--color-ink-950);
+  font-size: 0.875rem;
+  font-weight: 700;
+}
+
+.my-listing-card__price-contact {
+  color: var(--color-ink-500);
+  font-size: 0.75rem;
+}
+
+.my-listing-card__metadata {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  margin-top: var(--spacing-1);
+  color: var(--color-ink-400);
+  font-size: 0.75rem;
+}
+
+.my-listing-card__views {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.125rem;
+}
+
+.my-listing-card__actions {
+  display: flex;
+  gap: var(--spacing-1);
+  overflow-x: auto;
+  padding: var(--spacing-2) var(--spacing-3);
+  border-top: 1px solid var(--color-ink-100);
+  scrollbar-width: none;
+}
+
+.my-listing-card__actions::-webkit-scrollbar {
+  display: none;
+}
+
+.my-listing-action {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-1);
+  flex-shrink: 0;
+  padding: 0.375rem 0.625rem;
+  border-radius: var(--radius-lg);
+  color: var(--color-ink-600);
+  font-size: 0.75rem;
+  font-weight: 600;
+  white-space: nowrap;
+  transition: background-color 0.2s;
+}
+
+.my-listing-action:hover {
+  background: var(--color-ink-100);
+}
+
+.my-listing-action--danger {
+  margin-left: auto;
+  color: #ef4444;
+}
+
+.my-listing-action--danger:hover {
+  background: #fef2f2;
+}
+
+.my-listings-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-block: 5rem;
+  text-align: center;
+}
+
+.my-listings-empty__icon {
+  width: 5rem;
+  height: 5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: var(--spacing-4);
+  border-radius: var(--radius-3xl);
+  background: var(--color-ink-100);
+  color: var(--color-ink-300);
+}
+
+.my-listings-empty__title {
+  margin-bottom: var(--spacing-2);
+  color: var(--color-ink-800);
+  font-size: 1.125rem;
+  font-weight: 700;
+}
+
+.my-listings-empty__copy {
+  max-width: 20rem;
+  margin-bottom: var(--spacing-6);
+  color: var(--color-ink-500);
+  font-size: 0.875rem;
+}
+
+.my-listings-empty__button {
+  padding: var(--spacing-3) 1.25rem;
+  font-size: 0.875rem;
+}
+
+.my-listings-delete-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: var(--spacing-4);
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(4px);
+}
+
+.my-listings-delete-dialog {
+  width: 100%;
+  max-width: 24rem;
+  padding: 1.25rem;
+  border-radius: var(--radius-2xl);
+  background: var(--color-surface);
+  animation: slideUp 0.32s cubic-bezier(0.32, 0.72, 0, 1) both;
+}
+
+.my-listings-delete-dialog__title {
+  margin-bottom: var(--spacing-2);
+  color: var(--color-ink-950);
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.my-listings-delete-dialog__copy {
+  margin-bottom: 1.25rem;
+  color: var(--color-ink-500);
+  font-size: 0.875rem;
+}
+
+.my-listings-delete-dialog__actions {
+  display: flex;
+  gap: var(--spacing-3);
+}
+
+.my-listings-delete-dialog__cancel,
+.my-listings-delete-dialog__confirm {
+  flex: 1;
+  padding-block: var(--spacing-3);
+  border-radius: var(--radius-xl);
+  font-size: 0.875rem;
+  font-weight: 600;
+  transition: background-color 0.2s;
+}
+
+.my-listings-delete-dialog__cancel {
+  border: 1px solid var(--color-ink-200);
+  color: var(--color-ink-700);
+}
+
+.my-listings-delete-dialog__cancel:hover {
+  background: var(--color-ink-50);
+}
+
+.my-listings-delete-dialog__confirm {
+  background: #ef4444;
+  color: white;
+}
+
+.my-listings-delete-dialog__confirm:hover {
+  background: #dc2626;
+}
+
+.my-listings-back-button:focus-visible,
+.my-listings-create-button:focus-visible,
+.my-listings-quota__upgrade:focus-visible,
+.my-listings-tab:focus-visible,
+.my-listing-action:focus-visible,
+.my-listings-empty__button:focus-visible,
+.my-listings-delete-dialog button:focus-visible {
+  outline: 2px solid var(--color-brand-500);
+  outline-offset: 2px;
+}
+
+@media (min-width: 768px) {
+  .my-listings-delete-overlay {
+    align-items: center;
+  }
+}
+
+@media (min-width: 1024px) {
+  .my-listings-header__inner--desktop,
+  .my-listings-content--desktop {
+    padding-inline: var(--spacing-8);
+  }
+}

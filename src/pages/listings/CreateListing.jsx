@@ -3,9 +3,11 @@ import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, ImagePlus, X, ChevronRight, CheckCircle, Loader2 } from 'lucide-react';
 import { useUI } from '../../context/UIContext';
 import { useAuth } from '../../context/AuthContext';
+import { normalizeApiError } from '../../services/apiClient';
 import { listingsApi } from '../../services/listingsApi';
 import { categoriesApi } from '../../services/categoriesApi';
 import { locationsApi } from '../../services/locationsApi';
+import './CreateListing.css';
 
 const INITIAL_DRAFT = {
   images: [],
@@ -41,6 +43,12 @@ export default function CreateListing() {
 
   const totalSteps = 5;
   const update = (partial) => setDraft(d => ({ ...d, ...partial }));
+  const requiredUuid = (value) => value.trim() || undefined;
+  const optionalUuid = (value) => value.trim() || null;
+  const optionalText = (value) => {
+    const trimmed = value.trim();
+    return trimmed ? trimmed : null;
+  };
 
   useEffect(() => {
     Promise.all([
@@ -74,35 +82,36 @@ export default function CreateListing() {
 
   if (!user) {
     return (
-      <div className="flex flex-col items-center justify-center text-center h-full px-6">
-        <div className="w-20 h-20 bg-ink-100 rounded-3xl flex items-center justify-center mb-4">
-          <ImagePlus size={40} className="text-ink-300" />
+      <div className="listing-create-auth-state">
+        <div className="listing-create-auth-state__icon">
+          <ImagePlus size={40} className="listing-create-muted-icon" />
         </div>
-        <h3 className="text-lg font-bold text-ink-800 mb-2">Sign in to post a listing</h3>
-        <p className="text-sm text-ink-500 mb-6">You need an account to create listings and manage your store.</p>
-        <button onClick={() => showAuth()} className="btn btn-primary px-6">Sign In</button>
+        <h3 className="listing-create-auth-state__title">Sign in to post a listing</h3>
+        <p className="listing-create-auth-state__copy">You need an account to create listings and manage your store.</p>
+        <button onClick={() => showAuth()} className="listing-create-auth-state__button">Sign In</button>
       </div>
     );
   }
 
   const handleSubmit = async () => {
+    if (submitting) return;
     setSubmitting(true);
     setError('');
     try {
-      const parsedPrice = parseFloat(draft.price);
-      const priceVal = !isNaN(parsedPrice) ? parsedPrice : null;
+      const parsedPrice = Number.parseFloat(draft.price);
+      const priceVal = Number.isNaN(parsedPrice) ? null : parsedPrice;
       
       const payload = {
-        title: draft.title || undefined,
-        description: draft.description || undefined,
+        title: draft.title.trim() || undefined,
+        description: draft.description.trim() || undefined,
         price: draft.priceType !== 'contact' ? priceVal : null,
         price_type: draft.priceType === 'contact' ? 'contact_for_price' : draft.priceType,
-        category_id: draft.category_id || undefined,
-        subcategory_id: draft.subcategory_id || null,
-        province_id: draft.province_id || null,
-        city_id: draft.city_id || null,
+        category_id: requiredUuid(draft.category_id),
+        subcategory_id: optionalUuid(draft.subcategory_id),
+        province_id: optionalUuid(draft.province_id),
+        city_id: optionalUuid(draft.city_id),
         whatsapp_enabled: draft.whatsappEnabled,
-        whatsapp_number_override: draft.whatsapp || null,
+        whatsapp_number_override: draft.whatsappEnabled ? optionalText(draft.whatsapp) : null,
       };
       
       const res = await listingsApi.createListing(payload);
@@ -119,9 +128,10 @@ export default function CreateListing() {
       setSubmitted(true);
     } catch (err) {
       console.error(err);
-      let errorMsg = err.response?.data?.message || err.message || 'Failed to create listing';
-      if (err.response?.data?.errors?.length > 0) {
-        const firstErr = err.response.data.errors[0];
+      const apiError = normalizeApiError(err);
+      let errorMsg = apiError.message || 'Failed to create listing';
+      if (apiError.fieldErrors.length > 0) {
+        const firstErr = apiError.fieldErrors[0];
         errorMsg += ` (${firstErr.field}: ${firstErr.message})`;
       }
       setError(errorMsg);
@@ -133,9 +143,24 @@ export default function CreateListing() {
   const handleImageChange = (e) => {
     const files = Array.from(e.target.files);
     if (!files.length) return;
+
+    const acceptedTypes = new Set(['image/jpeg', 'image/png', 'image/webp']);
+    const maxFileSize = 5 * 1024 * 1024;
+    const invalidFile = files.find((file) => !acceptedTypes.has(file.type) || file.size > maxFileSize);
+
+    if (invalidFile) {
+      setError('Images must be JPG, PNG, or WebP files up to 5 MB each.');
+      if (fileInputRef.current) fileInputRef.current.value = '';
+      return;
+    }
     
     const maxAllowed = 10 - draft.images.length;
     const toAdd = files.slice(0, maxAllowed);
+    if (files.length > maxAllowed) {
+      setError('You can add up to 10 images per listing.');
+    } else {
+      setError('');
+    }
     
     const newImages = [...draft.images, ...toAdd];
     const newUrls = [...draft.imageUrls, ...toAdd.map(f => URL.createObjectURL(f))];
@@ -159,11 +184,11 @@ export default function CreateListing() {
 
   if (submitted) {
     return (
-      <div className="flex flex-col items-center justify-center h-full text-center p-6 bg-ink-50 animate-fade-in">
-        <CheckCircle size={48} color="var(--color-brand-600)" style={{marginBottom: '1rem'}} />
-        <h1 className="text-2xl font-bold mb-2">Listing submitted!</h1>
-        <p className="text-ink-500 mb-6">Your listing is being reviewed.</p>
-        <button onClick={() => navigate('/')} className="btn btn-primary w-full max-w-sm mb-3">Go Home</button>
+      <div className="listing-create-success">
+        <CheckCircle size={48} className="listing-create-success__icon" />
+        <h1 className="listing-create-success__title">Listing submitted!</h1>
+        <p className="listing-create-success__copy">Your listing is being reviewed.</p>
+        <button onClick={() => navigate('/')} className="listing-create-success__button">Go Home</button>
       </div>
     );
   }
@@ -171,7 +196,7 @@ export default function CreateListing() {
   const stepTitle = ['Add photos', 'Listing details', 'Set price', 'Location & contact', 'Review & submit'][step - 1];
 
   return (
-    <div className={`create-listing-container ${isMobile ? 'mobile' : 'desktop'}`}>
+    <div className={`create-listing-container ${isMobile ? 'create-listing-container--mobile' : 'create-listing-container--desktop'}`}>
       <div className="cl-inner">
         {/* Header */}
         <div className="cl-header">
@@ -181,7 +206,7 @@ export default function CreateListing() {
           <div className="cl-progress-info">
             <div className="cl-progress-text">
               <span>{stepTitle}</span>
-              <span className="text-xs text-ink-400">Step {step} of {totalSteps}</span>
+              <span className="listing-create-progress__step-count">Step {step} of {totalSteps}</span>
             </div>
             <div className="cl-progress-bar">
               <div className="cl-progress-fill" style={{ width: `${(step / totalSteps) * 100}%` }} />
@@ -191,14 +216,14 @@ export default function CreateListing() {
 
         {/* Content */}
         <div className="cl-content">
-          {error && <div className="error-text mb-4">{error}</div>}
+          {error && <div className="listing-create-error">{error}</div>}
 
           {step === 1 && (
             <div className="cl-step">
               <p className="cl-help-text">Add clear photos to help buyers trust your listing. You can add up to 10 images.</p>
               <div className="cl-photo-grid">
                 {draft.imageUrls.map((url, i) => (
-                  <div key={i} className={`cl-photo-box ${i===0?'cover':''}`}>
+                  <div key={i} className="cl-photo-box">
                     <img src={url} alt="" />
                     <button onClick={() => removeImage(i)}><X size={14}/></button>
                   </div>
@@ -209,7 +234,7 @@ export default function CreateListing() {
                       <ImagePlus size={24} />
                       <span>Add photo</span>
                     </button>
-                    <input type="file" multiple accept="image/jpeg,image/png,image/webp" ref={fileInputRef} onChange={handleImageChange} style={{display:'none'}} />
+                    <input type="file" multiple accept="image/jpeg,image/png,image/webp" ref={fileInputRef} onChange={handleImageChange} className="listing-create-file-input" />
                   </>
                 )}
               </div>
@@ -226,7 +251,13 @@ export default function CreateListing() {
                 <label>Category *</label>
                 <div className="cl-cat-grid">
                   {categories.map(c => (
-                    <button key={c.id} onClick={() => update({ category_id: c.id, subcategory_id: '' })} className={draft.category_id === c.id ? 'active' : ''}>{c.name}</button>
+                    <button
+                      key={c.id}
+                      onClick={() => update({ category_id: c.id, subcategory_id: '' })}
+                      className={`cl-category-option ${draft.category_id === c.id ? 'cl-category-option--active' : ''}`}
+                    >
+                      {c.name}
+                    </button>
                   ))}
                 </div>
               </div>
@@ -235,7 +266,13 @@ export default function CreateListing() {
                   <label>Subcategory</label>
                   <div className="cl-tag-list">
                     {subcategories.map(sub => (
-                      <button key={sub.id} onClick={() => update({ subcategory_id: sub.id })} className={draft.subcategory_id === sub.id ? 'active' : ''}>{sub.name}</button>
+                      <button
+                        key={sub.id}
+                        onClick={() => update({ subcategory_id: sub.id })}
+                        className={`cl-subcategory-option ${draft.subcategory_id === sub.id ? 'cl-subcategory-option--active' : ''}`}
+                      >
+                        {sub.name}
+                      </button>
                     ))}
                   </div>
                 </div>
@@ -253,9 +290,13 @@ export default function CreateListing() {
                 <label>Price type *</label>
                 <div className="cl-price-types">
                   {['fixed', 'negotiable', 'contact'].map(pt => (
-                    <button key={pt} onClick={() => update({ priceType: pt })} className={draft.priceType === pt ? 'active' : ''}>
+                    <button
+                      key={pt}
+                      onClick={() => update({ priceType: pt })}
+                      className={`cl-price-type ${draft.priceType === pt ? 'cl-price-type--active' : ''}`}
+                    >
                       <span className="radio"><span className="inner"/></span>
-                      <span style={{textTransform:'capitalize'}}>{pt}</span>
+                      <span className="cl-price-type__label">{pt}</span>
                     </button>
                   ))}
                 </div>
@@ -289,12 +330,12 @@ export default function CreateListing() {
               )}
               <div className="form-group">
                 <label>WhatsApp Contact</label>
-                <label style={{display:'flex', alignItems:'center', gap:'0.5rem', fontWeight:'normal'}}>
+                <label className="listing-create-whatsapp-toggle">
                   <input type="checkbox" checked={draft.whatsappEnabled} onChange={e => update({ whatsappEnabled: e.target.checked })} />
                   Allow WhatsApp contact
                 </label>
                 {draft.whatsappEnabled && (
-                  <input type="tel" placeholder="788000000" value={draft.whatsapp} onChange={e => update({ whatsapp: e.target.value })} style={{marginTop:'0.5rem'}} />
+                  <input type="tel" placeholder="788000000" value={draft.whatsapp} onChange={e => update({ whatsapp: e.target.value })} className="listing-create-whatsapp-input" />
                 )}
               </div>
             </div>
@@ -320,10 +361,10 @@ export default function CreateListing() {
         {/* Footer */}
         <div className="cl-footer">
           {step < totalSteps ? (
-            <button onClick={() => setStep(s => s + 1)} className="btn btn-primary w-full">Continue <ChevronRight size={16}/></button>
+            <button onClick={() => setStep(s => s + 1)} className="listing-create-footer__button">Continue <ChevronRight size={16}/></button>
           ) : (
-            <button onClick={handleSubmit} disabled={submitting} className="btn btn-primary w-full">
-              {submitting ? <Loader2 size={16} className="animate-spin" /> : 'Submit for review'}
+            <button onClick={handleSubmit} disabled={submitting} className="listing-create-footer__button">
+              {submitting ? <Loader2 size={16} className="listing-create-submit-spinner" /> : 'Submit for review'}
             </button>
           )}
         </div>

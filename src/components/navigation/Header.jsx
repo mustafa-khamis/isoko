@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Search, MapPin, Bell, Heart, MessageCircle, User, ShoppingBag, ChevronDown, X, Plus } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useUI } from '../../context/UIContext';
+import './Header.css';
 // We will replace categories hardcode with an API call later if needed, but for layout we can mock or keep static constants.
 // For MVP, since we don't have the constants file yet, we just stub a few categories.
 const CATEGORIES = [
@@ -22,6 +23,12 @@ export default function Header() {
   
   const [searchQuery, setSearchQuery] = useState('');
   const [searchFocused, setSearchFocused] = useState(false);
+  const [avatarFailed, setAvatarFailed] = useState(false);
+  const avatarUrl = user?.profile?.avatar_url || user?.avatar_url;
+
+  useEffect(() => {
+    setAvatarFailed(false);
+  }, [avatarUrl]);
 
   const handleSearch = () => {
     if (searchQuery.trim()) navigate(`/browse?search=${searchQuery.trim()}`);
@@ -61,7 +68,7 @@ export default function Header() {
         </button>
 
         <div className="header-search-container">
-          <div className={`header-search-box ${searchFocused ? 'focused' : ''}`}>
+          <div className={`header-search-box ${searchFocused ? 'header-search-box--focused' : ''}`}>
             <Search size={16} color="var(--color-ink-400)" />
             <input
               type="text"
@@ -74,7 +81,11 @@ export default function Header() {
               className="header-search-input"
             />
             {searchQuery && (
-              <button onClick={() => setSearchQuery('')} style={{color: 'var(--color-ink-400)'}}>
+              <button
+                onClick={() => setSearchQuery('')}
+                className="header-search-clear-button"
+                aria-label="Clear search"
+              >
                 <X size={16} />
               </button>
             )}
@@ -83,7 +94,7 @@ export default function Header() {
 
         <button
           onClick={() => navigate('/browse')}
-          className="header-location-btn hidden-mobile flex"
+          className="header-location-btn header-location-btn--desktop"
         >
           <MapPin size={16} color="var(--color-brand-600)" />
           <span>Kigali</span>
@@ -99,24 +110,20 @@ export default function Header() {
           </button>
           <button onClick={handleNotifications} className="header-icon-btn">
             <Bell size={20} />
-            <span className="notification-dot" />
+            <span className="header-notification-dot" />
           </button>
 
           {user ? (
-            <button onClick={() => navigate('/profile')} className="header-avatar-btn" style={{overflow: 'hidden'}}>
-              {user.profile?.avatar_url ? (
+            <button onClick={() => navigate('/profile')} className="header-avatar-btn" aria-label="Open profile">
+              {avatarUrl && !avatarFailed ? (
                 <img 
-                  src={user.profile.avatar_url} 
-                  alt={user.full_name || 'User'} 
-                  style={{width:'100%', height:'100%', objectFit:'cover'}} 
-                  onError={(e) => {
-                    e.target.onerror = null;
-                    e.target.style.display = 'none';
-                    e.target.nextSibling.style.display = 'flex';
-                  }}
+                  src={avatarUrl}
+                  alt={user.full_name || user.name || 'User'}
+                  className="header-avatar-image"
+                  onError={() => setAvatarFailed(true)}
                 />
               ) : null}
-              <div style={{display: user.profile?.avatar_url ? 'none' : 'flex', width: '100%', height: '100%', alignItems: 'center', justifyContent: 'center', backgroundColor: 'var(--color-ink-200)', color: 'var(--color-ink-600)'}}>
+              <div className={`header-avatar-fallback ${avatarUrl && !avatarFailed ? 'header-avatar-fallback--hidden' : ''}`}>
                 <User size={16} />
               </div>
             </button>
@@ -135,7 +142,7 @@ export default function Header() {
 
       <div className="header-categories">
         <div className="header-categories-inner">
-          <div className="header-categories-scroll no-scrollbar">
+          <div className="header-categories-scroll">
             <CategoryTab
               label="All"
               active={isHome || (location.pathname === '/browse' && !currentCategory)}
@@ -165,7 +172,7 @@ function CategoryTab({ label, active, onClick }) {
   return (
     <button
       onClick={onClick}
-      className={`category-tab ${active ? 'active' : ''}`}
+      className={`category-tab ${active ? 'category-tab--active' : ''}`}
     >
       {label}
     </button>

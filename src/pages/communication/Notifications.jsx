@@ -5,6 +5,7 @@ import { useAuth } from '../../context/AuthContext';
 import { useUI } from '../../context/UIContext';
 import { notificationsApi } from '../../services/notificationsApi';
 import { timeAgo } from '../../utils/formatters';
+import './Notifications.css';
 
 export default function Notifications() {
   const navigate = useNavigate();
@@ -63,13 +64,13 @@ export default function Notifications() {
 
   if (!user) {
     return (
-      <div className="flex flex-col items-center justify-center text-center h-full px-6">
-        <div className="w-20 h-20 bg-ink-100 rounded-3xl flex items-center justify-center mb-4">
-          <Bell size={40} className="text-ink-300" />
+      <div className="notifications-auth-state">
+        <div className="notifications-auth-icon">
+          <Bell size={40} />
         </div>
-        <h3 className="text-lg font-bold text-ink-800 mb-2">Sign in to see notifications</h3>
-        <p className="text-sm text-ink-500 mb-6">We'll let you know when your listing is approved or when someone messages you.</p>
-        <button onClick={() => showAuth()} className="btn btn-primary px-6">Sign In</button>
+        <h3 className="notifications-state-title">Sign in to see notifications</h3>
+        <p className="notifications-state-copy">We'll let you know when your listing is approved or when someone messages you.</p>
+        <button onClick={() => showAuth()} className="notifications-state-button">Sign In</button>
       </div>
     );
   }
@@ -77,34 +78,34 @@ export default function Notifications() {
   const unreadCount = notifications.filter(n => !n.is_read).length;
 
   return (
-    <div className="bg-ink-50 min-h-full animate-fade-in">
+    <div className="notifications-page">
       {/* Header */}
-      <div className={`bg-white border-b border-ink-100 ${isMobile ? 'sticky top-0 z-30' : ''}`}>
-        <div className={`flex items-center gap-3 px-4 py-4 ${isMobile ? '' : 'max-w-screen-xl mx-auto lg:px-8 max-w-2xl'}`}>
+      <div className={`notifications-header ${isMobile ? 'notifications-header--sticky' : ''}`}>
+        <div className="notifications-header-inner">
           {isMobile && (
-            <button onClick={() => navigate(-1)} className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-ink-100">
-              <ArrowLeft size={20} className="text-ink-600" />
+            <button onClick={() => navigate(-1)} className="notifications-back-button">
+              <ArrowLeft size={20} />
             </button>
           )}
-          <h1 className="text-lg font-bold text-ink-950">Notifications</h1>
+          <h1 className="notifications-title">Notifications</h1>
           {unreadCount > 0 && (
-            <span className="bg-brand-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">{unreadCount}</span>
+            <span className="notifications-count-badge">{unreadCount}</span>
           )}
           {unreadCount > 0 && (
-            <button onClick={markAllRead} className="ml-auto text-xs text-brand-600 font-semibold flex items-center gap-1">
+            <button onClick={markAllRead} className="notifications-mark-all-button">
               <Check size={14} />Mark all read
             </button>
           )}
         </div>
       </div>
 
-      <div className={`${isMobile ? 'px-3 pt-4' : 'max-w-screen-xl mx-auto px-4 lg:px-8 pt-6 max-w-2xl'}`}>
+      <div className={`notifications-content ${isMobile ? 'notifications-content--mobile' : ''}`}>
         {loading ? (
-          <div className="text-center py-10">Loading...</div>
+          <div className="notifications-loading">Loading...</div>
         ) : notifications.length === 0 ? (
           <EmptyNotifications />
         ) : (
-          <div className="flex flex-col gap-2">
+          <div className="notifications-list">
             {notifications.map(notif => (
               <NotificationRow key={notif.id} notif={notif} onClick={() => handleNotifClick(notif)} />
             ))}
@@ -117,41 +118,41 @@ export default function Notifications() {
 
 function NotificationRow({ notif, onClick }) {
   const icons = {
-    'message':          <MessageCircle size={20} className="text-brand-600" />,
-    'listing-approved': <CheckCircle size={20} className="text-brand-600" />,
-    'listing-rejected': <XCircle size={20} className="text-red-500" />,
+    'message':          <MessageCircle size={20} className="notifications-icon notifications-icon--brand" />,
+    'listing-approved': <CheckCircle size={20} className="notifications-icon notifications-icon--brand" />,
+    'listing-rejected': <XCircle size={20} className="notifications-icon notifications-icon--danger" />,
   };
 
   const bgColors = {
-    'message':          'bg-brand-50',
-    'listing-approved': 'bg-brand-50',
-    'listing-rejected': 'bg-red-50',
+    'message':          'notifications-row-icon--brand',
+    'listing-approved': 'notifications-row-icon--brand',
+    'listing-rejected': 'notifications-row-icon--danger',
   };
 
-  const icon = icons[notif.type] || <Bell size={20} className="text-ink-500" />;
-  const bg = bgColors[notif.type] || 'bg-ink-100';
+  const icon = icons[notif.type] || <Bell size={20} className="notifications-icon notifications-icon--muted" />;
+  const bg = bgColors[notif.type] || 'notifications-row-icon--muted';
 
   return (
     <button
       onClick={onClick}
-      className={`w-full flex gap-3 p-3.5 rounded-xl border text-left transition-all ${
+      className={`notifications-row ${
         !notif.is_read
-          ? 'bg-white border-brand-200 shadow-sm shadow-brand-50'
-          : 'bg-white border-ink-200 hover:border-ink-300'
+          ? 'notifications-row--unread'
+          : 'notifications-row--read'
       }`}
     >
-      <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${bg}`}>
+      <div className={`notifications-row-icon ${bg}`}>
         {icon}
       </div>
-      <div className="flex-1 min-w-0">
-        <p className={`text-sm leading-snug ${!notif.is_read ? 'font-semibold text-ink-900' : 'font-medium text-ink-800'}`}>
+      <div className="notifications-row-content">
+        <p className={`notifications-row-title ${!notif.is_read ? 'notifications-row-title--unread' : ''}`}>
           {notif.title}
         </p>
-        <p className="text-xs text-ink-500 mt-0.5 line-clamp-2 leading-relaxed">{notif.message}</p>
-        <p className="text-[10px] text-ink-400 mt-1">{timeAgo(notif.created_at)}</p>
+        <p className="notifications-row-message">{notif.message}</p>
+        <p className="notifications-row-time">{timeAgo(notif.created_at)}</p>
       </div>
       {!notif.is_read && (
-        <div className="w-2 h-2 bg-brand-500 rounded-full shrink-0 mt-2" />
+        <div className="notifications-unread-dot" />
       )}
     </button>
   );
@@ -159,12 +160,12 @@ function NotificationRow({ notif, onClick }) {
 
 function EmptyNotifications() {
   return (
-    <div className="flex flex-col items-center py-20 text-center">
-      <div className="w-20 h-20 bg-ink-100 rounded-3xl flex items-center justify-center mb-4">
-        <Bell size={40} className="text-ink-300" />
+    <div className="notifications-empty-state">
+      <div className="notifications-empty-icon">
+        <Bell size={40} />
       </div>
-      <h3 className="text-lg font-bold text-ink-800 mb-2">All caught up!</h3>
-      <p className="text-sm text-ink-500 max-w-xs">You'll be notified when your listings are approved or when someone sends you a message.</p>
+      <h3 className="notifications-state-title">All caught up!</h3>
+      <p className="notifications-state-copy">You'll be notified when your listings are approved or when someone sends you a message.</p>
     </div>
   );
 }

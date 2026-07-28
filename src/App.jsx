@@ -4,6 +4,7 @@ import { useUI } from './context/UIContext';
 import Header from './components/navigation/Header';
 import BottomNav from './components/navigation/BottomNav';
 import AuthModal from './components/auth/AuthModal';
+import './App.css';
 
 import Home from './pages/home/Home';
 import Browse from './pages/home/Browse';
@@ -28,7 +29,7 @@ const AppShell = () => {
     return (
       <div className="app-container">
         <main className="main-content">
-          <div className="p-8 text-center" role="status">Loading Isoko...</div>
+          <div className="app-loading-state" role="status">Loading Isoko...</div>
         </main>
       </div>
     );
@@ -67,7 +68,7 @@ const AppShell = () => {
           </div>
         ) : (
           <div className="auth-modal-overlay" onClick={e => { if (e.target === e.currentTarget) hideAuth(); }}>
-            <div className="auth-modal-wrapper animate-slide-up">
+            <div className="auth-modal-wrapper auth-modal-wrapper--entering">
               <AuthModal onClose={hideAuth} reason={authReason} />
             </div>
           </div>

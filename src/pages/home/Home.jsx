@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
-import { Search, MapPin, ChevronDown, ArrowRight, TrendingUp, Shield, Star, Eye } from 'lucide-react';
+import { Search, MapPin, ChevronDown, ArrowRight, TrendingUp } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import ListingCard, { SponsoredCard, SkeletonCard } from '../../components/listings/ListingCard';
+import ListingCard, { SkeletonCard } from '../../components/listings/ListingCard';
 import { useUI } from '../../context/UIContext';
 import { listingsApi } from '../../services/listingsApi';
+import './Home.css';
 
 const POPULAR_SEARCHES = ['iPhone', 'Toyota', 'Laptop', 'Sofa', 'Kigali apartment'];
 
@@ -97,7 +98,7 @@ export default function Home() {
         </div>
 
         {error ? (
-          <div style={{ color: 'var(--color-danger)', padding: '2rem', textAlign: 'center', backgroundColor: 'var(--color-ink-50)', borderRadius: 'var(--radius-xl)' }}>
+          <div className="home-listings-state home-listings-state--error">
             {error}
           </div>
         ) : loading ? (
@@ -109,7 +110,7 @@ export default function Home() {
             </div>
 
             {listings.length === 0 && (
-              <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--color-ink-500)' }}>
+              <div className="home-listings-state home-listings-state--empty">
                 No listings available right now.
               </div>
             )}
@@ -124,8 +125,8 @@ export default function Home() {
           <button onClick={() => navigate('/create-listing')} className="sell-cta-btn">Start selling</button>
         </div>
         
-        <div style={{ display: 'flex', justifyContent: 'center', marginTop: '2rem' }}>
-          <button onClick={() => navigate('/browse')} className="btn btn-outline">
+        <div className="home-browse-more">
+          <button onClick={() => navigate('/browse')} className="home-browse-more__button">
             Browse more listings
           </button>
         </div>

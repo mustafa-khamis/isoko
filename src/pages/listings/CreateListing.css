@@ -1,16 +1,16 @@
 /* Create Listing CSS */
 
 .create-listing-container {
-  min-height: 100vh;
+  min-height: calc(100vh - var(--desktop-header-height));
   background-color: var(--color-ink-50);
 }
 
-.create-listing-container.desktop {
-  padding-top: 6rem;
-  padding-bottom: 4rem;
+.create-listing-container--desktop {
+  padding-top: 2.5rem;
+  padding-bottom: 2.5rem;
 }
 
-.create-listing-container.desktop .cl-inner {
+.create-listing-container--desktop .cl-inner {
   max-width: 40rem;
   margin: 0 auto;
   background-color: var(--color-surface);
@@ -174,7 +174,7 @@
   gap: 0.5rem;
 }
 
-.cl-cat-grid button {
+.cl-category-option {
   padding: 0.625rem;
   text-align: left;
   border: 1px solid var(--color-ink-200);
@@ -183,7 +183,7 @@
   color: var(--color-ink-700);
 }
 
-.cl-cat-grid button.active {
+.cl-category-option--active {
   border-color: var(--color-brand-500);
   background-color: var(--color-brand-50);
   color: var(--color-brand-700);
@@ -196,14 +196,14 @@
   gap: 0.5rem;
 }
 
-.cl-tag-list button {
+.cl-subcategory-option {
   padding: 0.375rem 0.75rem;
   border: 1px solid var(--color-ink-200);
   border-radius: var(--radius-full);
   font-size: 0.875rem;
 }
 
-.cl-tag-list button.active {
+.cl-subcategory-option--active {
   border-color: var(--color-brand-500);
   background-color: var(--color-brand-50);
   color: var(--color-brand-700);
@@ -215,7 +215,7 @@
   gap: 0.5rem;
 }
 
-.cl-price-types button {
+.cl-price-type {
   display: flex;
   align-items: center;
   gap: 0.75rem;
@@ -225,7 +225,7 @@
   text-align: left;
 }
 
-.cl-price-types button.active {
+.cl-price-type--active {
   border-color: var(--color-brand-500);
   background-color: var(--color-brand-50);
 }
@@ -240,11 +240,11 @@
   justify-content: center;
 }
 
-.cl-price-types button.active .radio {
+.cl-price-type--active .radio {
   border-color: var(--color-brand-500);
 }
 
-.cl-price-types button.active .inner {
+.cl-price-type--active .inner {
   width: 0.625rem;
   height: 0.625rem;
   background-color: var(--color-brand-500);
@@ -260,17 +260,182 @@
 }
 
 /* Mobile specific */
-.create-listing-container.mobile .cl-header {
+.create-listing-container--mobile .cl-header {
   position: sticky;
   top: 0;
   z-index: 30;
   background-color: var(--color-surface);
 }
 
-.create-listing-container.mobile .cl-footer {
+.create-listing-container--mobile {
+  min-height: 100vh;
+}
+
+.create-listing-container--mobile .cl-footer {
   position: fixed;
-  bottom: 0;
+  bottom: calc(var(--mobile-nav-height) + env(safe-area-inset-bottom, 0px));
   left: 0; right: 0;
   z-index: 30;
-  padding-bottom: calc(1rem + env(safe-area-inset-bottom, 0px));
+  padding-bottom: 1rem;
+}
+
+.listing-create-auth-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  height: 100%;
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
+}
+
+.listing-create-auth-state__icon {
+  width: 5rem;
+  height: 5rem;
+  background: var(--color-ink-100);
+  border-radius: var(--radius-3xl);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1rem;
+}
+
+.listing-create-muted-icon {
+  color: var(--color-ink-300);
+}
+
+.listing-create-auth-state__title {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--color-ink-800);
+  margin-bottom: .5rem;
+}
+
+.listing-create-auth-state__copy {
+  font-size: .875rem;
+  color: var(--color-ink-500);
+  margin-bottom: 1.5rem;
+}
+
+.listing-create-auth-state__button {
+  padding: var(--spacing-3) var(--spacing-6);
+}
+
+.listing-create-success {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  text-align: center;
+  padding: 1.5rem;
+  background: var(--color-ink-50);
+  animation: fadeIn .22s ease-out both;
+}
+
+.listing-create-success__icon {
+  margin-bottom: 1rem;
+  color: var(--color-brand-600);
+}
+
+.listing-create-success__title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: .5rem;
+}
+
+.listing-create-success__copy {
+  color: var(--color-ink-500);
+  margin-bottom: 1.5rem;
+}
+
+.listing-create-success__button {
+  width: 100%;
+  max-width: 24rem;
+  margin-bottom: .75rem;
+}
+
+.listing-create-progress__step-count {
+  font-size: .75rem;
+  color: var(--color-ink-400);
+}
+
+.listing-create-error {
+  margin-bottom: 1rem;
+  color: var(--color-danger);
+  font-size: .875rem;
+}
+
+.cl-step {
+  animation: fadeIn .22s ease-out both;
+}
+
+.listing-create-footer__button {
+  width: 100%;
+}
+
+.listing-create-submit-spinner {
+  animation: spin .8s linear infinite;
+}
+
+.listing-create-auth-state__button,
+.listing-create-success__button,
+.listing-create-footer__button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-2);
+  border-radius: var(--radius-lg);
+  background: var(--color-brand-600);
+  color: white;
+  font-weight: 600;
+  padding: var(--spacing-3) var(--spacing-4);
+  transition: background-color .2s, opacity .2s;
+}
+
+.listing-create-auth-state__button:hover,
+.listing-create-success__button:hover,
+.listing-create-footer__button:hover:not(:disabled) {
+  background: var(--color-brand-700);
+}
+
+.listing-create-footer__button:disabled {
+  cursor: not-allowed;
+  opacity: .5;
+}
+
+.listing-create-file-input {
+  display: none;
+}
+
+.cl-price-type__label {
+  text-transform: capitalize;
+}
+
+.listing-create-whatsapp-toggle {
+  display: flex !important;
+  align-items: center;
+  gap: var(--spacing-2);
+  font-weight: 400 !important;
+}
+
+.listing-create-whatsapp-input {
+  margin-top: var(--spacing-2);
+}
+
+.listing-create-auth-state__button:focus-visible,
+.listing-create-success__button:focus-visible,
+.listing-create-footer__button:focus-visible,
+.cl-category-option:focus-visible,
+.cl-subcategory-option:focus-visible,
+.cl-price-type:focus-visible,
+.cl-photo-add:focus-visible,
+.cl-back-btn:focus-visible {
+  outline: 2px solid var(--color-brand-500);
+  outline-offset: 2px;
+}
+
+.create-listing-container--mobile .cl-content {
+  padding-bottom: 6rem;
 }

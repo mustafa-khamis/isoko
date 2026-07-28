@@ -4,6 +4,7 @@ import { Search, SlidersHorizontal, X, ChevronDown, ArrowLeft, PackageSearch } f
 import ListingCard, { SkeletonCard } from '../../components/listings/ListingCard';
 import { useUI } from '../../context/UIContext';
 import { listingsApi } from '../../services/listingsApi';
+import './Browse.css';
 
 // Dummy Categories for now (should come from API or constants)
 const CATEGORIES = [
@@ -131,7 +132,7 @@ export default function Browse() {
             <SortSelect value={sortBy} onChange={setSortBy} />
           </div>
 
-          {error && <div className="error-text text-center py-4">{error}</div>}
+          {error && <div className="browse-results-error">{error}</div>}
           
           {!error && loading ? renderSkeletons() : 
             listings.length === 0 ? <EmptyState /> : (
@@ -160,7 +161,7 @@ export default function Browse() {
       <div className="browse-desktop-inner">
         {/* Search bar */}
         <div className="browse-desktop-top">
-          <div className="browse-search-bar desktop">
+          <div className="browse-search-bar">
             <Search size={16} color="var(--color-ink-400)" />
             <input
               type="text"
@@ -180,7 +181,7 @@ export default function Browse() {
         </div>
 
         {activeFiltersCount > 0 && (
-          <div className="browse-active-filters desktop">
+          <div className="browse-active-filters">
             {province && <Chip label={province} onRemove={() => setProvince('')} />}
             {(priceMin || priceMax) && <Chip label={`RWF ${priceMin || '0'} – ${priceMax || '∞'}`} onRemove={() => { setPriceMin(''); setPriceMax(''); }} />}
             <button onClick={clearFilters} className="browse-clear-btn">Clear all filters</button>
@@ -196,11 +197,18 @@ export default function Browse() {
               <div className="filter-group">
                 <label>Category</label>
                 <div className="filter-list">
-                  <button onClick={() => setActiveCategory('')} className={!activeCategory ? 'active' : ''}>
+                  <button
+                    onClick={() => setActiveCategory('')}
+                    className={`filter-list__button ${!activeCategory ? 'filter-list__button--active' : ''}`}
+                  >
                     All categories
                   </button>
                   {CATEGORIES.map(c => (
-                    <button key={c.id} onClick={() => setActiveCategory(c.id)} className={activeCategory === c.id ? 'active' : ''}>
+                    <button
+                      key={c.id}
+                      onClick={() => setActiveCategory(c.id)}
+                      className={`filter-list__button ${activeCategory === c.id ? 'filter-list__button--active' : ''}`}
+                    >
                       {c.label}
                     </button>
                   ))}
@@ -226,7 +234,7 @@ export default function Browse() {
 
           {/* Grid */}
           <div className="browse-main">
-            {error && <div className="error-text text-center py-4">{error}</div>}
+            {error && <div className="browse-results-error">{error}</div>}
             
             {!error && loading ? renderSkeletons() :
               listings.length === 0 ? <EmptyState /> : (
@@ -290,9 +298,18 @@ function FilterSheet({ province, setProvince, priceMin, setPriceMin, priceMax, s
         <div className="filter-group">
           <label>Category</label>
           <div className="filter-chip-list">
-            <button onClick={() => setActiveCategory('')} className={!activeCategory ? 'active' : ''}>All</button>
+            <button
+              onClick={() => setActiveCategory('')}
+              className={`filter-chip-list__button ${!activeCategory ? 'filter-chip-list__button--active' : ''}`}
+            >
+              All
+            </button>
             {CATEGORIES.map(c => (
-              <button key={c.id} onClick={() => setActiveCategory(c.id)} className={activeCategory === c.id ? 'active' : ''}>
+              <button
+                key={c.id}
+                onClick={() => setActiveCategory(c.id)}
+                className={`filter-chip-list__button ${activeCategory === c.id ? 'filter-chip-list__button--active' : ''}`}
+              >
                 {c.label}
               </button>
             ))}
@@ -303,7 +320,13 @@ function FilterSheet({ province, setProvince, priceMin, setPriceMin, priceMax, s
           <label>Province</label>
           <div className="filter-chip-list">
             {PROVINCES.map(p => (
-              <button key={p} onClick={() => setProvince(p === 'All provinces' ? '' : p)} className={province === p || (p === 'All provinces' && !province) ? 'active' : ''}>
+              <button
+                key={p}
+                onClick={() => setProvince(p === 'All provinces' ? '' : p)}
+                className={`filter-chip-list__button ${
+                  province === p || (p === 'All provinces' && !province) ? 'filter-chip-list__button--active' : ''
+                }`}
+              >
                 {p}
               </button>
             ))}
@@ -318,7 +341,7 @@ function FilterSheet({ province, setProvince, priceMin, setPriceMin, priceMax, s
           </div>
         </div>
 
-        <button onClick={onClose} className="btn btn-primary w-full mt-4">Show results</button>
+        <button onClick={onClose} className="browse-filter-apply-button">Show results</button>
       </div>
     </div>
   );

@@ -12,11 +12,7 @@ export const listingsApi = {
 
   // Upload images for a listing (multipart/form-data expected)
   uploadListingImages: (id, formData) => {
-    return apiClient.post(`/listings/${id}/images`, formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    });
+    return apiClient.post(`/listings/${id}/images`, formData);
   },
 
   // Update a listing

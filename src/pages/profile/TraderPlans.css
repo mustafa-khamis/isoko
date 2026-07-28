@@ -1,0 +1,382 @@
+.trader-plans-page {
+  min-height: 100%;
+  background: var(--color-ink-50);
+  animation: fadeIn 0.22s ease-out both;
+}
+
+.trader-plans-header {
+  border-bottom: 1px solid var(--color-ink-100);
+  background: var(--color-surface);
+}
+
+.trader-plans-header--sticky {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+}
+
+.trader-plans-header__inner {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
+  padding: var(--spacing-4);
+}
+
+.trader-plans-header__inner--desktop,
+.trader-plans-content--desktop {
+  max-width: 1200px;
+  margin-inline: auto;
+}
+
+.trader-plans-back-button {
+  width: 2rem;
+  height: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-full);
+  color: var(--color-ink-600);
+}
+
+.trader-plans-back-button:hover {
+  background: var(--color-ink-100);
+}
+
+.trader-plans-title {
+  color: var(--color-ink-950);
+  font-size: 1.125rem;
+  font-weight: 700;
+}
+
+.trader-plans-subtitle,
+.trader-current-plan__label {
+  color: var(--color-ink-500);
+  font-size: 0.75rem;
+}
+
+.trader-plans-content {
+  padding: var(--spacing-6) var(--spacing-4);
+}
+
+.trader-current-plan {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-3);
+  margin-bottom: var(--spacing-6);
+  padding: var(--spacing-3) var(--spacing-4);
+  border: 1px solid var(--color-ink-200);
+  border-radius: var(--radius-xl);
+  background: var(--color-surface);
+}
+
+.trader-current-plan__name {
+  color: var(--color-ink-900);
+  font-size: 0.875rem;
+  font-weight: 700;
+}
+
+.trader-current-plan__badge {
+  padding: 0.25rem 0.625rem;
+  border: 1px solid var(--color-brand-200);
+  border-radius: var(--radius-full);
+  background: var(--color-brand-50);
+  color: var(--color-brand-700);
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.trader-plans-benefits {
+  margin-bottom: var(--spacing-6);
+  padding: 1.25rem;
+  border-radius: var(--radius-2xl);
+  background: linear-gradient(to right, var(--color-brand-600), var(--color-brand-700));
+  color: white;
+}
+
+.trader-plans-benefits__title {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  margin-bottom: var(--spacing-2);
+}
+
+.trader-plans-benefits__title h2 {
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.trader-plans-benefits__copy {
+  color: rgba(255, 255, 255, 0.82);
+  font-size: 0.875rem;
+  line-height: 1.625;
+}
+
+.trader-plans-grid {
+  display: grid;
+  gap: var(--spacing-4);
+}
+
+.trader-plans-grid--desktop {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.trader-plan-card {
+  position: relative;
+  overflow: hidden;
+  border: 2px solid var(--color-ink-200);
+  border-radius: var(--radius-2xl);
+  background: var(--color-surface);
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.trader-plan-card--current {
+  border-color: var(--color-brand-500);
+  box-shadow: 0 1px 3px var(--color-brand-100);
+}
+
+.trader-plan-card--popular {
+  border-color: var(--color-brand-300);
+  box-shadow: 0 1px 3px var(--color-brand-50);
+}
+
+.trader-plan-card__ribbon {
+  padding-block: 0.375rem;
+  background: var(--color-brand-500);
+  color: white;
+  font-size: 0.625rem;
+  font-weight: 700;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.trader-plan-card__ribbon--current {
+  background: var(--color-brand-600);
+  text-transform: none;
+}
+
+.trader-plan-card__body {
+  padding: 1.25rem;
+}
+
+.trader-plan-card__heading,
+.trader-plan-card__price {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+}
+
+.trader-plan-card__heading {
+  margin-bottom: var(--spacing-1);
+}
+
+.trader-plan-card__icon {
+  width: 1.5rem;
+  height: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border-radius: var(--radius-lg);
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.trader-plan-card__icon--free {
+  background: var(--color-ink-100);
+  color: var(--color-ink-500);
+}
+
+.trader-plan-card__icon--plus {
+  background: var(--color-brand-50);
+  color: var(--color-brand-600);
+}
+
+.trader-plan-card__icon--premium {
+  background: #fffbeb;
+  color: #f59e0b;
+}
+
+.trader-plan-card__name {
+  color: var(--color-ink-950);
+  font-size: 0.875rem;
+  font-weight: 700;
+}
+
+.trader-plan-card__price {
+  min-height: 2.25rem;
+  align-items: baseline;
+  margin-bottom: var(--spacing-4);
+}
+
+.trader-plan-card__price-value {
+  color: var(--color-ink-950);
+  font-size: 1.5rem;
+  font-weight: 800;
+}
+
+.trader-plan-card__price-period {
+  color: var(--color-ink-400);
+  font-size: 0.75rem;
+}
+
+.trader-plan-card__coming-soon {
+  color: var(--color-ink-400);
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.trader-plan-card__features {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
+  margin-bottom: 1.25rem;
+}
+
+.trader-plan-card__feature {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-2);
+  color: var(--color-ink-600);
+  font-size: 0.75rem;
+}
+
+.trader-plan-card__feature-icon {
+  flex-shrink: 0;
+  margin-top: 0.125rem;
+  color: var(--color-brand-500);
+}
+
+.trader-plan-card__button {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-2);
+  padding-block: var(--spacing-3);
+  border: 1px solid transparent;
+  border-radius: var(--radius-xl);
+  font-size: 0.875rem;
+  font-weight: 600;
+  transition: background-color 0.2s, border-color 0.2s;
+}
+
+.trader-plan-card__button--current {
+  cursor: default;
+  background: var(--color-ink-100);
+  color: var(--color-ink-400);
+}
+
+.trader-plan-card__button--unavailable {
+  cursor: not-allowed;
+  border-color: var(--color-ink-200);
+  color: var(--color-ink-400);
+}
+
+.trader-plan-card__button--primary {
+  background: var(--color-brand-600);
+  color: white;
+}
+
+.trader-plan-card__button--primary:hover:not(:disabled) {
+  background: var(--color-brand-700);
+}
+
+.trader-plan-card__button--primary:active:not(:disabled) {
+  background: var(--color-brand-800);
+}
+
+.trader-plan-card__button--secondary {
+  border-color: var(--color-ink-200);
+  color: var(--color-ink-700);
+}
+
+.trader-plan-card__button--secondary:hover {
+  border-color: var(--color-brand-400);
+  background: var(--color-brand-50);
+}
+
+.trader-plan-card__spinner {
+  animation: trader-plan-spin 0.8s linear infinite;
+}
+
+.trader-plan-success {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding-inline: var(--spacing-6);
+  background: var(--color-ink-50);
+  text-align: center;
+  animation: fadeIn 0.22s ease-out both;
+}
+
+.trader-plan-success__icon {
+  width: 6rem;
+  height: 6rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: var(--spacing-6);
+  border-radius: var(--radius-3xl);
+  background: var(--color-brand-50);
+  color: var(--color-brand-600);
+}
+
+.trader-plan-success__title {
+  color: var(--color-ink-950);
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.trader-plan-success__copy {
+  max-width: 20rem;
+  margin-top: var(--spacing-3);
+  color: var(--color-ink-500);
+  font-size: 0.875rem;
+  line-height: 1.625;
+}
+
+.trader-plan-success__button {
+  width: 100%;
+  max-width: 24rem;
+  margin-top: var(--spacing-8);
+  padding-block: 0.875rem;
+  border-radius: var(--radius-xl);
+  background: var(--color-brand-600);
+  color: white;
+  font-size: 0.875rem;
+  font-weight: 600;
+  transition: background-color 0.2s;
+}
+
+.trader-plan-success__button:hover {
+  background: var(--color-brand-700);
+}
+
+.trader-plans-back-button:focus-visible,
+.trader-plan-card__button:focus-visible,
+.trader-plan-success__button:focus-visible {
+  outline: 2px solid var(--color-brand-500);
+  outline-offset: 2px;
+}
+
+@keyframes trader-plan-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (max-width: 900px) {
+  .trader-plans-grid--desktop {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (min-width: 1024px) {
+  .trader-plans-header__inner--desktop,
+  .trader-plans-content--desktop {
+    padding-inline: var(--spacing-8);
+  }
+}

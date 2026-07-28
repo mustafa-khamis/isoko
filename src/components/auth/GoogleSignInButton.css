@@ -1,0 +1,31 @@
+.google-auth-wrapper {
+  width: 100%;
+}
+
+.google-button-skeleton {
+  width: 100%;
+  min-height: 2.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--color-ink-200);
+  border-radius: var(--radius-xl);
+  background: linear-gradient(90deg, var(--color-ink-100) 25%, var(--color-surface) 50%, var(--color-ink-100) 75%);
+  background-size: 200% 100%;
+  color: var(--color-ink-500);
+  font-size: 0.75rem;
+  animation: google-button-loading 1.5s linear infinite;
+}
+
+.google-auth-wrapper .auth-error {
+  margin-top: var(--spacing-2);
+  color: var(--color-danger);
+  font-size: 0.75rem;
+  text-align: center;
+}
+
+@keyframes google-button-loading {
+  to {
+    background-position: -200% 0;
+  }
+}

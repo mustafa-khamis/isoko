@@ -1,0 +1,295 @@
+.profile-edit-page {
+  min-height: 100%;
+  background: var(--color-ink-50);
+  animation: fadeIn 0.22s ease-out both;
+}
+
+.profile-edit-header {
+  border-bottom: 1px solid var(--color-ink-100);
+  background: var(--color-surface);
+}
+
+.profile-edit-header--sticky {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+}
+
+.profile-edit-header__inner {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
+  padding: var(--spacing-4);
+}
+
+.profile-edit-header__inner--desktop,
+.profile-edit-content--desktop {
+  max-width: 48rem;
+  margin-inline: auto;
+}
+
+.profile-edit-back-button {
+  width: 2rem;
+  height: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-full);
+  color: var(--color-ink-600);
+}
+
+.profile-edit-back-button:hover {
+  background: var(--color-ink-100);
+}
+
+.profile-edit-title {
+  color: var(--color-ink-950);
+  font-size: 1.125rem;
+  font-weight: 700;
+}
+
+.profile-edit-save-button {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-1);
+  margin-left: auto;
+  padding: var(--spacing-2) var(--spacing-3);
+  border-radius: var(--radius-xl);
+  background: var(--color-brand-600);
+  color: white;
+  font-size: 0.75rem;
+  font-weight: 600;
+  transition: background-color 0.2s, opacity 0.2s;
+}
+
+.profile-edit-save-button:hover:not(:disabled) {
+  background: var(--color-brand-700);
+}
+
+.profile-edit-save-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.profile-edit-content {
+  padding: 1.25rem var(--spacing-4) 2rem;
+}
+
+.profile-edit-avatar {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: var(--spacing-6);
+}
+
+.profile-edit-avatar__frame {
+  position: relative;
+  width: 6rem;
+  height: 6rem;
+  overflow: hidden;
+  border: 4px solid white;
+  border-radius: var(--radius-2xl);
+  box-shadow: var(--shadow-sm);
+}
+
+.profile-edit-avatar__image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.profile-edit-avatar__overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.4);
+  color: white;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.profile-edit-avatar__overlay:hover,
+.profile-edit-avatar__overlay:focus-visible {
+  opacity: 1;
+}
+
+.profile-edit-avatar__button {
+  margin-top: var(--spacing-2);
+  color: var(--color-brand-600);
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.profile-edit-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
+}
+
+.profile-edit-field__label {
+  display: block;
+  margin-bottom: 0.375rem;
+  color: var(--color-ink-600);
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.profile-edit-field__label--spaced {
+  margin-bottom: var(--spacing-2);
+}
+
+.profile-edit-field__input,
+.profile-edit-email,
+.profile-edit-whatsapp-field__input {
+  width: 100%;
+  border: 1px solid var(--color-ink-200);
+  border-radius: var(--radius-xl);
+  background: var(--color-surface);
+}
+
+.profile-edit-field__input {
+  padding: var(--spacing-3) var(--spacing-4);
+  color: var(--color-ink-800);
+  font-size: 0.875rem;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.profile-edit-field__input::placeholder {
+  color: var(--color-ink-300);
+}
+
+.profile-edit-field__input:focus,
+.profile-edit-whatsapp-field__input:focus-within {
+  border-color: var(--color-brand-500);
+  box-shadow: 0 0 0 2px var(--color-brand-100);
+}
+
+.profile-edit-email {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  padding: var(--spacing-3) var(--spacing-4);
+  background: var(--color-ink-50);
+}
+
+.profile-edit-email__icon {
+  flex-shrink: 0;
+  color: var(--color-ink-400);
+}
+
+.profile-edit-email__address {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--color-ink-500);
+  font-size: 0.875rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.profile-edit-email__badge {
+  flex-shrink: 0;
+  margin-left: auto;
+  padding: 0.125rem var(--spacing-2);
+  border-radius: var(--radius-full);
+  background: var(--color-brand-50);
+  color: var(--color-brand-700);
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.profile-edit-whatsapp-toggle {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--spacing-3) var(--spacing-4);
+  border: 1px solid var(--color-ink-200);
+  border-radius: var(--radius-xl);
+  transition: border-color 0.2s, background-color 0.2s;
+}
+
+.profile-edit-whatsapp-toggle--enabled {
+  border-color: var(--color-brand-400);
+  background: var(--color-brand-50);
+}
+
+.profile-edit-whatsapp-toggle__label {
+  color: var(--color-ink-800);
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.profile-edit-switch {
+  position: relative;
+  width: 2.5rem;
+  height: 1.5rem;
+  flex-shrink: 0;
+  border-radius: var(--radius-full);
+  background: var(--color-ink-300);
+  transition: background-color 0.2s;
+}
+
+.profile-edit-switch--enabled {
+  background: var(--color-brand-500);
+}
+
+.profile-edit-switch__thumb {
+  position: absolute;
+  top: 0.125rem;
+  left: 0.125rem;
+  width: 1.25rem;
+  height: 1.25rem;
+  border-radius: var(--radius-full);
+  background: white;
+  box-shadow: var(--shadow-base);
+  transition: transform 0.2s;
+}
+
+.profile-edit-switch__thumb--enabled {
+  transform: translateX(1rem);
+}
+
+.profile-edit-whatsapp-field {
+  margin-top: var(--spacing-2);
+  animation: fadeIn 0.22s ease-out both;
+}
+
+.profile-edit-whatsapp-field__input {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  padding: var(--spacing-3) var(--spacing-4);
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.profile-edit-whatsapp-field__prefix {
+  color: var(--color-ink-500);
+  font-size: 0.875rem;
+}
+
+.profile-edit-whatsapp-field__number {
+  min-width: 0;
+  flex: 1;
+  background: transparent;
+  color: var(--color-ink-800);
+  font-size: 0.875rem;
+  outline: none;
+}
+
+.profile-edit-back-button:focus-visible,
+.profile-edit-save-button:focus-visible,
+.profile-edit-avatar__button:focus-visible,
+.profile-edit-whatsapp-toggle:focus-visible {
+  outline: 2px solid var(--color-brand-500);
+  outline-offset: 2px;
+}
+
+@media (min-width: 1024px) {
+  .profile-edit-header__inner--desktop,
+  .profile-edit-content--desktop {
+    padding-inline: var(--spacing-8);
+  }
+}

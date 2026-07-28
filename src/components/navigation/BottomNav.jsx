@@ -2,6 +2,7 @@ import { Home, LayoutGrid, Plus, MessageCircle, User as UserIcon } from 'lucide-
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useUI } from '../../context/UIContext';
+import './BottomNav.css';
 
 export default function BottomNav() {
   const navigate = useNavigate();
@@ -44,7 +45,7 @@ export default function BottomNav() {
         />
 
         <div className="bottom-nav-sell-wrapper">
-          <button onClick={handleSell} className="bottom-nav-sell-btn">
+          <button onClick={handleSell} className="bottom-nav-sell-btn" aria-label="Create listing">
             <Plus size={24} strokeWidth={2.5} />
           </button>
         </div>
@@ -62,7 +63,7 @@ export default function BottomNav() {
             <img 
               src={user.profile?.avatar_url || '/images/default-avatar.svg'} 
               alt="" 
-              style={{width:'24px', height:'24px', borderRadius:'50%', objectFit:'cover'}} 
+              className="bottom-nav-avatar"
               onError={(e) => { e.target.onerror = null; e.target.src = '/images/default-avatar.svg'; }}
             />
           ) : (
@@ -79,14 +80,14 @@ export default function BottomNav() {
 
 function NavButton({ icon, label, active, onClick, badge }) {
   return (
-    <button onClick={onClick} className={`bottom-nav-btn ${active ? 'active' : ''}`}>
-      <div style={{ position: 'relative', color: active ? 'var(--color-brand-600)' : 'var(--color-ink-400)' }}>
+    <button onClick={onClick} className={`bottom-nav-btn ${active ? 'bottom-nav-btn--active' : ''}`}>
+      <div className={`bottom-nav-btn__icon ${active ? 'bottom-nav-btn__icon--active' : ''}`}>
         {icon}
         {badge && badge > 0 && (
-          <span className="badge">{badge}</span>
+          <span className="bottom-nav-badge">{badge}</span>
         )}
       </div>
-      <span className="bottom-nav-label" style={{ color: active ? 'var(--color-brand-600)' : 'var(--color-ink-400)' }}>
+      <span className="bottom-nav-label">
         {label}
       </span>
     </button>

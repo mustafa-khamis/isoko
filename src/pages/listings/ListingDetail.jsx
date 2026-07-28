@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Heart, Share2, MapPin, Clock, ChevronLeft, ChevronRight, X, Shield, Eye, MessageCircle, Zap, Crown, Check } from 'lucide-react';
+import { ArrowLeft, Heart, Share2, MapPin, Clock, ChevronLeft, ChevronRight, X, Eye, MessageCircle, Zap } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useUI } from '../../context/UIContext';
 import { listingsApi } from '../../services/listingsApi';
 import ListingCard, { PriceBadge } from '../../components/listings/ListingCard';
-import { timeAgo, formatJoinedDate } from '../../utils/formatters';
+import { timeAgo } from '../../utils/formatters';
+import './ListingDetail.css';
 
 function WhatsAppIcon() {
   return (
@@ -81,20 +82,20 @@ export default function ListingDetail() {
     }
   };
 
-  if (loading) return <div className="p-8 text-center">Loading...</div>;
-  if (error || !listing) return <div className="p-8 text-center text-red-500">{error || 'Listing not found'}</div>;
+  if (loading) return <div className="listing-detail-state">Loading...</div>;
+  if (error || !listing) return <div className="listing-detail-state listing-detail-state--error">{error || 'Listing not found'}</div>;
 
   const images = listing.images || [];
   const displayImage = images.length > 0 ? images[currentImg] : '/images/default-listing.svg';
 
   const ContactActions = () => (
-    <div className="flex flex-col gap-2">
-      <button onClick={handleMessage} className="w-full flex items-center justify-center gap-2 bg-brand-600 hover:bg-brand-700 active:bg-brand-800 text-white font-semibold text-sm py-3.5 rounded-xl transition-colors duration-150">
+    <div className="listing-contact-actions">
+      <button onClick={handleMessage} className="listing-contact-button listing-contact-button--message">
         <MessageCircle size={16} />
         Message seller
       </button>
       {listing.whatsapp_enabled && listing.whatsapp && (
-        <button onClick={handleWhatsApp} className="w-full flex items-center justify-center gap-2 bg-[#25D366] hover:bg-[#1ebe5d] text-white font-semibold text-sm py-3.5 rounded-xl transition-colors duration-150">
+        <button onClick={handleWhatsApp} className="listing-contact-button listing-contact-button--whatsapp">
           <WhatsAppIcon />
           WhatsApp seller
         </button>
@@ -109,11 +110,11 @@ export default function ListingDetail() {
           <button onClick={() => navigate(-1)} className="ld-header-btn">
             <ArrowLeft size={20} />
           </button>
-          <div style={{display:'flex', gap:'0.5rem'}}>
-            <button onClick={toggleFavorite} className={`ld-header-btn ${saved ? 'saved' : ''}`}>
+          <div className="listing-detail-mobile__header-actions">
+            <button onClick={toggleFavorite} className={`ld-header-btn ${saved ? 'ld-header-btn--saved' : ''}`} aria-label="Save listing">
               <Heart size={16} fill={saved ? 'currentColor' : 'none'} />
             </button>
-            <button className="ld-header-btn"><Share2 size={16} /></button>
+            <button className="ld-header-btn" aria-label="Share listing"><Share2 size={16} /></button>
           </div>
         </div>
 
@@ -121,10 +122,10 @@ export default function ListingDetail() {
           <img src={displayImage} alt={listing.title} />
           {images.length > 1 && (
             <>
-              <button onClick={e => { e.stopPropagation(); setCurrentImg(i => Math.max(0, i - 1)); }} className="ld-gallery-nav left">
+              <button onClick={e => { e.stopPropagation(); setCurrentImg(i => Math.max(0, i - 1)); }} className="ld-gallery-nav ld-gallery-nav--previous" aria-label="Previous image">
                 <ChevronLeft size={20} />
               </button>
-              <button onClick={e => { e.stopPropagation(); setCurrentImg(i => Math.min(images.length - 1, i + 1)); }} className="ld-gallery-nav right">
+              <button onClick={e => { e.stopPropagation(); setCurrentImg(i => Math.min(images.length - 1, i + 1)); }} className="ld-gallery-nav ld-gallery-nav--next" aria-label="Next image">
                 <ChevronRight size={20} />
               </button>
               <div className="ld-gallery-indicator">{currentImg + 1}/{images.length}</div>
@@ -137,7 +138,7 @@ export default function ListingDetail() {
 
         <div className="ld-info-section">
           <h1>{listing.title}</h1>
-          <div className="mt-2"><PriceBadge price={listing.price} priceType={listing.price_type} /></div>
+          <div className="listing-detail-price"><PriceBadge price={listing.price} priceType={listing.price_type} /></div>
           
           <div className="ld-meta">
             {listing.location && <span><MapPin size={12} />{listing.location}</span>}
@@ -153,7 +154,7 @@ export default function ListingDetail() {
 
         <div className="ld-desc-section">
           <h2>Description</h2>
-          <p className={!showDesc ? 'line-clamp-3' : ''}>{listing.description}</p>
+          <p className={!showDesc ? 'listing-description--collapsed' : ''}>{listing.description}</p>
           <button onClick={() => setShowDesc(!showDesc)}>{showDesc ? 'Show less' : 'Show more'}</button>
         </div>
 
@@ -164,7 +165,7 @@ export default function ListingDetail() {
             <div className="ld-seller-avatar"></div>
             <div className="ld-seller-info">
               <div><span>Seller Name</span></div>
-              <span className="text-xs">Member since 2024</span>
+              <span className="ld-seller-since">Member since 2024</span>
             </div>
           </div>
         </div>
@@ -173,7 +174,7 @@ export default function ListingDetail() {
         {related.length > 0 && (
           <div className="ld-related-section">
             <h2>More in {listing.category}</h2>
-            <div className="browse-grid-mobile">
+            <div className="ld-related-grid ld-related-grid--mobile">
               {related.map(l => <ListingCard key={l.id} listing={l} compact />)}
             </div>
           </div>
@@ -187,7 +188,7 @@ export default function ListingDetail() {
           <div className="ld-sticky-btns">
             <button onClick={handleMessage} className="btn-message"><MessageCircle size={16} /> Message</button>
             {listing.whatsapp_enabled && (
-              <button onClick={handleWhatsApp} className="btn-wa"><WhatsAppIcon /></button>
+              <button onClick={handleWhatsApp} className="btn-wa" aria-label="Contact seller on WhatsApp"><WhatsAppIcon /></button>
             )}
           </div>
         </div>
@@ -195,9 +196,9 @@ export default function ListingDetail() {
         {showGallery && (
           <div className="ld-fullscreen-gallery">
             <div className="ld-fullscreen-header">
-              <button onClick={() => setShowGallery(false)}><X size={24} /></button>
+              <button onClick={() => setShowGallery(false)} aria-label="Close gallery"><X size={24} /></button>
               <span>{currentImg + 1} / {images.length}</span>
-              <div style={{width:24}} />
+              <div className="listing-gallery-header__spacer" aria-hidden="true" />
             </div>
             <img src={images[currentImg]} alt="" />
           </div>
@@ -208,7 +209,7 @@ export default function ListingDetail() {
 
   // Desktop
   return (
-    <div className="ld-desktop-container animate-fade-in">
+    <div className="ld-desktop-container">
       <div className="ld-desktop-inner">
         <button onClick={() => navigate(-1)} className="ld-back-link">
           <ArrowLeft size={16} /> Back to listings
@@ -221,10 +222,10 @@ export default function ListingDetail() {
               <img src={displayImage} alt={listing.title} />
               {images.length > 1 && (
                 <>
-                  <button onClick={e => { e.stopPropagation(); setCurrentImg(i => Math.max(0, i - 1)); }} className="ld-gallery-nav left">
+                  <button onClick={e => { e.stopPropagation(); setCurrentImg(i => Math.max(0, i - 1)); }} className="ld-gallery-nav ld-gallery-nav--previous" aria-label="Previous image">
                     <ChevronLeft size={24} />
                   </button>
-                  <button onClick={e => { e.stopPropagation(); setCurrentImg(i => Math.min(images.length - 1, i + 1)); }} className="ld-gallery-nav right">
+                  <button onClick={e => { e.stopPropagation(); setCurrentImg(i => Math.min(images.length - 1, i + 1)); }} className="ld-gallery-nav ld-gallery-nav--next" aria-label="Next image">
                     <ChevronRight size={24} />
                   </button>
                   <div className="ld-gallery-indicator">{currentImg + 1} / {images.length}</div>
@@ -235,7 +236,7 @@ export default function ListingDetail() {
             {images.length > 1 && (
               <div className="ld-thumbnails">
                 {images.map((img, i) => (
-                  <button key={i} onClick={() => setCurrentImg(i)} className={i === currentImg ? 'active' : ''}>
+                  <button key={i} onClick={() => setCurrentImg(i)} className={i === currentImg ? 'ld-thumbnail--active' : ''}>
                     <img src={img} alt="" />
                   </button>
                 ))}
@@ -255,9 +256,9 @@ export default function ListingDetail() {
               </div>
             </div>
 
-            <div className="ld-desc-section desktop">
+            <div className="ld-desc-section ld-desc-section--desktop">
               <h2>Description</h2>
-              <p className={!showDesc ? 'line-clamp-3' : ''}>{listing.description}</p>
+              <p className={!showDesc ? 'listing-description--collapsed' : ''}>{listing.description}</p>
               {listing.description?.length > 200 && (
                 <button onClick={() => setShowDesc(!showDesc)}>{showDesc ? 'Show less' : 'Read more'}</button>
               )}
@@ -266,7 +267,7 @@ export default function ListingDetail() {
             {related.length > 0 && (
               <div className="ld-related-desktop">
                 <h2>More in {listing.category}</h2>
-                <div className="browse-grid">
+                <div className="ld-related-grid ld-related-grid--desktop">
                   {related.map(l => <ListingCard key={l.id} listing={l} />)}
                 </div>
               </div>
@@ -281,18 +282,18 @@ export default function ListingDetail() {
               
               <div className="ld-sidebar-actions">
                 <ContactActions />
-                <div style={{display:'flex', gap:'0.5rem', marginTop: '0.75rem'}}>
-                  <button onClick={toggleFavorite} className={`btn-outline w-full ${saved ? 'saved' : ''}`}>
+                <div className="listing-secondary-actions">
+                  <button onClick={toggleFavorite} className={`listing-secondary-button ${saved ? 'listing-secondary-button--saved' : ''}`}>
                     <Heart size={16} fill={saved ? 'currentColor' : 'none'} />
                     {saved ? 'Saved' : 'Save'}
                   </button>
-                  <button className="btn-outline w-full">
+                  <button className="listing-secondary-button">
                     <Share2 size={16} /> Share
                   </button>
                 </div>
               </div>
 
-              <div className="ld-seller-card desktop">
+              <div className="ld-seller-card ld-seller-card--desktop">
                 <h3>Seller</h3>
                 <div className="ld-seller-info-row">
                   <div className="ld-seller-avatar"></div>
@@ -308,7 +309,7 @@ export default function ListingDetail() {
       </div>
 
       {showGallery && (
-        <div className="ld-fullscreen-gallery desktop">
+        <div className="ld-fullscreen-gallery">
           <div className="ld-fullscreen-header">
             <button onClick={() => setShowGallery(false)}><X size={20} /> Close</button>
             <span>{currentImg + 1} / {images.length}</span>

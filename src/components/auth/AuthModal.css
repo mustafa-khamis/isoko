@@ -52,6 +52,10 @@
   border-bottom: 1px solid var(--color-ink-100);
 }
 
+.auth-header__spacer {
+  width: 2rem;
+}
+
 .auth-back-btn {
   width: 2rem;
   height: 2rem;
@@ -87,7 +91,7 @@
   font-weight: 800;
   color: var(--color-ink-950);
   font-size: 1rem;
-  letter-spacing: -0.025em;
+  letter-spacing: 0;
 }
 
 .auth-body {
@@ -219,6 +223,16 @@
   margin-bottom: 0.375rem;
 }
 
+.auth-label--flush {
+  margin-bottom: 0;
+}
+
+.auth-password-heading {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.375rem;
+}
+
 .auth-input-group {
   display: flex;
   align-items: center;
@@ -326,6 +340,10 @@
   margin-bottom: 1.5rem;
 }
 
+.auth-otp-inputs--left {
+  justify-content: flex-start;
+}
+
 .auth-otp-input {
   width: 2.75rem;
   height: 3.5rem;
@@ -376,5 +394,32 @@
   color: var(--color-brand-600);
 }
 
-.mt-6 { margin-top: 1.5rem; }
-.mt-4 { margin-top: 1rem; }
+.auth-panel {
+  animation: fadeIn 0.22s ease-out both;
+}
+
+.auth-panel--centered {
+  text-align: center;
+}
+
+.auth-subtitle--left {
+  text-align: left;
+}
+
+.auth-spinner {
+  animation: spin 0.8s linear infinite;
+}
+
+.auth-resend-text--spaced {
+  margin-top: 1rem;
+}
+
+.auth-btn-primary--spaced {
+  margin-top: 1.5rem;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

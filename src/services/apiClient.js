@@ -26,6 +26,52 @@ const AUTH_REQUESTS_WITHOUT_REFRESH_RETRY = new Set([
   '/auth/google',
 ]);
 
+const isFormData = (value) =>
+  typeof FormData !== 'undefined' && value instanceof FormData;
+
+const getHeaderValue = (headers, name) => {
+  if (!headers) return undefined;
+  if (typeof headers.get === 'function') return headers.get(name);
+  const key = Object.keys(headers).find((header) => header.toLowerCase() === name.toLowerCase());
+  return key ? headers[key] : undefined;
+};
+
+const setHeaderValue = (headers, name, value) => {
+  if (typeof headers.set === 'function') headers.set(name, value);
+  else headers[name] = value;
+};
+
+const deleteHeaderValue = (headers, name) => {
+  if (typeof headers.delete === 'function') headers.delete(name);
+  else {
+    const key = Object.keys(headers).find((header) => header.toLowerCase() === name.toLowerCase());
+    if (key) delete headers[key];
+  }
+};
+
+const restoreRetryPayload = (config) => {
+  if (!config) return config;
+
+  if (config._originalData !== undefined) {
+    config.data = config._originalData;
+  } else {
+    const contentType = getHeaderValue(config.headers, 'Content-Type') || '';
+    if (typeof config.data === 'string' && contentType.toLowerCase().includes('application/json')) {
+      try {
+        config.data = JSON.parse(config.data);
+      } catch {
+        // Keep non-JSON strings as-is.
+      }
+    }
+  }
+
+  if (isFormData(config.data)) {
+    deleteHeaderValue(config.headers, 'Content-Type');
+  }
+
+  return config;
+};
+
 // In-memory token storage
 export const setAccessToken = (token) => {
   accessToken = token;
@@ -107,11 +153,17 @@ export const refreshAccessToken = () => {
 
 apiClient.interceptors.request.use(
   (config) => {
+    config.headers = config.headers || {};
+    config._originalData ??= config.data;
     config._accessTokenAtRequest = accessToken;
     config._authSessionVersion = authSessionVersion;
 
+    if (isFormData(config.data)) {
+      deleteHeaderValue(config.headers, 'Content-Type');
+    }
+
     if (accessToken) {
-      config.headers.Authorization = `Bearer ${accessToken}`;
+      setHeaderValue(config.headers, 'Authorization', `Bearer ${accessToken}`);
     }
     return config;
   },
@@ -144,8 +196,8 @@ apiClient.interceptors.response.use(
         accessToken
       ) {
         originalRequest.headers = originalRequest.headers || {};
-        originalRequest.headers.Authorization = `Bearer ${accessToken}`;
-        return apiClient(originalRequest);
+        setHeaderValue(originalRequest.headers, 'Authorization', `Bearer ${accessToken}`);
+        return apiClient(restoreRetryPayload(originalRequest));
       }
 
       const requestSessionVersion = authSessionVersion;
@@ -159,8 +211,8 @@ apiClient.interceptors.response.use(
 
         // Retry original request
         originalRequest.headers = originalRequest.headers || {};
-        originalRequest.headers.Authorization = `Bearer ${token}`;
-        return apiClient(originalRequest);
+        setHeaderValue(originalRequest.headers, 'Authorization', `Bearer ${token}`);
+        return apiClient(restoreRetryPayload(originalRequest));
       } catch (err) {
         if (requestSessionVersion === authSessionVersion) {
           // Refresh failed, user is actually logged out
@@ -177,5 +229,36 @@ apiClient.interceptors.response.use(
     return Promise.reject(error);
   }
 );
+
+export const normalizeApiError = (error) => {
+  if (!error.response) {
+    return {
+      status: 0,
+      code: 'SERVICE_UNAVAILABLE',
+      message: 'The Isoko API is unavailable. Check the backend and try again.',
+      fieldErrors: [],
+    };
+  }
+
+  const data = error.response.data || {};
+  const rawErrors = Array.isArray(data.errors)
+    ? data.errors
+    : Array.isArray(data.error?.errors)
+      ? data.error.errors
+      : [];
+
+  return {
+    status: error.response.status,
+    code: data.errorCode || data.error_code || data.code || data.error?.code || 'REQUEST_FAILED',
+    message:
+      data.message ||
+      data.error?.message ||
+      (error.response.status === 422 ? 'The submitted data is invalid.' : 'The request could not be completed.'),
+    fieldErrors: rawErrors.map((fieldError) => ({
+      field: fieldError.field || fieldError.path || '',
+      message: fieldError.message || String(fieldError),
+    })),
+  };
+};
 
 export default apiClient;

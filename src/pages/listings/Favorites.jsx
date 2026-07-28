@@ -5,6 +5,7 @@ import { useAuth } from '../../context/AuthContext';
 import { useUI } from '../../context/UIContext';
 import { listingsApi } from '../../services/listingsApi';
 import ListingCard from '../../components/listings/ListingCard';
+import './Favorites.css';
 
 export default function Favorites() {
   const navigate = useNavigate();
@@ -43,50 +44,50 @@ export default function Favorites() {
 
   if (!user) {
     return (
-      <div className="flex flex-col items-center justify-center text-center h-full px-6">
-        <div className="w-20 h-20 bg-ink-100 rounded-3xl flex items-center justify-center mb-4">
-          <Heart size={40} className="text-ink-300" />
+      <div className="favorites-auth-state">
+        <div className="favorites-auth-icon">
+          <Heart size={40} />
         </div>
-        <h3 className="text-lg font-bold text-ink-800 mb-2">Sign in to save listings</h3>
-        <p className="text-sm text-ink-500 max-w-xs mb-6">Create a free account to save your favourite listings and come back to them anytime.</p>
-        <button onClick={() => showAuth()} className="btn btn-primary px-6">Sign In</button>
+        <h3 className="favorites-state-title">Sign in to save listings</h3>
+        <p className="favorites-state-copy">Create a free account to save your favourite listings and come back to them anytime.</p>
+        <button onClick={() => showAuth()} className="favorites-state-button">Sign In</button>
       </div>
     );
   }
 
   return (
-    <div className="bg-ink-50 min-h-full animate-fade-in">
+    <div className="favorites-page">
       {/* Header */}
-      <div className={`bg-white border-b border-ink-100 ${isMobile ? 'sticky top-0 z-30' : ''}`}>
-        <div className={`flex items-center gap-3 px-4 py-4 ${isMobile ? '' : 'max-w-screen-xl mx-auto lg:px-8'}`}>
+      <div className={`favorites-header ${isMobile ? 'favorites-header--sticky' : ''}`}>
+        <div className="favorites-header-inner">
           {isMobile && (
-            <button onClick={() => navigate(-1)} className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-ink-100">
-              <ArrowLeft size={20} className="text-ink-600" />
+            <button onClick={() => navigate(-1)} className="favorites-back-button">
+              <ArrowLeft size={20} />
             </button>
           )}
-          <h1 className="text-lg font-bold text-ink-950">Saved Listings</h1>
+          <h1 className="favorites-title">Saved Listings</h1>
           {!loading && savedListings.length > 0 && (
-            <span className="text-sm text-ink-400 ml-1">({savedListings.length})</span>
+            <span className="favorites-count">({savedListings.length})</span>
           )}
         </div>
       </div>
 
-      <div className={`${isMobile ? 'px-3 pt-4' : 'max-w-screen-xl mx-auto px-4 lg:px-8 pt-6'}`}>
+      <div className={`favorites-content ${isMobile ? 'favorites-content--mobile' : ''}`}>
         {loading ? (
-          <div className="text-center py-10">Loading...</div>
+          <div className="favorites-loading">Loading...</div>
         ) : savedListings.length === 0 ? (
-          <div className="flex flex-col items-center py-20 text-center">
-            <div className="w-20 h-20 bg-brand-50 rounded-3xl flex items-center justify-center mb-4">
-              <Heart size={40} className="text-brand-300" />
+          <div className="favorites-empty-state">
+            <div className="favorites-empty-icon">
+              <Heart size={40} />
             </div>
-            <h3 className="text-lg font-bold text-ink-800 mb-2">No saved listings yet</h3>
-            <p className="text-sm text-ink-500 max-w-xs mb-6">Tap the heart icon on any listing to save it here for later.</p>
-            <button onClick={() => navigate('/browse')} className="btn btn-primary px-5">
+            <h3 className="favorites-state-title">No saved listings yet</h3>
+            <p className="favorites-state-copy">Tap the heart icon on any listing to save it here for later.</p>
+            <button onClick={() => navigate('/browse')} className="favorites-browse-button">
               Browse listings
             </button>
           </div>
         ) : (
-          <div className={isMobile ? "browse-grid-mobile" : "browse-grid"}>
+          <div className={`favorites-grid ${isMobile ? 'favorites-grid--mobile' : 'favorites-grid--desktop'}`}>
             {savedListings.map(l => (
               <ListingCard key={l.id} listing={l} compact={isMobile} />
             ))}
