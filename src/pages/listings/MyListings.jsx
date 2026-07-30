@@ -197,7 +197,7 @@ function ListingRow({ listing, onEdit, onDelete }) {
       <div className="my-listing-card__main">
         <div className="my-listing-card__image-frame">
           <img
-            src={listing.images?.[0] || '/images/default-listing.svg'}
+            src={listing.cover_image_url || listing.images?.[0] || '/images/default-listing.svg'}
             alt={listing.title}
             className="my-listing-card__image"
             onError={(event) => {

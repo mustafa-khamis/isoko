@@ -49,6 +49,40 @@ export default function CreateListing() {
     const trimmed = value.trim();
     return trimmed ? trimmed : null;
   };
+  const setStepError = (message) => {
+    setError(message);
+    return false;
+  };
+  const validateStep = (stepToValidate = step) => {
+    if (stepToValidate === 2) {
+      const title = draft.title.trim();
+      const description = draft.description.trim();
+
+      if (title.length < 5) {
+        return setStepError('Listing title must be at least 5 characters.');
+      }
+      if (!draft.category_id) {
+        return setStepError('Please choose a category.');
+      }
+      if (description.length < 20) {
+        return setStepError('Description must be at least 20 characters.');
+      }
+    }
+
+    if (stepToValidate === 3 && draft.priceType !== 'contact') {
+      const parsedPrice = Number.parseFloat(draft.price);
+      if (draft.price.trim() === '' || Number.isNaN(parsedPrice) || parsedPrice < 0) {
+        return setStepError('Enter a valid price, or choose contact for price.');
+      }
+    }
+
+    setError('');
+    return true;
+  };
+  const goToNextStep = () => {
+    if (!validateStep(step)) return;
+    setStep(s => s + 1);
+  };
 
   useEffect(() => {
     Promise.all([
@@ -95,6 +129,12 @@ export default function CreateListing() {
 
   const handleSubmit = async () => {
     if (submitting) return;
+    for (let stepToValidate = 2; stepToValidate <= 3; stepToValidate += 1) {
+      if (!validateStep(stepToValidate)) {
+        setStep(stepToValidate);
+        return;
+      }
+    }
     setSubmitting(true);
     setError('');
     try {
@@ -127,9 +167,20 @@ export default function CreateListing() {
 
       setSubmitted(true);
     } catch (err) {
-      console.error(err);
+      const responseCode = err.response?.data?.error?.code
+        || err.response?.data?.code
+        || err.response?.data?.error_code;
+      console.error('Create listing failed', {
+        status: err.response?.status,
+        code: responseCode,
+        message: err.response?.data?.error?.message
+          || err.response?.data?.message
+          || err.message,
+      });
       const apiError = normalizeApiError(err);
-      let errorMsg = apiError.message || 'Failed to create listing';
+      let errorMsg = responseCode === 'PLAN_CONFIGURATION_INVALID'
+        ? 'Your selling plan is temporarily misconfigured. Please contact support.'
+        : apiError.message || 'Failed to create listing';
       if (apiError.fieldErrors.length > 0) {
         const firstErr = apiError.fieldErrors[0];
         errorMsg += ` (${firstErr.field}: ${firstErr.message})`;
@@ -361,7 +412,7 @@ export default function CreateListing() {
         {/* Footer */}
         <div className="cl-footer">
           {step < totalSteps ? (
-            <button onClick={() => setStep(s => s + 1)} className="listing-create-footer__button">Continue <ChevronRight size={16}/></button>
+            <button onClick={goToNextStep} className="listing-create-footer__button">Continue <ChevronRight size={16}/></button>
           ) : (
             <button onClick={handleSubmit} disabled={submitting} className="listing-create-footer__button">
               {submitting ? <Loader2 size={16} className="listing-create-submit-spinner" /> : 'Submit for review'}

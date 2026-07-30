@@ -22,8 +22,8 @@ export default function Home() {
       setLoading(true);
       try {
         const res = await listingsApi.getListings({ limit: 12 });
-        // The API returns { status: 'success', data: { listings: [...] } }
-        setListings(res.data.data.listings || []);
+        // The API returns { success: true, data: [...], pagination: {...} }
+        setListings(res.data.data || []);
       } catch (err) {
         console.error('Failed to fetch listings', err);
         setError('Failed to load listings. Check backend connection.');

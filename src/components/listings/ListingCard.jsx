@@ -35,10 +35,10 @@ export default function ListingCard({ listing, compact = false, variant = 'grid'
 
   const handleClick = () => navigate(`/listing/${listing.id}`);
 
-  // Need a fallback image if listing.images is missing or empty
-  const imageUrl = listing.images && listing.images.length > 0 
-    ? listing.images[0].url || listing.images[0] 
-    : '/images/default-listing.svg';
+  // Need a fallback image if listing.images or cover_image_url is missing
+  const imageUrl = listing.cover_image_url 
+    || (listing.images && listing.images.length > 0 ? (listing.images[0].url || listing.images[0]) : null) 
+    || '/images/default-listing.svg';
 
   if (variant === 'list') {
     return (

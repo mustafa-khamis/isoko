@@ -52,7 +52,7 @@ export default function Browse() {
         if (sortBy) params.sort = sortBy;
 
         const res = await listingsApi.getListings(params);
-        setListings(res.data.data.listings || []);
+        setListings(res.data.data || []);
       } catch (err) {
         console.error('Fetch listings failed', err);
         setError('Failed to load listings.');
