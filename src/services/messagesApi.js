@@ -1,10 +1,10 @@
 import apiClient from './apiClient';
 
 export const messagesApi = {
-  getConversations: () => apiClient.get('/conversations'),
-  getConversation: (id) => apiClient.get(`/conversations/${id}`),
-  createConversation: (data) => apiClient.post('/conversations', data), // { listing_id, participant_id }
-  getMessages: (conversationId) => apiClient.get(`/conversations/${conversationId}/messages`),
-  sendMessage: (conversationId, data) => apiClient.post(`/conversations/${conversationId}/messages`, data), // { content }
-  markAsRead: (conversationId) => apiClient.patch(`/conversations/${conversationId}/read`),
+  getConversations: () => apiClient.get('/chat'),
+  getConversation: (id) => apiClient.get(`/chat/${id}/info`),
+  createConversation: (listingId, data) => apiClient.post(`/chat/${listingId}`, data), // { message }
+  getMessages: (conversationId) => apiClient.get(`/chat/${conversationId}`),
+  sendMessage: (conversationId, data) => apiClient.post(`/chat/${conversationId}/messages`, data), // { content }
+  markAsRead: (conversationId) => apiClient.patch(`/chat/${conversationId}/read`),
 };

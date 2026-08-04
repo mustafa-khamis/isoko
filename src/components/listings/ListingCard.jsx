@@ -42,7 +42,7 @@ export default function ListingCard({ listing, compact = false, variant = 'grid'
 
   if (variant === 'list') {
     return (
-      <button onClick={handleClick} className="listing-card-list">
+      <div onClick={handleClick} className="listing-card-list">
         <div className="listing-card-list-img-wrapper">
           <img 
             src={imageUrl} 
@@ -55,7 +55,7 @@ export default function ListingCard({ listing, compact = false, variant = 'grid'
         <div className="listing-card-list-content">
           <p className="listing-title listing-title--clamped">{listing.title}</p>
           <div className="listing-price-wrapper">
-            <PriceBadge price={listing.price} priceType={listing.priceType} />
+            <PriceBadge price={listing.price} priceType={listing.price_type || listing.priceType} />
           </div>
           <div className="listing-meta">
             {listing.location && (
@@ -73,12 +73,13 @@ export default function ListingCard({ listing, compact = false, variant = 'grid'
         >
           <Heart size={16} fill={saved ? 'currentColor' : 'none'} />
         </button>
-      </button>
+      </div>
     );
   }
 
+
   return (
-    <button onClick={handleClick} className={`listing-card-grid ${compact ? 'listing-card-grid--compact' : ''}`}>
+    <div onClick={handleClick} className={`listing-card-grid ${compact ? 'listing-card-grid--compact' : ''}`}>
       <div className="listing-card-img-container">
         <img
           src={imageUrl}
@@ -119,7 +120,7 @@ export default function ListingCard({ listing, compact = false, variant = 'grid'
         <p className="listing-title listing-title--clamped">
           {listing.title}
         </p>
-        <PriceBadge price={listing.price} priceType={listing.priceType} />
+        <PriceBadge price={listing.price} priceType={listing.price_type || listing.priceType} />
         <div className="listing-meta listing-meta--pushed">
           {listing.location && (
             <>
@@ -131,7 +132,7 @@ export default function ListingCard({ listing, compact = false, variant = 'grid'
           <span className="listing-time-text">{timeAgo(listing.created_at || listing.postedAt || new Date())}</span>
         </div>
       </div>
-    </button>
+    </div>
   );
 }
 

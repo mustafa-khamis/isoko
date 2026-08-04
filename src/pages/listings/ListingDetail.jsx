@@ -4,6 +4,7 @@ import { ArrowLeft, Heart, Share2, MapPin, Clock, ChevronLeft, ChevronRight, X, 
 import { useAuth } from '../../context/AuthContext';
 import { useUI } from '../../context/UIContext';
 import { listingsApi } from '../../services/listingsApi';
+import { messagesApi } from '../../services/messagesApi';
 import ListingCard, { PriceBadge } from '../../components/listings/ListingCard';
 import { timeAgo } from '../../utils/formatters';
 import './ListingDetail.css';
@@ -31,54 +32,84 @@ export default function ListingDetail() {
   const [showGallery, setShowGallery] = useState(false);
   const [showDesc, setShowDesc] = useState(false);
   
-  // Basic saved state mapping. 
-  // In a real app we'd fetch user's favorites or use context.
-  const [saved, setSaved] = useState(false);
+  const { toggleFavorite, isFavorite } = useUI();
+  
+  const saved = listing ? isFavorite(listing.id) : false;
 
   useEffect(() => {
+    let isMounted = true;
     const fetchListing = async () => {
       setLoading(true);
       setError('');
       try {
         const res = await listingsApi.getListing(id);
+        if (!isMounted) return;
+
         const fetchedListing = res.data.data;
         setListing(fetchedListing);
         
         // Fetch related listings based on category
         if (fetchedListing.category) {
           const relatedRes = await listingsApi.getListings({ category: fetchedListing.category, limit: 4 });
+          if (!isMounted) return;
           // exclude current
           const filtered = (relatedRes.data.data.listings || []).filter(l => l.id !== fetchedListing.id);
           setRelated(filtered);
         }
       } catch (err) {
+        if (!isMounted) return;
         console.error('Fetch listing error', err);
         setError('Failed to load listing details.');
       } finally {
-        setLoading(false);
+        if (isMounted) setLoading(false);
       }
     };
     fetchListing();
+
+    return () => {
+      isMounted = false;
+    };
   }, [id]);
 
-  const handleMessage = () => {
+  const handleMessage = async () => {
     if (!user) { showAuth('Sign in to message the seller.'); return; }
-    navigate(`/messages/${listing.seller_id}`);
+    try {
+      const response = await messagesApi.createConversation(listing.id, { message: `Hi, I'm interested in your listing: "${listing.title}"` });
+      navigate(`/messages/${response.data.data.conversation_id}`);
+    } catch (err) {
+      console.error('Failed to start conversation', err);
+      // Fallback if conversation already exists or failed
+      navigate('/messages');
+    }
   };
 
   const handleWhatsApp = () => {
-    if (!user) { showAuth('Sign in to contact the seller via WhatsApp.'); return; }
-    if (listing.whatsapp) window.open(`https://wa.me/${listing.whatsapp.replace(/\D/g, '')}`, '_blank');
+    if (!listing.whatsapp_enabled) {
+      alert("This seller has not enabled WhatsApp contact.");
+      return;
+    }
+    if (!listing.seller_phone) {
+      alert("Seller hasn't provided a phone number.");
+      return;
+    }
+    const url = `https://wa.me/${listing.seller_phone.replace(/\D/g, '')}?text=Hi, I'm interested in your listing on Isoko: ${listing.title}`;
+    window.open(url, '_blank');
   };
 
-  const toggleFavorite = async () => {
-    if (!user) { showAuth('Sign in to save listings.'); return; }
+  const handleShare = async () => {
     try {
-      if (saved) await listingsApi.removeFavorite(listing.id);
-      else await listingsApi.addFavorite(listing.id);
-      setSaved(!saved);
+      if (navigator.share) {
+        await navigator.share({
+          title: listing.title,
+          text: `Check out ${listing.title} on Isoko!`,
+          url: window.location.href,
+        });
+      } else {
+        await navigator.clipboard.writeText(window.location.href);
+        alert('Link copied to clipboard!');
+      }
     } catch (err) {
-      console.error(err);
+      console.error('Error sharing:', err);
     }
   };
 
@@ -111,10 +142,10 @@ export default function ListingDetail() {
             <ArrowLeft size={20} />
           </button>
           <div className="listing-detail-mobile__header-actions">
-            <button onClick={toggleFavorite} className={`ld-header-btn ${saved ? 'ld-header-btn--saved' : ''}`} aria-label="Save listing">
+            <button onClick={() => toggleFavorite(listing.id)} className={`ld-header-btn ${saved ? 'ld-header-btn--saved' : ''}`} aria-label="Save listing">
               <Heart size={16} fill={saved ? 'currentColor' : 'none'} />
             </button>
-            <button className="ld-header-btn" aria-label="Share listing"><Share2 size={16} /></button>
+            <button onClick={handleShare} className="ld-header-btn" aria-label="Share listing"><Share2 size={16} /></button>
           </div>
         </div>
 
@@ -143,7 +174,9 @@ export default function ListingDetail() {
           <div className="ld-meta">
             {listing.location && <span><MapPin size={12} />{listing.location}</span>}
             <span><Clock size={12} />{timeAgo(listing.created_at)}</span>
-            <span><Eye size={12} />{listing.views || 0} views</span>
+            {(user?.id === listing.user_id || user?.roles?.some(r => ['admin', 'super_admin'].includes(r))) && (
+              <span><Eye size={12} />{listing.views || 0} views</span>
+            )}
           </div>
 
           <div className="ld-tags">
@@ -158,14 +191,16 @@ export default function ListingDetail() {
           <button onClick={() => setShowDesc(!showDesc)}>{showDesc ? 'Show less' : 'Show more'}</button>
         </div>
 
-        {/* Seller Info Placeholder */}
+        {/* Seller Info */}
         <div className="ld-seller-section">
           <h2>Seller</h2>
-          <div className="ld-seller-card">
-            <div className="ld-seller-avatar"></div>
+          <div className="ld-seller-card" onClick={() => navigate(`/seller/${listing.user_id}`)} style={{cursor: 'pointer'}}>
+            <div className="ld-seller-avatar">
+              {listing.seller_profile_image_path ? <img src={listing.seller_profile_image_path} alt="" /> : null}
+            </div>
             <div className="ld-seller-info">
-              <div><span>Seller Name</span></div>
-              <span className="ld-seller-since">Member since 2024</span>
+              <div><span className="name">{listing.seller_name || 'Anonymous Seller'}</span></div>
+              <span className="ld-seller-since">Member since {new Date(listing.created_at).getFullYear()}</span>
             </div>
           </div>
         </div>
@@ -248,7 +283,9 @@ export default function ListingDetail() {
               <div className="ld-meta">
                 {listing.location && <span><MapPin size={14} />{listing.location}</span>}
                 <span><Clock size={14} />{timeAgo(listing.created_at)}</span>
-                <span><Eye size={14} />{listing.views || 0} views</span>
+                {(user?.id === listing.user_id || user?.roles?.some(r => ['admin', 'super_admin'].includes(r))) && (
+                  <span><Eye size={14} />{listing.views || 0} views</span>
+                )}
               </div>
               <div className="ld-tags">
                 <span>{listing.category}</span>
@@ -278,28 +315,29 @@ export default function ListingDetail() {
           <div className="ld-sidebar">
             <div className="ld-sidebar-inner">
               <PriceBadge price={listing.price} priceType={listing.price_type} />
-              {listing.price_type === 'negotiable' && <p className="ld-negotiable-text">Price is negotiable</p>}
               
               <div className="ld-sidebar-actions">
                 <ContactActions />
                 <div className="listing-secondary-actions">
-                  <button onClick={toggleFavorite} className={`listing-secondary-button ${saved ? 'listing-secondary-button--saved' : ''}`}>
+                  <button onClick={() => toggleFavorite(listing.id)} className={`listing-secondary-button ${saved ? 'listing-secondary-button--saved' : ''}`}>
                     <Heart size={16} fill={saved ? 'currentColor' : 'none'} />
                     {saved ? 'Saved' : 'Save'}
                   </button>
-                  <button className="listing-secondary-button">
+                  <button onClick={handleShare} className="listing-secondary-button">
                     <Share2 size={16} /> Share
                   </button>
                 </div>
               </div>
 
-              <div className="ld-seller-card ld-seller-card--desktop">
+              <div className="ld-seller-card ld-seller-card--desktop" onClick={() => navigate(`/seller/${listing.user_id}`)} style={{cursor: 'pointer'}}>
                 <h3>Seller</h3>
                 <div className="ld-seller-info-row">
-                  <div className="ld-seller-avatar"></div>
+                  <div className="ld-seller-avatar">
+                    {listing.seller_profile_image_path ? <img src={listing.seller_profile_image_path} alt="" /> : null}
+                  </div>
                   <div>
-                    <span className="name">Seller ID: {listing.seller_id}</span>
-                    <span className="since">Since 2024</span>
+                    <span className="name">{listing.seller_name || 'Anonymous Seller'}</span>
+                    <span className="since">Since {new Date(listing.created_at).getFullYear()}</span>
                   </div>
                 </div>
               </div>

@@ -3,9 +3,12 @@ import apiClient from './apiClient';
 export const listingsApi = {
   // Returns all listings (can take query params for filtering)
   getListings: (params) => apiClient.get('/listings', { params }),
+  searchListings: (params) => apiClient.get('/listings/search', { params }),
   
   // Get a single listing by ID
   getListing: (id) => apiClient.get(`/listings/${id}`),
+
+  toggleFavorite: (id) => apiClient.post(`/listings/${id}/favorite`),
   
   // Create a listing (JSON)
   createListing: (data) => apiClient.post('/listings', data),

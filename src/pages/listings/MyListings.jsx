@@ -16,6 +16,7 @@ import {
 import { useAuth } from '../../context/AuthContext';
 import { useUI } from '../../context/UIContext';
 import { listingsApi } from '../../services/listingsApi';
+import { usersApi } from '../../services/usersApi';
 import { formatRWF, timeAgo } from '../../utils/formatters';
 import './MyListings.css';
 
@@ -47,7 +48,6 @@ export default function MyListings() {
 
     const fetchMyListings = async () => {
       try {
-        const { usersApi } = await import('../../services/usersApi');
         const response = await usersApi.getMyListings();
         if (response.data?.data) {
           setListings(response.data.data || []);

@@ -18,6 +18,7 @@ import Profile from './pages/profile/Profile';
 import ProfileEdit from './pages/profile/ProfileEdit';
 import TraderPlans from './pages/profile/TraderPlans';
 import SponsoredAd from './pages/profile/SponsoredAd';
+import SellerProfile from './pages/profile/SellerProfile';
 
 // We will import pages here later
 
@@ -37,7 +38,7 @@ const AppShell = () => {
 
   return (
     <div className="app-container">
-      {!isMobile && <Header />}
+      <Header />
       
       <main className="main-content">
         <Routes>
@@ -54,6 +55,7 @@ const AppShell = () => {
           <Route path="/profile/edit" element={<ProfileEdit />} />
           <Route path="/trader-plans" element={<TraderPlans />} />
           <Route path="/sponsored-ad" element={<SponsoredAd />} />
+          <Route path="/seller/:id" element={<SellerProfile />} />
           {/* Add more routes here */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>

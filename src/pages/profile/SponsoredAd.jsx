@@ -15,11 +15,7 @@ import { useAuth } from '../../context/AuthContext';
 import { useUI } from '../../context/UIContext';
 import './SponsoredAd.css';
 
-const DEMO_IMAGES = [
-  'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&q=80',
-  'https://images.unsplash.com/photo-1585386959984-a4155224a1ad?w=400&q=80',
-  'https://images.unsplash.com/photo-1491553895911-0055eca6402d?w=400&q=80',
-];
+import { adsApi } from '../../services/adsApi';
 
 const AD_SUMMARY = [
   { label: 'Duration', value: '7 days after approval' },
@@ -36,16 +32,49 @@ export default function SponsoredAd() {
   const [adType, setAdType] = useState('feed');
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
-  const [selectedImage, setSelectedImage] = useState(0);
+  const [selectedImage, setSelectedImage] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
   const [link, setLink] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  if (user?.role === 'buyer') {
+  const hasTraderPlan = user?.selling_plan && user.selling_plan.code !== 'free';
+
+  if (!hasTraderPlan) {
     return <TraderRequired navigate={navigate} isMobile={isMobile} />;
   }
 
   if (step === 'submitted') {
     return <AdSubmitted navigate={navigate} isMobile={isMobile} adType={adType} />;
   }
+
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setSelectedImage(file);
+      setImagePreview(URL.createObjectURL(file));
+    }
+  };
+
+  const handleSubmit = async () => {
+    if (!selectedImage || !title) return;
+    setIsSubmitting(true);
+    try {
+      const formData = new FormData();
+      formData.append('title', title);
+      formData.append('description', description);
+      if (link) formData.append('target_url', link);
+      formData.append('placement', adType === 'story' ? 'stories' : 'feed');
+      formData.append('image', selectedImage);
+      
+      await adsApi.createSponsoredAd(formData);
+      setStep('submitted');
+    } catch (err) {
+      console.error(err);
+      alert('Failed to submit ad. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   const stepLabel = step === 'type'
     ? 'Step 1 of 3 - Choose format'
@@ -137,22 +166,22 @@ export default function SponsoredAd() {
               <label className="sponsored-ad-field-label">
                 Ad Image <span className="sponsored-ad-required">*</span>
               </label>
-              <div className="sponsored-ad-image-grid">
-                {DEMO_IMAGES.map((image, index) => (
-                  <button
-                    key={image}
-                    onClick={() => setSelectedImage(index)}
-                    className={`sponsored-ad-image-option ${selectedImage === index ? 'sponsored-ad-image-option--selected' : ''}`}
-                    aria-label={`Select ad image ${index + 1}`}
-                    aria-pressed={selectedImage === index}
-                  >
-                    <img src={image} alt="" className="sponsored-ad-image-option__image" />
-                  </button>
-                ))}
-                <button className="sponsored-ad-upload-button">
-                  <Camera size={20} />
-                  <span>Upload</span>
-                </button>
+              <div className="sponsored-ad-image-grid" style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+                {imagePreview ? (
+                  <div className="sponsored-ad-image-option sponsored-ad-image-option--selected" style={{ position: 'relative' }}>
+                    <img src={imagePreview} alt="Preview" className="sponsored-ad-image-option__image" />
+                    <button 
+                      onClick={() => { setSelectedImage(null); setImagePreview(null); }}
+                      style={{ position: 'absolute', top: 5, right: 5, background: 'rgba(0,0,0,0.5)', color: 'white', border: 'none', borderRadius: '50%', cursor: 'pointer', padding: 5 }}
+                    >X</button>
+                  </div>
+                ) : (
+                  <label className="sponsored-ad-upload-button" style={{ cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+                    <Camera size={20} />
+                    <span>Upload</span>
+                    <input type="file" accept="image/*" style={{ display: 'none' }} onChange={handleImageChange} />
+                  </label>
+                )}
               </div>
               <p className="sponsored-ad-help-text">Recommended size: 800 x 800px. Max 2MB.</p>
             </div>
@@ -201,7 +230,7 @@ export default function SponsoredAd() {
 
             <button
               onClick={() => setStep('preview')}
-              disabled={!title}
+              disabled={!title || !selectedImage}
               className="sponsored-ad-primary-button"
             >
               Preview ad
@@ -215,7 +244,7 @@ export default function SponsoredAd() {
 
             <article className="sponsored-ad-preview">
               <div className="sponsored-ad-preview__image-frame">
-                <img src={DEMO_IMAGES[selectedImage]} alt="" className="sponsored-ad-preview__image" />
+                <img src={imagePreview} alt="" className="sponsored-ad-preview__image" />
                 <div className="sponsored-ad-preview__badge">
                   <Megaphone size={12} /> Sponsored
                 </div>
@@ -243,8 +272,10 @@ export default function SponsoredAd() {
             </div>
 
             <div className="sponsored-ad-review-actions">
-              <button onClick={() => setStep('content')} className="sponsored-ad-secondary-button">Edit</button>
-              <button onClick={() => setStep('submitted')} className="sponsored-ad-primary-button">Submit for review</button>
+              <button onClick={() => setStep('content')} className="sponsored-ad-secondary-button" disabled={isSubmitting}>Edit</button>
+              <button onClick={handleSubmit} className="sponsored-ad-primary-button" disabled={isSubmitting}>
+                {isSubmitting ? 'Submitting...' : 'Submit for review'}
+              </button>
             </div>
           </section>
         )}
@@ -268,10 +299,10 @@ function QuotaBanner({ userRole }) {
       <div className="sponsored-ad-quota__icon"><Zap size={16} /></div>
       <div className="sponsored-ad-quota__content">
         <p className="sponsored-ad-quota__label">
-          {userRole === 'seller' ? '1 of 2 sponsored ads remaining' : '3 of 5 sponsored ads remaining'}
+          {userRole?.includes('trader') ? 'Sponsored ads remaining' : 'Unlimited ads available'}
         </p>
         <div className="sponsored-ad-quota__track">
-          <div className="sponsored-ad-quota__fill" style={{ width: userRole === 'seller' ? '50%' : '40%' }} />
+          <div className="sponsored-ad-quota__fill" style={{ width: '100%' }} />
         </div>
       </div>
     </div>

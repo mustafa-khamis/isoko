@@ -12,5 +12,6 @@ export const usersApi = {
   getUserPublic: (userId) => apiClient.get(`/users/${userId}/public`),
   getUserListings: (userId) => apiClient.get(`/users/${userId}/listings`),
   getMyListings: (params) => apiClient.get('/users/me/listings', { params }),
+  getFavorites: () => apiClient.get('/users/me/favorites'),
   deleteAccount: () => apiClient.delete('/users/me'),
 };

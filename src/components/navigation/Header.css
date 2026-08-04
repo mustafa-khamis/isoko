@@ -266,7 +266,13 @@
 }
 
 @media (max-width: 768px) {
-  .header-location-btn--desktop {
+  .header-main {
+    display: none;
+  }
+}
+
+@media (min-width: 769px) {
+  .header-categories {
     display: none;
   }
 }

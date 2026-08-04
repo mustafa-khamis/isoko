@@ -4,17 +4,8 @@ import { Search, SlidersHorizontal, X, ChevronDown, ArrowLeft, PackageSearch } f
 import ListingCard, { SkeletonCard } from '../../components/listings/ListingCard';
 import { useUI } from '../../context/UIContext';
 import { listingsApi } from '../../services/listingsApi';
+import { categoriesApi } from '../../services/categoriesApi';
 import './Browse.css';
-
-// Dummy Categories for now (should come from API or constants)
-const CATEGORIES = [
-  { id: 'electronics', label: 'Electronics', icon: 'Smartphone' },
-  { id: 'vehicles', label: 'Vehicles', icon: 'Car' },
-  { id: 'real-estate', label: 'Real Estate', icon: 'Building2' },
-  { id: 'fashion', label: 'Fashion', icon: 'Shirt' },
-  { id: 'home', label: 'Home & Garden', icon: 'Sofa' },
-  { id: 'agriculture', label: 'Agriculture', icon: 'Wheat' },
-];
 
 const PROVINCES = ['All provinces', 'Kigali City', 'Northern', 'Southern', 'Eastern', 'Western'];
 
@@ -37,6 +28,12 @@ export default function Browse() {
   const [listings, setListings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  
+  const [categories, setCategories] = useState([]);
+
+  useEffect(() => {
+    categoriesApi.getCategories().then(res => setCategories(res.data?.data || [])).catch(console.error);
+  }, []);
 
   // Fetch listings when filters change
   useEffect(() => {
@@ -44,11 +41,11 @@ export default function Browse() {
       setLoading(true);
       try {
         const params = {};
-        if (searchQuery) params.search = searchQuery;
-        if (activeCategory) params.category = activeCategory;
+        if (searchQuery) params.q = searchQuery;
+        if (activeCategory) params.category_id = activeCategory;
         if (priceMin) params.min_price = priceMin;
         if (priceMax) params.max_price = priceMax;
-        if (province && province !== 'All provinces') params.location = province; // assuming location matches
+        if (province && province !== 'All provinces') params.location = province;
         if (sortBy) params.sort = sortBy;
 
         const res = await listingsApi.getListings(params);
@@ -74,7 +71,7 @@ export default function Browse() {
     setSearchParams(params, { replace: true });
   }, [searchQuery, activeCategory, setSearchParams]);
 
-  const cat = CATEGORIES.find(c => c.id === activeCategory);
+  const cat = categories.find(c => c.id === activeCategory);
   const activeFiltersCount = [activeCategory, province, priceMin, priceMax].filter(Boolean).length;
   const clearFilters = () => { setActiveCategory(''); setProvince(''); setPriceMin(''); setPriceMax(''); };
 
@@ -148,6 +145,7 @@ export default function Browse() {
             priceMin={priceMin} setPriceMin={setPriceMin}
             priceMax={priceMax} setPriceMax={setPriceMax}
             activeCategory={activeCategory} setActiveCategory={setActiveCategory}
+            categories={categories}
             onClose={() => setShowFilters(false)}
           />
         )}
@@ -203,13 +201,13 @@ export default function Browse() {
                   >
                     All categories
                   </button>
-                  {CATEGORIES.map(c => (
+                  {categories.map(c => (
                     <button
                       key={c.id}
                       onClick={() => setActiveCategory(c.id)}
                       className={`filter-list__button ${activeCategory === c.id ? 'filter-list__button--active' : ''}`}
                     >
-                      {c.label}
+                      {c.name}
                     </button>
                   ))}
                 </div>
@@ -286,7 +284,7 @@ function EmptyState() {
   );
 }
 
-function FilterSheet({ province, setProvince, priceMin, setPriceMin, priceMax, setPriceMax, activeCategory, setActiveCategory, onClose }) {
+function FilterSheet({ province, setProvince, priceMin, setPriceMin, priceMax, setPriceMax, activeCategory, setActiveCategory, onClose, categories = [] }) {
   return (
     <div className="filter-sheet-overlay" onClick={onClose}>
       <div className="filter-sheet-content" onClick={e => e.stopPropagation()}>
@@ -304,13 +302,13 @@ function FilterSheet({ province, setProvince, priceMin, setPriceMin, priceMax, s
             >
               All
             </button>
-            {CATEGORIES.map(c => (
+            {categories.map(c => (
               <button
                 key={c.id}
                 onClick={() => setActiveCategory(c.id)}
                 className={`filter-chip-list__button ${activeCategory === c.id ? 'filter-chip-list__button--active' : ''}`}
               >
-                {c.label}
+                {c.name}
               </button>
             ))}
           </div>
