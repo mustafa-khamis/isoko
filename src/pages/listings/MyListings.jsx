@@ -32,7 +32,7 @@ const TABS = [
 
 export default function MyListings() {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, isLoading } = useAuth();
   const { isMobile, showAuth } = useUI();
 
   const [activeTab, setActiveTab] = useState('all');
@@ -41,6 +41,8 @@ export default function MyListings() {
   const [deletingId, setDeletingId] = useState(null);
 
   useEffect(() => {
+    if (isLoading) return;
+
     if (!user) {
       showAuth('Sign in to view your listings.');
       return;
@@ -60,7 +62,7 @@ export default function MyListings() {
     };
 
     fetchMyListings();
-  }, [user, showAuth]);
+  }, [user, isLoading, showAuth]);
 
   if (!user) return null;
 

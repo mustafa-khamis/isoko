@@ -38,11 +38,13 @@ const PLANS = [
 ];
 
 export default function TraderPlans() {
-  const { user } = useAuth();
+  const { user, isLoading } = useAuth();
   const { isMobile, showAuth } = useUI();
   const navigate = useNavigate();
   const [activating, setActivating] = useState(null);
   const [activated, setActivated] = useState(null);
+
+  if (isLoading) return <div className="page-loading" style={{ minHeight: '100vh' }}></div>;
 
   const currentPlan = user?.role === 'buyer' ? 'free' : 'trader-plus';
 

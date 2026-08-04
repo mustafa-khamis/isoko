@@ -38,11 +38,11 @@ describe('Google Authentication Frontend', () => {
   const renderModal = (initialMode = 'signin') => {
     return render(
       <BrowserRouter>
-        <UIProvider>
-          <AuthProvider>
+        <AuthProvider>
+          <UIProvider>
             <AuthModal onClose={() => {}} initialMode={initialMode} />
-          </AuthProvider>
-        </UIProvider>
+          </UIProvider>
+        </AuthProvider>
       </BrowserRouter>
     );
   };

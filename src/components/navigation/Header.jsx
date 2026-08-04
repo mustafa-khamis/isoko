@@ -3,17 +3,8 @@ import { Search, MapPin, Bell, Heart, MessageCircle, User, ShoppingBag, ChevronD
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useUI } from '../../context/UIContext';
+import { categoriesApi } from '../../services/categoriesApi';
 import './Header.css';
-// We will replace categories hardcode with an API call later if needed, but for layout we can mock or keep static constants.
-// For MVP, since we don't have the constants file yet, we just stub a few categories.
-const CATEGORIES = [
-  { id: 'electronics', label: 'Electronics' },
-  { id: 'vehicles', label: 'Vehicles' },
-  { id: 'property', label: 'Property' },
-  { id: 'fashion', label: 'Fashion' },
-  { id: 'furniture', label: 'Furniture' },
-  { id: 'agriculture', label: 'Agriculture' },
-];
 
 export default function Header() {
   const navigate = useNavigate();
@@ -21,10 +12,15 @@ export default function Header() {
   const { user } = useAuth();
   const { showAuth } = useUI();
   
+  const [categories, setCategories] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [searchFocused, setSearchFocused] = useState(false);
   const [avatarFailed, setAvatarFailed] = useState(false);
   const avatarUrl = user?.profile?.avatar_url || user?.avatar_url;
+
+  useEffect(() => {
+    categoriesApi.getCategories().then(res => setCategories(res.data?.data || [])).catch(console.error);
+  }, []);
 
   useEffect(() => {
     setAvatarFailed(false);
@@ -148,10 +144,10 @@ export default function Header() {
               active={isHome || (location.pathname === '/browse' && !currentCategory)}
               onClick={() => navigate('/')}
             />
-            {CATEGORIES.map(cat => (
+            {categories.map(cat => (
               <CategoryTab
                 key={cat.id}
-                label={cat.label}
+                label={cat.name || cat.label}
                 active={currentCategory === cat.id}
                 onClick={() => navigate(`/browse?category=${cat.id}`)}
               />

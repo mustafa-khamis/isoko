@@ -1,4 +1,5 @@
 import axios from 'axios';
+import * as authStorage from '../auth/authStorage';
 
 // Create a centralized Axios instance
 const apiClient = axios.create({
@@ -9,11 +10,26 @@ const apiClient = axios.create({
   },
 });
 
-let accessToken = null;
+let accessToken = authStorage.getAccessToken();
 let refreshPromise = null;
 let authSessionVersion = 0;
 const REFRESH_LOCK_NAME = 'isoko-refresh-token';
 const REFRESH_CONFLICT_CODE = 'AUTH_REFRESH_TOKEN_CONCURRENT';
+const TERMINAL_UNAUTH_CODES = new Set([
+  'REFRESH_TOKEN_INVALID',
+  'REFRESH_TOKEN_EXPIRED',
+  'SESSION_REVOKED',
+  'UNAUTHORIZED',
+  'AUTH_REFRESH_TOKEN_INVALID',
+  'AUTH_REFRESH_TOKEN_EXPIRED',
+  'AUTH_REFRESH_TOKEN_REUSED',
+  'AUTH_TOKEN_EXPIRED',
+  'AUTH_TOKEN_INVALID',
+  'AUTH_UNAUTHORIZED',
+  'AUTH_USER_NOT_FOUND',
+  'AUTH_ACCOUNT_SUSPENDED',
+]);
+
 const AUTH_REQUESTS_WITHOUT_REFRESH_RETRY = new Set([
   '/auth/register',
   '/auth/verify-email',
@@ -72,9 +88,10 @@ const restoreRetryPayload = (config) => {
   return config;
 };
 
-// In-memory token storage
+// Token storage
 export const setAccessToken = (token) => {
   accessToken = token;
+  authStorage.setAccessToken(token);
 };
 
 export const startAuthSession = (token) => {
@@ -84,10 +101,14 @@ export const startAuthSession = (token) => {
 
 export const endAuthSession = () => {
   authSessionVersion += 1;
-  setAccessToken(null);
+  accessToken = null;
+  authStorage.clearAuthCache();
 };
 
 export const getAccessToken = () => {
+  if (!accessToken) {
+    accessToken = authStorage.getAccessToken();
+  }
   return accessToken;
 };
 
@@ -215,11 +236,15 @@ apiClient.interceptors.response.use(
         return apiClient(restoreRetryPayload(originalRequest));
       } catch (err) {
         if (requestSessionVersion === authSessionVersion) {
-          // Refresh failed, user is actually logged out
-          endAuthSession();
+          const status = err.response?.status;
+          const code = err.response?.data?.error_code || err.response?.data?.errorCode || err.response?.data?.code || err.response?.data?.error?.code;
 
-          // Dispatch custom event to tell app to log out / redirect
-          window.dispatchEvent(new Event('auth:unauthorized'));
+          const isConfirmedInvalid = status === 401 || (code && TERMINAL_UNAUTH_CODES.has(code));
+
+          if (isConfirmedInvalid) {
+            endAuthSession();
+            window.dispatchEvent(new Event('auth:unauthorized'));
+          }
         }
         
         return Promise.reject(err);

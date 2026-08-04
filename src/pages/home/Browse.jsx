@@ -5,9 +5,8 @@ import ListingCard, { SkeletonCard } from '../../components/listings/ListingCard
 import { useUI } from '../../context/UIContext';
 import { listingsApi } from '../../services/listingsApi';
 import { categoriesApi } from '../../services/categoriesApi';
+import { locationsApi } from '../../services/locationsApi';
 import './Browse.css';
-
-const PROVINCES = ['All provinces', 'Kigali City', 'Northern', 'Southern', 'Eastern', 'Western'];
 
 export default function Browse() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -30,9 +29,11 @@ export default function Browse() {
   const [error, setError] = useState('');
   
   const [categories, setCategories] = useState([]);
+  const [provinces, setProvinces] = useState([]);
 
   useEffect(() => {
     categoriesApi.getCategories().then(res => setCategories(res.data?.data || [])).catch(console.error);
+    locationsApi.getProvinces().then(res => setProvinces(res.data?.data || [])).catch(console.error);
   }, []);
 
   // Fetch listings when filters change
@@ -146,6 +147,7 @@ export default function Browse() {
             priceMax={priceMax} setPriceMax={setPriceMax}
             activeCategory={activeCategory} setActiveCategory={setActiveCategory}
             categories={categories}
+            provinces={provinces}
             onClose={() => setShowFilters(false)}
           />
         )}
@@ -215,8 +217,9 @@ export default function Browse() {
 
               <div className="filter-group">
                 <label>Province</label>
-                <select value={province} onChange={e => setProvince(e.target.value === 'All provinces' ? '' : e.target.value)}>
-                  {PROVINCES.map(p => <option key={p}>{p}</option>)}
+                <select value={province} onChange={e => setProvince(e.target.value)}>
+                  <option value="">All provinces</option>
+                  {provinces.map(p => <option key={p.id || p.name} value={p.name}>{p.name}</option>)}
                 </select>
               </div>
 
@@ -284,7 +287,7 @@ function EmptyState() {
   );
 }
 
-function FilterSheet({ province, setProvince, priceMin, setPriceMin, priceMax, setPriceMax, activeCategory, setActiveCategory, onClose, categories = [] }) {
+function FilterSheet({ province, setProvince, priceMin, setPriceMin, priceMax, setPriceMax, activeCategory, setActiveCategory, onClose, categories = [], provinces = [] }) {
   return (
     <div className="filter-sheet-overlay" onClick={onClose}>
       <div className="filter-sheet-content" onClick={e => e.stopPropagation()}>
@@ -317,15 +320,19 @@ function FilterSheet({ province, setProvince, priceMin, setPriceMin, priceMax, s
         <div className="filter-group">
           <label>Province</label>
           <div className="filter-chip-list">
-            {PROVINCES.map(p => (
+            <button
+              onClick={() => setProvince('')}
+              className={`filter-chip-list__button ${!province ? 'filter-chip-list__button--active' : ''}`}
+            >
+              All provinces
+            </button>
+            {provinces.map(p => (
               <button
-                key={p}
-                onClick={() => setProvince(p === 'All provinces' ? '' : p)}
-                className={`filter-chip-list__button ${
-                  province === p || (p === 'All provinces' && !province) ? 'filter-chip-list__button--active' : ''
-                }`}
+                key={p.id || p.name}
+                onClick={() => setProvince(p.name)}
+                className={`filter-chip-list__button ${province === p.name ? 'filter-chip-list__button--active' : ''}`}
               >
-                {p}
+                {p.name}
               </button>
             ))}
           </div>

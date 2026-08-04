@@ -9,13 +9,15 @@ import './Notifications.css';
 
 export default function Notifications() {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, isLoading } = useAuth();
   const { isMobile, showAuth } = useUI();
   
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (isLoading) return;
+
     if (!user) {
       setLoading(false);
       return;

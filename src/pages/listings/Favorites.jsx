@@ -9,13 +9,15 @@ import './Favorites.css';
 
 export default function Favorites() {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, isLoading } = useAuth();
   const { isMobile, showAuth } = useUI();
   
   const [savedListings, setSavedListings] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (isLoading) return;
+    
     if (!user) {
       setLoading(false);
       return;

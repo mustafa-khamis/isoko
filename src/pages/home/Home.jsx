@@ -14,6 +14,7 @@ export default function Home() {
   const { isMobile } = useUI();
   const [searchQuery, setSearchQuery] = useState('');
   const [listings, setListings] = useState([]);
+  const [sponsoredAds, setSponsoredAds] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -21,9 +22,15 @@ export default function Home() {
     const fetchListings = async () => {
       setLoading(true);
       try {
-        const res = await listingsApi.getListings({ limit: 12 });
-        // The API returns { success: true, data: [...], pagination: {...} }
-        setListings(res.data.data || []);
+        const [listingsRes, adsRes] = await Promise.all([
+          listingsApi.getListings({ limit: 12 }),
+          import('../../services/adsApi').then(m => m.adsApi.getSponsoredAds().catch(() => null))
+        ]);
+        
+        setListings(listingsRes.data.data || []);
+        if (adsRes && adsRes.data && adsRes.data.data) {
+          setSponsoredAds(adsRes.data.data);
+        }
       } catch (err) {
         console.error('Failed to fetch listings', err);
         setError('Failed to load listings. Check backend connection.');
@@ -105,6 +112,26 @@ export default function Home() {
           renderSkeletons()
         ) : (
           <>
+            {sponsoredAds.length > 0 && (
+              <div className="sponsored-ads-section" style={{ marginBottom: '2rem' }}>
+                <h3 style={{ fontSize: '1.25rem', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--color-ink-900)' }}>
+                  <TrendingUp size={18} color="var(--color-brand-500)" /> Sponsored
+                </h3>
+                <div className="listings-grid">
+                  {sponsoredAds.map(ad => (
+                    <div key={ad.id} className="sponsored-ad-card" style={{ cursor: 'pointer', borderRadius: '12px', overflow: 'hidden', border: '1px solid var(--color-ink-200)' }} onClick={() => ad.listing_id && navigate(`/listing/${ad.listing_id}`)}>
+                      <div style={{ aspectRatio: '1/1', background: 'var(--color-ink-100)' }}>
+                        <img src={ad.image_url} alt={ad.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                      </div>
+                      <div style={{ padding: '0.75rem' }}>
+                        <h4 style={{ margin: '0 0 0.25rem 0', fontSize: '0.9rem', color: 'var(--color-ink-900)' }}>{ad.title}</h4>
+                        <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--color-ink-500)', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{ad.description}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
             <div className="listings-grid">
               {listings.map(l => <ListingCard key={l.id} listing={l} compact={isMobile} />)}
             </div>

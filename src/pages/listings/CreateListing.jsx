@@ -27,7 +27,7 @@ const INITIAL_DRAFT = {
 export default function CreateListing() {
   const navigate = useNavigate();
   const { isMobile, showAuth } = useUI();
-  const { user } = useAuth();
+  const { user, isLoading } = useAuth();
   
   const [step, setStep] = useState(1);
   const [draft, setDraft] = useState(INITIAL_DRAFT);
@@ -89,15 +89,15 @@ export default function CreateListing() {
       categoriesApi.getCategories(),
       locationsApi.getProvinces()
     ]).then(([catRes, provRes]) => {
-      setCategories(catRes.data.data);
-      setProvinces(provRes.data.data);
+      setCategories(catRes.data?.data || catRes.data || []);
+      setProvinces(provRes.data?.data || provRes.data || []);
     }).catch(console.error);
   }, []);
 
   useEffect(() => {
     if (draft.category_id) {
       categoriesApi.getSubcategories(draft.category_id).then(res => {
-        setSubcategories(res.data.data);
+        setSubcategories(res.data?.data || res.data || []);
       }).catch(console.error);
     } else {
       setSubcategories([]);
@@ -107,12 +107,16 @@ export default function CreateListing() {
   useEffect(() => {
     if (draft.province_id) {
       locationsApi.getCities({ province_id: draft.province_id }).then(res => {
-        setCities(res.data.data);
+        setCities(res.data?.data || res.data || []);
       }).catch(console.error);
     } else {
       setCities([]);
     }
   }, [draft.province_id]);
+
+  if (isLoading) {
+    return <div className="page-loading" style={{ minHeight: '100vh' }}></div>;
+  }
 
   if (!user) {
     return (
@@ -296,7 +300,7 @@ export default function CreateListing() {
             <div className="cl-step">
               <div className="form-group">
                 <label>Listing title *</label>
-                <input type="text" placeholder="e.g. Samsung Galaxy A54" value={draft.title} onChange={e => update({ title: e.target.value })} maxLength={80} />
+                <input type="text" placeholder="Enter a clear title for your listing" value={draft.title} onChange={e => update({ title: e.target.value })} maxLength={80} />
               </div>
               <div className="form-group">
                 <label>Category *</label>
