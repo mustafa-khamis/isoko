@@ -8,9 +8,13 @@ import { formatRWF, timeAgo } from '../../utils/formatters';
 import './Messages.css';
 
 export default function Messages() {
-  const { user } = useAuth();
+  const { user, isLoading } = useAuth();
   const { isMobile, showAuth } = useUI();
   const { id } = useParams();
+
+  if (isLoading) {
+    return <div className="messages-layout" style={{ minHeight: '100vh' }}></div>;
+  }
 
   if (!user) {
     return (
@@ -23,10 +27,34 @@ export default function Messages() {
     );
   }
 
-  return id ? <ConversationView convId={id} isMobile={isMobile} /> : <ConversationList isMobile={isMobile} />;
+  if (isMobile) {
+    return (
+      <div className="messages-layout messages-layout--mobile">
+        {id ? <ConversationView convId={id} isMobile={isMobile} /> : <ConversationList isMobile={isMobile} activeConvId={id} />}
+      </div>
+    );
+  }
+
+  return (
+    <div className="messages-layout messages-layout--desktop">
+      <div className="messages-sidebar">
+        <ConversationList isMobile={isMobile} activeConvId={id} />
+      </div>
+      <div className="messages-main">
+        {id ? (
+          <ConversationView convId={id} isMobile={isMobile} />
+        ) : (
+          <div className="messages-empty-state">
+            <MessageCircle size={48} className="messages-empty-icon" />
+            <p>Select a conversation to start messaging</p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
 }
 
-function ConversationList({ isMobile }) {
+function ConversationList({ isMobile, activeConvId }) {
   const navigate = useNavigate();
   const [conversations, setConversations] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -76,6 +104,7 @@ function ConversationList({ isMobile }) {
               <ConversationRow
                 key={conversation.id}
                 conversation={conversation}
+                isActive={conversation.id === activeConvId}
                 onClick={() => navigate(`/messages/${conversation.id}`)}
               />
             ))}
@@ -86,13 +115,13 @@ function ConversationList({ isMobile }) {
   );
 }
 
-function ConversationRow({ conversation, onClick }) {
+function ConversationRow({ conversation, onClick, isActive }) {
   const otherUser = conversation.other_user || {};
   const listing = conversation.listing || {};
   const unread = conversation.unread_count > 0;
 
   return (
-    <button onClick={onClick} className="conversation-row">
+    <button onClick={onClick} className={`conversation-row ${isActive ? 'conversation-row--active' : ''}`}>
       <div className="conversation-row__avatar">
         {otherUser.avatar_url ? (
           <img src={otherUser.avatar_url} alt={otherUser.name || 'User'} className="conversation-row__avatar-image" />

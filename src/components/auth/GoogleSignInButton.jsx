@@ -10,6 +10,7 @@ export default function GoogleSignInButton({ onSuccess }) {
 
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(true);
+  const [isGoogleProcessing, setIsGoogleProcessing] = useState(false);
 
   useEffect(() => {
     const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
@@ -23,11 +24,13 @@ export default function GoogleSignInButton({ onSuccess }) {
     const callback = async (response) => {
       try {
         setError("");
+        setIsGoogleProcessing(true);
         const result = await continueWithGoogle(response.credential);
         login(result.data.user, result.data.accessToken);
         if (onSuccess) onSuccess();
       } catch (requestError) {
         setError(requestError.response?.data?.message || "Google sign-in failed.");
+        setIsGoogleProcessing(false);
       }
     };
 
@@ -35,17 +38,24 @@ export default function GoogleSignInButton({ onSuccess }) {
       initializeAndRenderGoogleButton(clientId, buttonRef.current, callback);
       setIsLoading(false);
     }
-  }, [login]);
+  }, [login, onSuccess]);
 
   return (
     <div className="google-auth-wrapper">
-      {isLoading && (
+      {(isLoading || isGoogleProcessing) && (
         <div className="google-button-skeleton">
-          Loading Google sign-in…
+          {isGoogleProcessing ? "Please wait..." : "Loading Google sign-in…"}
         </div>
       )}
 
-      <div ref={buttonRef} />
+      {/* Hide the google button if processing, or mask it */}
+      <div 
+        ref={buttonRef} 
+        style={{ 
+          display: isGoogleProcessing ? 'none' : 'block',
+          width: '100%'
+        }} 
+      />
 
       {error && (
         <p className="auth-error" role="alert">

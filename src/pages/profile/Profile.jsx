@@ -18,9 +18,13 @@ import { useUI } from '../../context/UIContext';
 import './Profile.css';
 
 export default function Profile() {
-  const { user, logout } = useAuth();
+  const { user, logout, isLoading } = useAuth();
   const { isMobile, showAuth } = useUI();
   const navigate = useNavigate();
+
+  if (isLoading) {
+    return <div className="profile-page-loading" style={{ minHeight: '100vh' }}></div>;
+  }
 
   if (!user) {
     return (
@@ -83,7 +87,7 @@ export default function Profile() {
             </div>
 
             <div className="profile-name-row">
-              <h2 className="profile-name">{user.name}</h2>
+              <h2 className="profile-name">{user.name || user.full_name}</h2>
               {user.role !== 'buyer' && <Crown size={16} className="profile-icon--premium" />}
             </div>
 

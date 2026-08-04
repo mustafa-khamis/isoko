@@ -46,7 +46,6 @@ export function initializeAndRenderGoogleButton(clientId, containerElement, call
       text: 'continue_with',
       shape: 'rectangular',
       logo_alignment: 'left',
-      width: 360,
     });
   }
 }

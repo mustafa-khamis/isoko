@@ -7,16 +7,31 @@ import { usersApi } from '../../services/usersApi';
 import './ProfileEdit.css';
 
 export default function ProfileEdit() {
-  const { user, updateUser } = useAuth();
+  const { user, updateUser, isLoading } = useAuth();
   const { isMobile } = useUI();
   const navigate = useNavigate();
 
-  const [name, setName] = useState(user?.name || '');
+  const fileInputRef = useRef(null);
+  const [name, setName] = useState(user?.name || user?.full_name || '');
   const [city, setCity] = useState(user?.city || '');
   const [whatsapp, setWhatsapp] = useState(user?.whatsapp || '');
   const [whatsappEnabled, setWhatsappEnabled] = useState(!!user?.whatsapp);
   const [saved, setSaved] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [avatarPreview, setAvatarPreview] = useState(user?.avatar_url || '/images/default-avatar.svg');
+  const [avatarFile, setAvatarFile] = useState(null);
+
+  if (isLoading) {
+    return <div className="profile-edit-page" style={{ minHeight: '100vh' }}></div>;
+  }
+
+  const handleAvatarChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setAvatarFile(file);
+      setAvatarPreview(URL.createObjectURL(file));
+    }
+  };
 
   const handleSave = async () => {
     setLoading(true);
@@ -25,8 +40,14 @@ export default function ProfileEdit() {
         whatsapp_enabled: whatsappEnabled,
         whatsapp_number: whatsapp,
       };
-      await usersApi.updateProfile({ name });
+      await usersApi.updateProfile({ full_name: name });
       await usersApi.updateContactPreferences(contactPreferences);
+
+      if (avatarFile) {
+        const formData = new FormData();
+        formData.append('avatar', avatarFile);
+        await usersApi.uploadAvatar(formData);
+      }
 
       const meRes = await usersApi.getMe();
       if (meRes.data?.data) {
@@ -63,7 +84,7 @@ export default function ProfileEdit() {
         <div className="profile-edit-avatar">
           <div className="profile-edit-avatar__frame">
             <img
-              src={user?.avatar_url || '/images/default-avatar.svg'}
+              src={avatarPreview}
               alt=""
               className="profile-edit-avatar__image"
               onError={(event) => {
@@ -71,11 +92,12 @@ export default function ProfileEdit() {
                 event.currentTarget.src = '/images/default-avatar.svg';
               }}
             />
-            <button className="profile-edit-avatar__overlay" aria-label="Change profile photo">
+            <button className="profile-edit-avatar__overlay" onClick={() => fileInputRef.current?.click()} aria-label="Change profile photo">
               <Camera size={24} />
             </button>
           </div>
-          <button className="profile-edit-avatar__button">Change photo</button>
+          <button className="profile-edit-avatar__button" onClick={() => fileInputRef.current?.click()}>Change photo</button>
+          <input type="file" ref={fileInputRef} onChange={handleAvatarChange} style={{ display: 'none' }} accept="image/*" />
         </div>
 
         <div className="profile-edit-form">

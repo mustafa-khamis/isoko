@@ -25,7 +25,7 @@ const AD_SUMMARY = [
 
 export default function SponsoredAd() {
   const { isMobile } = useUI();
-  const { user } = useAuth();
+  const { user, isLoading } = useAuth();
   const navigate = useNavigate();
 
   const [step, setStep] = useState('type');
@@ -34,10 +34,25 @@ export default function SponsoredAd() {
   const [description, setDescription] = useState('');
   const [selectedImage, setSelectedImage] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
-  const [link, setLink] = useState('');
+  const [selectedListingId, setSelectedListingId] = useState('');
+  const [myListings, setMyListings] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [activeAds, setActiveAds] = useState([]);
 
   const hasTraderPlan = user?.selling_plan && user.selling_plan.code !== 'free';
+
+  useEffect(() => {
+    if (user && hasTraderPlan) {
+      import('../../services/usersApi').then(({ usersApi }) => {
+        usersApi.getMyListings().then(res => setMyListings(res.data?.data || []));
+      });
+      adsApi.getMySponsoredAds().then(res => setActiveAds(res.data?.data || []));
+    }
+  }, [user, hasTraderPlan]);
+
+  if (isLoading) {
+    return <div className="sponsored-ad-page" style={{ minHeight: '100vh' }}></div>;
+  }
 
   if (!hasTraderPlan) {
     return <TraderRequired navigate={navigate} isMobile={isMobile} />;
@@ -62,7 +77,9 @@ export default function SponsoredAd() {
       const formData = new FormData();
       formData.append('title', title);
       formData.append('description', description);
-      if (link) formData.append('target_url', link);
+      if (selectedListingId) {
+        formData.append('listing_id', selectedListingId);
+      }
       formData.append('placement', adType === 'story' ? 'stories' : 'feed');
       formData.append('image', selectedImage);
       
@@ -218,14 +235,25 @@ export default function SponsoredAd() {
 
             <div className="sponsored-ad-field sponsored-ad-field--last">
               <label htmlFor="sponsored-ad-link" className="sponsored-ad-field-label">Link to listing (optional)</label>
-              <input
+              <select
                 id="sponsored-ad-link"
-                type="url"
-                value={link}
-                onChange={(event) => setLink(event.target.value)}
-                placeholder="Paste a listing link or leave empty to link to your profile"
+                value={selectedListingId}
+                onChange={(event) => {
+                  const val = event.target.value;
+                  setSelectedListingId(val);
+                  const listing = myListings.find(l => l.id === val);
+                  if (listing) {
+                    if (!title) setTitle(listing.title.slice(0, 60));
+                    if (!description) setDescription(listing.description.slice(0, 120));
+                  }
+                }}
                 className="sponsored-ad-field-control"
-              />
+              >
+                <option value="">Link to profile instead</option>
+                {myListings.map(l => (
+                  <option key={l.id} value={l.id}>{l.title}</option>
+                ))}
+              </select>
             </div>
 
             <button

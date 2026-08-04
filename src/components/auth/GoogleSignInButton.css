@@ -2,6 +2,15 @@
   width: 100%;
 }
 
+.google-auth-wrapper > div {
+  width: 100% !important;
+}
+
+.google-auth-wrapper iframe {
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
 .google-button-skeleton {
   width: 100%;
   min-height: 2.75rem;

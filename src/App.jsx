@@ -26,15 +26,7 @@ const AppShell = () => {
   const { isLoading } = useAuth();
   const { isMobile, isAuthOpen, hideAuth, authReason } = useUI();
 
-  if (isLoading) {
-    return (
-      <div className="app-container">
-        <main className="main-content">
-          <div className="app-loading-state" role="status">Loading Isoko...</div>
-        </main>
-      </div>
-    );
-  }
+
 
   return (
     <div className="app-container">
