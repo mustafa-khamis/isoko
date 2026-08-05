@@ -288,6 +288,7 @@ function FieldError({ msg }) {
 }
 
 function SignUpForm({ name, email, password, showPass, errors, loading, onName, onEmail, onPass, onTogglePass, onSubmit, onSwitch, onClose }) {
+  const handleKey = (e) => { if (e.key === 'Enter') onSubmit(); };
   return (
     <div className="auth-panel">
       <h1 className="auth-title">Create your account</h1>
@@ -299,7 +300,7 @@ function SignUpForm({ name, email, password, showPass, errors, loading, onName, 
           <label className="auth-label">Full name</label>
           <div className="auth-input-group">
             <User size={16} />
-            <input type="text" placeholder="Amahoro Jean" value={name} onChange={e => onName(e.target.value)} />
+            <input type="text" placeholder="Amahoro Jean" value={name} onChange={e => onName(e.target.value)} onKeyDown={handleKey} />
           </div>
           <FieldError msg={errors.name} />
         </div>
@@ -307,7 +308,7 @@ function SignUpForm({ name, email, password, showPass, errors, loading, onName, 
           <label className="auth-label">Email address</label>
           <div className="auth-input-group">
             <Mail size={16} />
-            <input type="email" placeholder="you@example.com" value={email} onChange={e => onEmail(e.target.value)} />
+            <input type="email" placeholder="you@example.com" value={email} onChange={e => onEmail(e.target.value)} onKeyDown={handleKey} />
           </div>
           <FieldError msg={errors.email} />
         </div>
@@ -315,7 +316,7 @@ function SignUpForm({ name, email, password, showPass, errors, loading, onName, 
           <label className="auth-label">Password</label>
           <div className="auth-input-group">
             <Lock size={16} />
-            <input type={showPass ? 'text' : 'password'} placeholder="Minimum 8 characters" value={password} onChange={e => onPass(e.target.value)} />
+            <input type={showPass ? 'text' : 'password'} placeholder="Minimum 8 characters" value={password} onChange={e => onPass(e.target.value)} onKeyDown={handleKey} />
             <button type="button" onClick={onTogglePass}>
               {showPass ? <EyeOff size={16} /> : <Eye size={16} />}
             </button>
@@ -335,6 +336,7 @@ function SignUpForm({ name, email, password, showPass, errors, loading, onName, 
 }
 
 function SignInForm({ email, password, showPass, errors, loading, onEmail, onPass, onTogglePass, onSubmit, onSwitch, onForgot, onClose }) {
+  const handleKey = (e) => { if (e.key === 'Enter') onSubmit(); };
   return (
     <div className="auth-panel">
       <h1 className="auth-title">Welcome back</h1>
@@ -346,7 +348,7 @@ function SignInForm({ email, password, showPass, errors, loading, onEmail, onPas
           <label className="auth-label">Email address</label>
           <div className="auth-input-group">
             <Mail size={16} />
-            <input type="email" placeholder="you@example.com" value={email} onChange={e => onEmail(e.target.value)} />
+            <input type="email" placeholder="you@example.com" value={email} onChange={e => onEmail(e.target.value)} onKeyDown={handleKey} />
           </div>
           <FieldError msg={errors.email} />
         </div>
@@ -357,7 +359,7 @@ function SignInForm({ email, password, showPass, errors, loading, onEmail, onPas
           </div>
           <div className="auth-input-group">
             <Lock size={16} />
-            <input type={showPass ? 'text' : 'password'} placeholder="Your password" value={password} onChange={e => onPass(e.target.value)} />
+            <input type={showPass ? 'text' : 'password'} placeholder="Your password" value={password} onChange={e => onPass(e.target.value)} onKeyDown={handleKey} />
             <button type="button" onClick={onTogglePass}>
               {showPass ? <EyeOff size={16} /> : <Eye size={16} />}
             </button>
@@ -387,6 +389,19 @@ function OtpScreen({ email, otp, setOtp, loading, resendSeconds, onResend, onSub
   };
   const handleKeyDown = (i, e) => {
     if (e.key === 'Backspace' && !otp[i] && i > 0) refs.current[i - 1]?.focus();
+    if (e.key === 'Enter' && otp.join('').length === 6) onSubmit();
+  };
+  const handlePaste = (e) => {
+    e.preventDefault();
+    const pasted = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 6);
+    if (!pasted) return;
+    const newOtp = [...otp];
+    for (let idx = 0; idx < 6; idx++) {
+      newOtp[idx] = pasted[idx] || '';
+    }
+    setOtp(newOtp);
+    const nextFocus = Math.min(pasted.length, 5);
+    refs.current[nextFocus]?.focus();
   };
   return (
     <div className="auth-panel auth-panel--centered">
@@ -395,7 +410,7 @@ function OtpScreen({ email, otp, setOtp, loading, resendSeconds, onResend, onSub
       <p className="auth-subtitle">We sent a 6-digit code to <b>{email}</b>.</p>
       <div className="auth-otp-inputs">
         {otp.map((digit, i) => (
-          <input key={i} ref={el => refs.current[i] = el} type="text" inputMode="numeric" maxLength={1} value={digit} onChange={e => handleChange(i, e.target.value)} onKeyDown={e => handleKeyDown(i, e)} className="auth-otp-input" />
+          <input key={i} ref={el => refs.current[i] = el} type="text" inputMode="numeric" maxLength={1} value={digit} onChange={e => handleChange(i, e.target.value)} onKeyDown={e => handleKeyDown(i, e)} onPaste={handlePaste} className="auth-otp-input" />
         ))}
       </div>
       <button onClick={onSubmit} disabled={loading || otp.join('').length !== 6} className="auth-btn-primary">
@@ -447,6 +462,18 @@ function ResetPassword({ resetOtp, setResetOtp, onReset, loading, email }) {
   const handleKeyDown = (i, e) => {
     if (e.key === 'Backspace' && !resetOtp[i] && i > 0) refs.current[i - 1]?.focus();
   };
+  const handlePaste = (e) => {
+    e.preventDefault();
+    const pasted = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 6);
+    if (!pasted) return;
+    const newOtp = [...resetOtp];
+    for (let idx = 0; idx < 6; idx++) {
+      newOtp[idx] = pasted[idx] || '';
+    }
+    setResetOtp(newOtp);
+    const nextFocus = Math.min(pasted.length, 5);
+    refs.current[nextFocus]?.focus();
+  };
 
   return (
     <div className="auth-panel">
@@ -458,7 +485,7 @@ function ResetPassword({ resetOtp, setResetOtp, onReset, loading, email }) {
           <label className="auth-label">Reset code</label>
           <div className="auth-otp-inputs auth-otp-inputs--left">
             {resetOtp.map((digit, i) => (
-              <input key={i} ref={el => refs.current[i] = el} type="text" inputMode="numeric" maxLength={1} value={digit} onChange={e => handleChange(i, e.target.value)} onKeyDown={e => handleKeyDown(i, e)} className="auth-otp-input" />
+              <input key={i} ref={el => refs.current[i] = el} type="text" inputMode="numeric" maxLength={1} value={digit} onChange={e => handleChange(i, e.target.value)} onKeyDown={e => handleKeyDown(i, e)} onPaste={handlePaste} className="auth-otp-input" />
             ))}
           </div>
         </div>

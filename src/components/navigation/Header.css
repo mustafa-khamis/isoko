@@ -267,7 +267,20 @@
 
 @media (max-width: 768px) {
   .header-main {
+    display: flex;
+  }
+
+  /* On mobile: hide the location, action icons, and sell button
+     — navigation is handled by the bottom nav bar */
+  .header-location-btn--desktop,
+  .header-actions,
+  .header-sell-btn {
     display: none;
+  }
+
+  /* Give the search container full width on mobile */
+  .header-search-container {
+    max-width: none;
   }
 }
 

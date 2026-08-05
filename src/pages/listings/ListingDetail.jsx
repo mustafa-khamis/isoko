@@ -125,7 +125,7 @@ export default function ListingDetail() {
         <MessageCircle size={16} />
         Message seller
       </button>
-      {listing.whatsapp_enabled && listing.whatsapp && (
+      {listing.whatsapp_enabled && (
         <button onClick={handleWhatsApp} className="listing-contact-button listing-contact-button--whatsapp">
           <WhatsAppIcon />
           WhatsApp seller

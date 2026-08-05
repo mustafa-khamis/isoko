@@ -284,7 +284,7 @@
   position: relative;
   aspect-ratio: 4/3;
   background-color: var(--color-ink-100);
-  margin-top: 3.5rem; /* space for header */
+  margin-top: 4rem; /* space for fixed mobile header */
 }
 
 .ld-gallery-preview img {

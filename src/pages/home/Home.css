@@ -1,7 +1,6 @@
 /* Home page CSS */
 
 .home-container {
-  padding-top: 4rem; /* to account for fixed header */
   animation: fadeIn 0.22s ease-out both;
 }
 
@@ -13,7 +12,7 @@
 .home-hero-inner {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 2.5rem var(--spacing-4);
+  padding: 1.5rem var(--spacing-4);
 }
 
 .home-hero-title {
@@ -269,7 +268,6 @@
 /* Mobile Adjustments */
 @media (max-width: 768px) {
   .home-container {
-    padding-top: 0;
     padding-bottom: 5rem; /* for bottom nav */
   }
 
