@@ -293,3 +293,7 @@
     padding-inline: var(--spacing-8);
   }
 }
+
+input{
+  border: none;
+}
