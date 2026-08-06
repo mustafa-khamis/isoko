@@ -31,6 +31,8 @@ export default function ListingDetail() {
   const [currentImg, setCurrentImg] = useState(0);
   const [showGallery, setShowGallery] = useState(false);
   const [showDesc, setShowDesc] = useState(false);
+  const [startingConversation, setStartingConversation] = useState(false);
+  const [messageError, setMessageError] = useState('');
   
   const { toggleFavorite, isFavorite } = useUI();
   
@@ -71,15 +73,51 @@ export default function ListingDetail() {
     };
   }, [id]);
 
+  const isOwner = String(user?.id) === String(listing?.user_id);
+
   const handleMessage = async () => {
-    if (!user) { showAuth('Sign in to message the seller.'); return; }
+    if (!user) {
+      showAuth('Sign in to message the seller.');
+      return;
+    }
+
+    if (isOwner) {
+      return;
+    }
+
+    if (startingConversation) {
+      return;
+    }
+
+    setStartingConversation(true);
+    setMessageError('');
+
     try {
       const response = await messagesApi.createConversation(listing.id, { message: `Hi, I'm interested in your listing: "${listing.title}"` });
-      navigate(`/messages/${response.data.data.conversation_id}`);
-    } catch (err) {
-      console.error('Failed to start conversation', err);
-      // Fallback if conversation already exists or failed
-      navigate('/messages');
+      
+      const conversation = response.data?.data?.conversation ?? response.data?.data;
+      const conversationId = conversation?.conversation_id ?? conversation?.id;
+
+      if (!conversationId) {
+        throw new Error('Conversation API did not return a conversation ID');
+      }
+
+      navigate(`/messages/${conversationId}`);
+    } catch (error) {
+      const message =
+        error.response?.data?.error?.message ??
+        error.response?.data?.message ??
+        'Unable to start this conversation. Please try again.';
+
+      setMessageError(message);
+
+      console.error('Failed to start conversation', {
+        status: error.response?.status,
+        code: error.response?.data?.error?.code,
+        message,
+      });
+    } finally {
+      setStartingConversation(false);
     }
   };
 
@@ -119,20 +157,33 @@ export default function ListingDetail() {
   const images = listing.images || [];
   const displayImage = images.length > 0 ? images[currentImg] : '/images/default-listing.svg';
 
-  const ContactActions = () => (
-    <div className="listing-contact-actions">
-      <button onClick={handleMessage} className="listing-contact-button listing-contact-button--message">
-        <MessageCircle size={16} />
-        Message seller
-      </button>
-      {listing.whatsapp_enabled && (
-        <button onClick={handleWhatsApp} className="listing-contact-button listing-contact-button--whatsapp">
-          <WhatsAppIcon />
-          WhatsApp seller
+  const ContactActions = () => {
+    if (isOwner) {
+      return (
+        <div className="listing-contact-actions">
+          <button onClick={() => navigate('/admin')} className="listing-contact-button">
+            Manage your listing
+          </button>
+        </div>
+      );
+    }
+
+    return (
+      <div className="listing-contact-actions">
+        {messageError && <div className="listing-detail-error" style={{ color: 'red', fontSize: '0.875rem', marginBottom: '8px' }}>{messageError}</div>}
+        <button onClick={handleMessage} disabled={startingConversation} className="listing-contact-button listing-contact-button--message">
+          <MessageCircle size={16} />
+          {startingConversation ? 'Starting chat...' : 'Message seller'}
         </button>
-      )}
-    </div>
-  );
+        {listing.whatsapp_enabled && (
+          <button onClick={handleWhatsApp} className="listing-contact-button listing-contact-button--whatsapp">
+            <WhatsAppIcon />
+            WhatsApp seller
+          </button>
+        )}
+      </div>
+    );
+  };
 
   if (isMobile) {
     return (
@@ -221,9 +272,17 @@ export default function ListingDetail() {
             <PriceBadge price={listing.price} priceType={listing.price_type} />
           </div>
           <div className="ld-sticky-btns">
-            <button onClick={handleMessage} className="btn-message"><MessageCircle size={16} /> Message</button>
-            {listing.whatsapp_enabled && (
-              <button onClick={handleWhatsApp} className="btn-wa" aria-label="Contact seller on WhatsApp"><WhatsAppIcon /></button>
+            {!isOwner ? (
+              <>
+                <button onClick={handleMessage} disabled={startingConversation} className="btn-message">
+                  <MessageCircle size={16} /> {startingConversation ? '...' : 'Message'}
+                </button>
+                {listing.whatsapp_enabled && (
+                  <button onClick={handleWhatsApp} className="btn-wa" aria-label="Contact seller on WhatsApp"><WhatsAppIcon /></button>
+                )}
+              </>
+            ) : (
+              <button onClick={() => navigate('/admin')} className="btn-message">Manage</button>
             )}
           </div>
         </div>

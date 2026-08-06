@@ -8,7 +8,7 @@ export default function BottomNav() {
   const navigate = useNavigate();
   const location = useLocation();
   const { user } = useAuth();
-  const { showAuth } = useUI();
+  const { showAuth, unreadMessageCount } = useUI();
 
   const handleSell = () => {
     if (!user) { showAuth('Create a free account to start listing your items.'); return; }
@@ -55,7 +55,7 @@ export default function BottomNav() {
           label="Messages"
           active={isActive(['/messages'])}
           onClick={handleMessages}
-          badge={1} // mock badge
+          badge={unreadMessageCount > 0 ? unreadMessageCount : null}
         />
 
         <NavButton

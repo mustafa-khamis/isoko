@@ -2,6 +2,7 @@ import { createContext, useContext, useState, useEffect, useCallback } from 'rea
 import { useAuth } from './AuthContext';
 import { usersApi } from '../services/usersApi';
 import { listingsApi } from '../services/listingsApi';
+import { messagesApi } from '../services/messagesApi';
 
 const UIContext = createContext(null);
 
@@ -22,19 +23,45 @@ export const UIProvider = ({ children }) => {
   const [isAuthOpen, setIsAuthOpen] = useState(false);
   const [authReason, setAuthReason] = useState('');
   
-  const { user } = useAuth();
+  const { user, isLoading } = useAuth();
   
   const [favorites, setFavorites] = useState([]);
+  const [unreadMessageCount, setUnreadMessageCount] = useState(0);
 
   useEffect(() => {
+    if (isLoading) return;
+
+    let isMounted = true;
+    let pollInterval;
+
     if (user) {
+      // Fetch favorites
       usersApi.getFavorites().then(res => {
-        setFavorites(res.data?.data?.map(f => f.id) || []);
+        if (isMounted) setFavorites(res.data?.data?.map(f => f.id) || []);
       }).catch(err => console.error('Failed to load favorites', err));
+
+      // Fetch unread messages
+      const fetchUnread = async () => {
+        try {
+          const res = await messagesApi.getUnreadCount();
+          if (isMounted) setUnreadMessageCount(res.data?.data?.count || 0);
+        } catch (err) {
+          console.error('Failed to load unread count', err);
+        }
+      };
+      
+      fetchUnread();
+      pollInterval = setInterval(fetchUnread, 15000); // poll every 15s
     } else {
       setFavorites([]);
+      setUnreadMessageCount(0);
     }
-  }, [user]);
+
+    return () => {
+      isMounted = false;
+      if (pollInterval) clearInterval(pollInterval);
+    };
+  }, [user, isLoading]);
 
   const showAuth = useCallback((reason = '') => {
     setAuthReason(reason);
@@ -75,7 +102,8 @@ export const UIProvider = ({ children }) => {
       hideAuth,
       favorites,
       toggleFavorite,
-      isFavorite
+      isFavorite,
+      unreadMessageCount
     }}>
       {children}
     </UIContext.Provider>

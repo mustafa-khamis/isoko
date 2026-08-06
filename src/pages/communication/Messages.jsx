@@ -157,6 +157,7 @@ function ConversationView({ convId, isMobile }) {
   const [messages, setMessages] = useState([]);
   const [text, setText] = useState('');
   const [loading, setLoading] = useState(true);
+  const [sending, setSending] = useState(false);
   const scrollRef = useRef(null);
 
   useEffect(() => {
@@ -168,8 +169,12 @@ function ConversationView({ convId, isMobile }) {
         ]);
         setConversation(conversationResponse.data.data);
         setMessages(messagesResponse.data.data || []);
+        
+        // Mark conversation as read when opened
+        messagesApi.markAsRead(convId).catch(() => {});
       } catch (error) {
         console.error(error);
+        setConversation(null);
       } finally {
         setLoading(false);
       }
@@ -196,24 +201,29 @@ function ConversationView({ convId, isMobile }) {
 
   const handleSend = async () => {
     const content = text.trim();
-    if (!content) return;
+    if (!content || sending) return;
+    setSending(true);
 
     try {
-      await messagesApi.sendMessage(convId, { content });
-      setMessages((current) => [...current, {
-        id: `m${Date.now()}`,
-        sender_id: user.id,
-        content,
-        created_at: new Date().toISOString(),
-      }]);
+      const response = await messagesApi.sendMessage(convId, { content });
+      const newMsg = response.data?.data;
+      if (newMsg) {
+        setMessages((current) => {
+          if (current.some(m => String(m.id) === String(newMsg.id))) return current;
+          return [...current, newMsg];
+        });
+      }
       setText('');
     } catch (error) {
       console.error(error);
+      alert('Failed to send message. Please try again.');
+    } finally {
+      setSending(false);
     }
   };
 
   if (loading) return <div className="messages-conversation-state">Loading conversation...</div>;
-  if (!conversation) return <div className="messages-conversation-state">Conversation not found</div>;
+  if (!conversation) return <div className="messages-conversation-state">Conversation not found or unavailable.</div>;
 
   const otherUser = conversation.other_user || {};
   const listing = conversation.listing || {};
@@ -297,7 +307,7 @@ function ConversationView({ convId, isMobile }) {
           </div>
           <button
             onClick={handleSend}
-            disabled={!text.trim()}
+            disabled={!text.trim() || sending}
             className="conversation-composer__send"
             aria-label="Send message"
           >

@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Heart } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useUI } from '../../context/UIContext';
-import { listingsApi } from '../../services/listingsApi';
+import { usersApi } from '../../services/usersApi';
 import ListingCard from '../../components/listings/ListingCard';
 import './Favorites.css';
 
@@ -22,27 +22,20 @@ export default function Favorites() {
       setLoading(false);
       return;
     }
-    const fetchFavorites = async () => {
+      const fetchFavorites = async () => {
       try {
-        // In the backend, we would have a GET /listings/favorites
-        // But for now, if it doesn't exist, we will mock or just show empty.
-        // Actually MVP endpoint is /listings/favorites? 
-        // Let's assume it exists or we just fail gracefully.
-        const res = await listingsApi.getListings({ favorited_by: user.id }); 
-        // This query might not work natively depending on backend MVP, but let's try.
-        // Alternatively, if there's a specific endpoint for user's favorites:
-        // const res = await listingsApi.getFavorites();
-        if (res.data && res.data.data && res.data.data.listings) {
-          setSavedListings(res.data.data.listings);
+        const res = await usersApi.getFavorites();
+        if (res.data?.data) {
+          setSavedListings(res.data.data);
         }
       } catch (err) {
-        console.error(err);
+        console.error('Failed to load favorites', err);
       } finally {
         setLoading(false);
       }
     };
     fetchFavorites();
-  }, [user]);
+  }, [user, isLoading]);
 
   if (!user) {
     return (

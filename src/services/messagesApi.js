@@ -7,4 +7,5 @@ export const messagesApi = {
   getMessages: (conversationId) => apiClient.get(`/chat/${conversationId}`),
   sendMessage: (conversationId, data) => apiClient.post(`/chat/${conversationId}/messages`, data), // { content }
   markAsRead: (conversationId) => apiClient.patch(`/chat/${conversationId}/read`),
+  getUnreadCount: () => apiClient.get('/chat/unread-count'),
 };
