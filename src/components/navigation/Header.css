@@ -289,3 +289,9 @@
     display: none;
   }
 }
+
+.header-mobile-notification-btn {
+  flex-shrink: 0;
+  margin-left: var(--spacing-2);
+}
+

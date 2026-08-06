@@ -1,9 +1,10 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Camera, Check, Mail } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useUI } from '../../context/UIContext';
 import { usersApi } from '../../services/usersApi';
+import { locationsApi } from '../../services/locationsApi';
 import './ProfileEdit.css';
 
 export default function ProfileEdit() {
@@ -13,13 +14,28 @@ export default function ProfileEdit() {
 
   const fileInputRef = useRef(null);
   const [name, setName] = useState(user?.name || user?.full_name || '');
-  const [city, setCity] = useState(user?.city || '');
+  const [provinceId, setProvinceId] = useState(user?.province_id || '');
+  const [cityId, setCityId] = useState(user?.city_id || '');
   const [whatsapp, setWhatsapp] = useState(user?.whatsapp || '');
   const [whatsappEnabled, setWhatsappEnabled] = useState(!!user?.whatsapp);
   const [saved, setSaved] = useState(false);
   const [loading, setLoading] = useState(false);
   const [avatarPreview, setAvatarPreview] = useState(user?.avatar_url || '/images/default-avatar.svg');
   const [avatarFile, setAvatarFile] = useState(null);
+  const [provinces, setProvinces] = useState([]);
+  const [cities, setCities] = useState([]);
+
+  useEffect(() => {
+    locationsApi.getProvinces().then(res => setProvinces(res.data?.data || res.data || [])).catch(console.error);
+  }, []);
+
+  useEffect(() => {
+    if (provinceId) {
+      locationsApi.getCities({ province_id: provinceId }).then(res => setCities(res.data?.data || res.data || [])).catch(console.error);
+    } else {
+      setCities([]);
+    }
+  }, [provinceId]);
 
   if (isLoading) {
     return <div className="profile-edit-page" style={{ minHeight: '100vh' }}></div>;
@@ -38,9 +54,19 @@ export default function ProfileEdit() {
     try {
       const contactPreferences = {
         whatsapp_enabled: whatsappEnabled,
-        whatsapp_number: whatsapp,
       };
-      await usersApi.updateProfile({ full_name: name });
+      
+      const profileData = { full_name: name };
+      if (provinceId) profileData.province_id = provinceId;
+      if (cityId) profileData.city_id = cityId;
+
+      if (whatsappEnabled && whatsapp) {
+        profileData.whatsapp_number = whatsapp;
+      } else if (!whatsappEnabled) {
+        profileData.whatsapp_number = null;
+      }
+      
+      await usersApi.updateProfile(profileData);
       await usersApi.updateContactPreferences(contactPreferences);
 
       if (avatarFile) {
@@ -110,7 +136,33 @@ export default function ProfileEdit() {
               <span className="profile-edit-email__badge">Verified</span>
             </div>
           </div>
-          <Field label="City / District (optional)" value={city} onChange={setCity} placeholder="e.g. Kigali, Musanze" />
+          <div>
+            <label className="profile-edit-field__label">Province</label>
+            <select 
+              value={provinceId} 
+              onChange={e => {
+                setProvinceId(e.target.value);
+                setCityId('');
+              }}
+              className="profile-edit-field__input"
+            >
+              <option value="">Select province</option>
+              {provinces.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+            </select>
+          </div>
+          {cities.length > 0 && (
+            <div>
+              <label className="profile-edit-field__label">City</label>
+              <select 
+                value={cityId} 
+                onChange={e => setCityId(e.target.value)}
+                className="profile-edit-field__input"
+              >
+                <option value="">Select city</option>
+                {cities.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+              </select>
+            </div>
+          )}
 
           <div>
             <label className="profile-edit-field__label profile-edit-field__label--spaced">WhatsApp contact</label>

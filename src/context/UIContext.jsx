@@ -3,6 +3,7 @@ import { useAuth } from './AuthContext';
 import { usersApi } from '../services/usersApi';
 import { listingsApi } from '../services/listingsApi';
 import { messagesApi } from '../services/messagesApi';
+import { notificationsApi } from '../services/notificationsApi';
 
 const UIContext = createContext(null);
 
@@ -27,6 +28,7 @@ export const UIProvider = ({ children }) => {
   
   const [favorites, setFavorites] = useState([]);
   const [unreadMessageCount, setUnreadMessageCount] = useState(0);
+  const [unreadNotificationCount, setUnreadNotificationCount] = useState(0);
 
   useEffect(() => {
     if (isLoading) return;
@@ -40,13 +42,19 @@ export const UIProvider = ({ children }) => {
         if (isMounted) setFavorites(res.data?.data?.map(f => f.id) || []);
       }).catch(err => console.error('Failed to load favorites', err));
 
-      // Fetch unread messages
+      // Fetch unread messages and notifications
       const fetchUnread = async () => {
         try {
-          const res = await messagesApi.getUnreadCount();
-          if (isMounted) setUnreadMessageCount(res.data?.data?.count || 0);
+          const [msgRes, notifRes] = await Promise.all([
+            messagesApi.getUnreadCount(),
+            notificationsApi.getUnreadCount()
+          ]);
+          if (isMounted) {
+            setUnreadMessageCount(msgRes.data?.data?.count || 0);
+            setUnreadNotificationCount(notifRes.data?.data?.count || 0);
+          }
         } catch (err) {
-          console.error('Failed to load unread count', err);
+          console.error('Failed to load unread counts', err);
         }
       };
       
@@ -55,6 +63,7 @@ export const UIProvider = ({ children }) => {
     } else {
       setFavorites([]);
       setUnreadMessageCount(0);
+      setUnreadNotificationCount(0);
     }
 
     return () => {
@@ -103,7 +112,8 @@ export const UIProvider = ({ children }) => {
       favorites,
       toggleFavorite,
       isFavorite,
-      unreadMessageCount
+      unreadMessageCount,
+      unreadNotificationCount
     }}>
       {children}
     </UIContext.Provider>

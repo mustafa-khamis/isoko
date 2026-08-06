@@ -10,7 +10,7 @@ export default function Header() {
   const navigate = useNavigate();
   const location = useLocation();
   const { user } = useAuth();
-  const { showAuth } = useUI();
+  const { showAuth, isMobile, unreadNotificationCount } = useUI();
   
   const [categories, setCategories] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -88,6 +88,13 @@ export default function Header() {
           </div>
         </div>
 
+        {isMobile && (
+          <button onClick={handleNotifications} className="header-icon-btn header-mobile-notification-btn">
+            <Bell size={20} />
+            {unreadNotificationCount > 0 && <span className="header-notification-dot" />}
+          </button>
+        )}
+
         <button
           onClick={() => navigate('/browse')}
           className="header-location-btn header-location-btn--desktop"
@@ -106,7 +113,7 @@ export default function Header() {
           </button>
           <button onClick={handleNotifications} className="header-icon-btn">
             <Bell size={20} />
-            <span className="header-notification-dot" />
+            {unreadNotificationCount > 0 && <span className="header-notification-dot" />}
           </button>
 
           {user ? (
