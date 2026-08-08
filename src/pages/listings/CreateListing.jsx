@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, ImagePlus, X, ChevronRight, CheckCircle, Loader2 } from 'lucide-react';
+import { ArrowLeft, ImagePlus, Camera, X, ChevronRight, CheckCircle, Loader2 } from 'lucide-react';
 import { useUI } from '../../context/UIContext';
 import { useAuth } from '../../context/AuthContext';
 import { normalizeApiError } from '../../services/apiClient';
@@ -40,6 +40,7 @@ export default function CreateListing() {
   const [provinces, setProvinces] = useState([]);
   const [cities, setCities] = useState([]);
   const fileInputRef = useRef(null);
+  const cameraInputRef = useRef(null);
 
   const totalSteps = 5;
   const update = (partial) => setDraft(d => ({ ...d, ...partial }));
@@ -195,7 +196,7 @@ export default function CreateListing() {
     }
   };
 
-  const handleImageChange = (e) => {
+  const handleImageChange = (e, source = 'gallery') => {
     const files = Array.from(e.target.files);
     if (!files.length) return;
 
@@ -205,7 +206,8 @@ export default function CreateListing() {
 
     if (invalidFile) {
       setError('Images must be JPG, PNG, or WebP files up to 5 MB each.');
-      if (fileInputRef.current) fileInputRef.current.value = '';
+      const ref = source === 'camera' ? cameraInputRef : fileInputRef;
+    if (ref.current) ref.current.value = '';
       return;
     }
     
@@ -221,7 +223,8 @@ export default function CreateListing() {
     const newUrls = [...draft.imageUrls, ...toAdd.map(f => URL.createObjectURL(f))];
     
     update({ images: newImages, imageUrls: newUrls });
-    if (fileInputRef.current) fileInputRef.current.value = '';
+    const ref = source === 'camera' ? cameraInputRef : fileInputRef;
+    if (ref.current) ref.current.value = '';
   };
 
   const removeImage = (i) => {
@@ -285,11 +288,43 @@ export default function CreateListing() {
                 ))}
                 {draft.images.length < 10 && (
                   <>
-                    <button onClick={() => fileInputRef.current?.click()} className="cl-photo-add">
-                      <ImagePlus size={24} />
-                      <span>Add photo</span>
-                    </button>
-                    <input type="file" multiple accept="image/jpeg,image/png,image/webp" ref={fileInputRef} onChange={handleImageChange} className="listing-create-file-input" />
+                    <div className="cl-photo-add">
+                      <button
+                        type="button"
+                        className="cl-photo-add-btn"
+                        onClick={() => fileInputRef.current?.click()}
+                        title="Choose from gallery"
+                      >
+                        <ImagePlus size={22} />
+                        <span>Gallery</span>
+                      </button>
+                      <div className="cl-photo-add-divider" />
+                      <button
+                        type="button"
+                        className="cl-photo-add-btn"
+                        onClick={() => cameraInputRef.current?.click()}
+                        title="Take a photo"
+                      >
+                        <Camera size={22} />
+                        <span>Camera</span>
+                      </button>
+                    </div>
+                    <input
+                      type="file"
+                      multiple
+                      accept="image/jpeg,image/png,image/webp"
+                      ref={fileInputRef}
+                      onChange={(e) => handleImageChange(e, 'gallery')}
+                      className="listing-create-file-input"
+                    />
+                    <input
+                      type="file"
+                      accept="image/*"
+                      capture="environment"
+                      ref={cameraInputRef}
+                      onChange={(e) => handleImageChange(e, 'camera')}
+                      className="listing-create-file-input"
+                    />
                   </>
                 )}
               </div>

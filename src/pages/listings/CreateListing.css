@@ -125,17 +125,37 @@
   border: 2px dashed var(--color-ink-300);
   border-radius: var(--radius-xl);
   display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  overflow: hidden;
+}
+
+.cl-photo-add-btn {
+  flex: 1;
+  display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 0.5rem;
+  gap: 0.3rem;
   color: var(--color-ink-400);
+  font-size: 0.6rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  transition: background-color 0.15s, color 0.15s;
+  padding: 0.25rem;
 }
 
-.cl-photo-add:hover {
-  border-color: var(--color-brand-400);
+.cl-photo-add-btn:hover {
   background-color: var(--color-brand-50);
   color: var(--color-brand-500);
+}
+
+.cl-photo-add-divider {
+  width: 1px;
+  background-color: var(--color-ink-200);
+  align-self: stretch;
+  flex-shrink: 0;
 }
 
 .form-group {
@@ -430,7 +450,7 @@
 .cl-category-option:focus-visible,
 .cl-subcategory-option:focus-visible,
 .cl-price-type:focus-visible,
-.cl-photo-add:focus-visible,
+.cl-photo-add-btn:focus-visible,
 .cl-back-btn:focus-visible {
   outline: 2px solid var(--color-brand-500);
   outline-offset: 2px;

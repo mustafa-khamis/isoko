@@ -42,9 +42,34 @@ export default function GoogleSignInButton({ onSuccess }) {
 
   return (
     <div className="google-auth-wrapper">
-      {(isLoading || isGoogleProcessing) && (
+      {isLoading && !isGoogleProcessing && (
         <div className="google-button-skeleton">
-          {isGoogleProcessing ? "Please wait..." : "Loading Google sign-in…"}
+          <span className="google-skeleton-text">Loading Google sign-in…</span>
+        </div>
+      )}
+
+      {isGoogleProcessing && (
+        <div className="google-processing-overlay">
+          <svg
+            className="google-spinner"
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="none"
+            aria-hidden="true"
+          >
+            <circle
+              className="google-spinner-track"
+              cx="12" cy="12" r="10"
+              strokeWidth="3"
+            />
+            <path
+              className="google-spinner-arc"
+              d="M22 12a10 10 0 0 1-10 10"
+              strokeWidth="3"
+              strokeLinecap="round"
+            />
+          </svg>
+          <span className="google-processing-text">Signing you in…</span>
         </div>
       )}
 
@@ -52,7 +77,7 @@ export default function GoogleSignInButton({ onSuccess }) {
       <div 
         ref={buttonRef} 
         style={{ 
-          display: isGoogleProcessing ? 'none' : 'block',
+          display: (isLoading || isGoogleProcessing) ? 'none' : 'block',
           width: '100%'
         }} 
       />
