@@ -4,7 +4,6 @@ import { ArrowLeft, Heart, Share2, MapPin, Clock, ChevronLeft, ChevronRight, X, 
 import { useAuth } from '../../context/AuthContext';
 import { useUI } from '../../context/UIContext';
 import { listingsApi } from '../../services/listingsApi';
-import { messagesApi } from '../../services/messagesApi';
 import ListingCard, { PriceBadge } from '../../components/listings/ListingCard';
 import { timeAgo } from '../../utils/formatters';
 import './ListingDetail.css';
@@ -31,8 +30,7 @@ export default function ListingDetail() {
   const [currentImg, setCurrentImg] = useState(0);
   const [showGallery, setShowGallery] = useState(false);
   const [showDesc, setShowDesc] = useState(false);
-  const [startingConversation, setStartingConversation] = useState(false);
-  const [messageError, setMessageError] = useState('');
+
   
   const { toggleFavorite, isFavorite } = useUI();
   
@@ -75,50 +73,14 @@ export default function ListingDetail() {
 
   const isOwner = String(user?.id) === String(listing?.user_id);
 
-  const handleMessage = async () => {
+  const handleMessage = () => {
     if (!user) {
       showAuth('Sign in to message the seller.');
       return;
     }
-
-    if (isOwner) {
-      return;
-    }
-
-    if (startingConversation) {
-      return;
-    }
-
-    setStartingConversation(true);
-    setMessageError('');
-
-    try {
-      const response = await messagesApi.createConversation(listing.id, { message: `Hi, I'm interested in your listing: "${listing.title}"` });
-      
-      const conversation = response.data?.data?.conversation ?? response.data?.data;
-      const conversationId = conversation?.conversation_id ?? conversation?.id;
-
-      if (!conversationId) {
-        throw new Error('Conversation API did not return a conversation ID');
-      }
-
-      navigate(`/messages/${conversationId}`);
-    } catch (error) {
-      const message =
-        error.response?.data?.error?.message ??
-        error.response?.data?.message ??
-        'Unable to start this conversation. Please try again.';
-
-      setMessageError(message);
-
-      console.error('Failed to start conversation', {
-        status: error.response?.status,
-        code: error.response?.data?.error?.code,
-        message,
-      });
-    } finally {
-      setStartingConversation(false);
-    }
+    if (isOwner) return;
+    // Navigate to compose screen; conversation is created when user sends their first message
+    navigate(`/messages/new?listing=${listing.id}&title=${encodeURIComponent(listing.title)}`);
   };
 
   const handleWhatsApp = () => {
@@ -130,7 +92,10 @@ export default function ListingDetail() {
       alert("Seller hasn't provided a phone number.");
       return;
     }
-    const url = `https://wa.me/${listing.seller_phone.replace(/\D/g, '')}?text=Hi, I'm interested in your listing on Isoko: ${listing.title}`;
+    // Strip all non-digits, then ensure the Rwanda country code (250) is present
+    const digits = listing.seller_phone.replace(/\D/g, '');
+    const e164 = digits.startsWith('250') ? digits : `250${digits}`;
+    const url = `https://wa.me/${e164}`;
     window.open(url, '_blank');
   };
 
@@ -274,8 +239,8 @@ export default function ListingDetail() {
           <div className="ld-sticky-btns">
             {!isOwner ? (
               <>
-                <button onClick={handleMessage} disabled={startingConversation} className="btn-message">
-                  <MessageCircle size={16} /> {startingConversation ? '...' : 'Message'}
+                <button onClick={handleMessage} className="btn-message">
+                  <MessageCircle size={16} /> Message
                 </button>
                 {listing.whatsapp_enabled && (
                   <button onClick={handleWhatsApp} className="btn-wa" aria-label="Contact seller on WhatsApp"><WhatsAppIcon /></button>

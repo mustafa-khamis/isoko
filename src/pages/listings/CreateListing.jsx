@@ -34,6 +34,8 @@ export default function CreateListing() {
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
+  // Track which fields the user has already interacted with
+  const [touched, setTouched] = useState({});
 
   const [categories, setCategories] = useState([]);
   const [subcategories, setSubcategories] = useState([]);
@@ -334,8 +336,29 @@ export default function CreateListing() {
           {step === 2 && (
             <div className="cl-step">
               <div className="form-group">
-                <label>Listing title *</label>
-                <input type="text" placeholder="Enter a clear title for your listing" value={draft.title} onChange={e => update({ title: e.target.value })} maxLength={80} />
+                <div className="cl-field-header">
+                  <label>Listing title *</label>
+                  <span className={`cl-char-count ${draft.title.length < 5 && touched.title ? 'cl-char-count--error' : ''}`}>
+                    {draft.title.length}/80
+                  </span>
+                </div>
+                <input
+                  type="text"
+                  placeholder="Enter a clear title for your listing"
+                  value={draft.title}
+                  onChange={e => { update({ title: e.target.value }); setTouched(t => ({ ...t, title: true })); }}
+                  onBlur={() => setTouched(t => ({ ...t, title: true }))}
+                  maxLength={80}
+                  className={touched.title && draft.title.trim().length < 5 ? 'cl-input--error' : ''}
+                />
+                {touched.title && draft.title.trim().length < 5 && (
+                  <p className="cl-field-hint cl-field-hint--error">
+                    {draft.title.trim().length === 0 ? 'Title is required.' : `${5 - draft.title.trim().length} more character${5 - draft.title.trim().length === 1 ? '' : 's'} needed.`}
+                  </p>
+                )}
+                {touched.title && draft.title.trim().length >= 5 && (
+                  <p className="cl-field-hint cl-field-hint--ok">✓ Looks good</p>
+                )}
               </div>
               <div className="form-group">
                 <label>Category *</label>
@@ -368,8 +391,30 @@ export default function CreateListing() {
                 </div>
               )}
               <div className="form-group">
-                <label>Description *</label>
-                <textarea rows={5} placeholder="Describe your item..." value={draft.description} onChange={e => update({ description: e.target.value })} />
+                <div className="cl-field-header">
+                  <label>Description *</label>
+                  <span className={`cl-char-count ${draft.description.length < 20 && touched.description ? 'cl-char-count--error' : ''}`}>
+                    {draft.description.length} chars
+                  </span>
+                </div>
+                <textarea
+                  rows={5}
+                  placeholder="Describe your item — condition, size, features, reason for selling…"
+                  value={draft.description}
+                  onChange={e => { update({ description: e.target.value }); setTouched(t => ({ ...t, description: true })); }}
+                  onBlur={() => setTouched(t => ({ ...t, description: true }))}
+                  className={touched.description && draft.description.trim().length < 20 ? 'cl-input--error' : ''}
+                />
+                {touched.description && draft.description.trim().length < 20 && (
+                  <p className="cl-field-hint cl-field-hint--error">
+                    {draft.description.trim().length === 0
+                      ? 'Description is required.'
+                      : `At least ${20 - draft.description.trim().length} more character${20 - draft.description.trim().length === 1 ? '' : 's'} needed.`}
+                  </p>
+                )}
+                {touched.description && draft.description.trim().length >= 20 && (
+                  <p className="cl-field-hint cl-field-hint--ok">✓ Great description</p>
+                )}
               </div>
             </div>
           )}
@@ -425,7 +470,38 @@ export default function CreateListing() {
                   Allow WhatsApp contact
                 </label>
                 {draft.whatsappEnabled && (
-                  <input type="tel" placeholder="788000000" value={draft.whatsapp} onChange={e => update({ whatsapp: e.target.value })} className="listing-create-whatsapp-input" />
+                  <div className="cl-phone-field">
+                    <span className="cl-phone-prefix">+250</span>
+                    <input
+                      type="tel"
+                      inputMode="numeric"
+                      placeholder="794101251"
+                      maxLength={9}
+                      value={draft.whatsapp}
+                      onChange={e => {
+                        // Allow digits only
+                        const digits = e.target.value.replace(/\D/g, '').slice(0, 9);
+                        update({ whatsapp: digits });
+                        setTouched(t => ({ ...t, whatsapp: true }));
+                      }}
+                      onBlur={() => setTouched(t => ({ ...t, whatsapp: true }))}
+                      className={`cl-phone-input${touched.whatsapp && draft.whatsapp.length !== 9 ? ' cl-input--error' : ''}`}
+                    />
+                    <span className={`cl-phone-count ${
+                      draft.whatsapp.length === 9 ? 'cl-phone-count--ok' :
+                      touched.whatsapp ? 'cl-phone-count--error' : ''
+                    }`}>
+                      {draft.whatsapp.length}/9
+                    </span>
+                  </div>
+                )}
+                {draft.whatsappEnabled && touched.whatsapp && draft.whatsapp.length !== 9 && (
+                  <p className="cl-field-hint cl-field-hint--error">
+                    {draft.whatsapp.length === 0 ? 'Phone number is required.' : `Must be exactly 9 digits — ${9 - draft.whatsapp.length} more needed.`}
+                  </p>
+                )}
+                {draft.whatsappEnabled && draft.whatsapp.length === 9 && (
+                  <p className="cl-field-hint cl-field-hint--ok">✓ Number looks good (+250 {draft.whatsapp})</p>
                 )}
               </div>
             </div>

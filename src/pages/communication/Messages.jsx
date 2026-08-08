@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { ArrowLeft, ChevronRight, MessageCircle, Send } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useUI } from '../../context/UIContext';
@@ -13,7 +13,7 @@ export default function Messages() {
   const { id } = useParams();
 
   if (isLoading) {
-    return <div className="messages-layout" style={{ minHeight: '100vh' }}></div>;
+    return <div className="messages-layout" />;
   }
 
   if (!user) {
@@ -30,7 +30,13 @@ export default function Messages() {
   if (isMobile) {
     return (
       <div className="messages-layout messages-layout--mobile">
-        {id ? <ConversationView convId={id} isMobile={isMobile} /> : <ConversationList isMobile={isMobile} activeConvId={id} />}
+        {id === 'new' ? (
+          <NewConversationView isMobile={isMobile} />
+        ) : id ? (
+          <ConversationView convId={id} isMobile={isMobile} />
+        ) : (
+          <ConversationList isMobile={isMobile} activeConvId={id} />
+        )}
       </div>
     );
   }
@@ -41,10 +47,12 @@ export default function Messages() {
         <ConversationList isMobile={isMobile} activeConvId={id} />
       </div>
       <div className="messages-main">
-        {id ? (
+        {id === 'new' ? (
+          <NewConversationView isMobile={isMobile} />
+        ) : id ? (
           <ConversationView convId={id} isMobile={isMobile} />
         ) : (
-          <div className="messages-empty-state">
+          <div className="messages-empty-state" style={{ margin: 'auto' }}>
             <MessageCircle size={48} className="messages-empty-icon" />
             <p>Select a conversation to start messaging</p>
           </div>
@@ -147,6 +155,99 @@ function ConversationRow({ conversation, onClick, isActive }) {
       </div>
       <ChevronRight size={16} className="conversation-row__chevron" />
     </button>
+  );
+}
+
+function NewConversationView({ isMobile }) {
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const listingId = searchParams.get('listing');
+  const listingTitle = searchParams.get('title') || 'this listing';
+
+  const [text, setText] = useState('');
+  const [sending, setSending] = useState(false);
+  const [sendError, setSendError] = useState('');
+  const inputRef = useRef(null);
+
+  // Auto-focus the input when the compose screen opens
+  useEffect(() => { inputRef.current?.focus(); }, []);
+
+  const handleSend = async () => {
+    const content = text.trim();
+    if (!content || sending || !listingId) return;
+    setSending(true);
+    setSendError('');
+    try {
+      const response = await messagesApi.createConversation(listingId, { message: content });
+      const conversation = response.data?.data?.conversation ?? response.data?.data;
+      const conversationId = conversation?.conversation_id ?? conversation?.id;
+      if (!conversationId) throw new Error('No conversation ID returned');
+      navigate(`/messages/${conversationId}`, { replace: true });
+    } catch (err) {
+      const msg =
+        err.response?.data?.error?.message ??
+        err.response?.data?.message ??
+        'Failed to send. Please try again.';
+      setSendError(msg);
+      setSending(false);
+    }
+  };
+
+  return (
+    <div className="messages-conversation">
+      {/* Header */}
+      <header className={`conversation-header ${isMobile ? 'conversation-header--sticky' : ''}`}>
+        <div className={`conversation-header__person ${isMobile ? '' : 'conversation-header__person--desktop'}`}>
+          <button onClick={() => navigate(-1)} className="messages-back-button" aria-label="Back">
+            <ArrowLeft size={20} />
+          </button>
+          <div className="conversation-header__identity">
+            <p className="conversation-header__name">New message</p>
+            <p className="conversation-header__listing-title">{listingTitle}</p>
+          </div>
+        </div>
+      </header>
+
+      {/* Empty message area with intro hint */}
+      <div className="conversation-messages conversation-messages--desktop new-conversation-body">
+        <div className="new-conversation-hint">
+          <MessageCircle size={36} className="new-conversation-hint__icon" />
+          <p className="new-conversation-hint__text">
+            You're starting a conversation about <strong>{listingTitle}</strong>.
+            Write your first message below.
+          </p>
+        </div>
+      </div>
+
+      {/* Composer */}
+      <div className={`conversation-composer ${isMobile ? 'conversation-composer--mobile' : ''}`}>
+        {sendError && <p className="new-conversation-error">{sendError}</p>}
+        <div className={`conversation-composer__inner ${isMobile ? '' : 'conversation-composer__inner--desktop'}`}>
+          <div className="conversation-composer__field">
+            <input
+              ref={inputRef}
+              type="text"
+              placeholder="Write your message…"
+              value={text}
+              onChange={e => setText(e.target.value)}
+              onKeyDown={e => {
+                if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); }
+              }}
+              className="conversation-composer__input"
+              disabled={sending}
+            />
+          </div>
+          <button
+            onClick={handleSend}
+            disabled={!text.trim() || sending}
+            className="conversation-composer__send"
+            aria-label="Send message"
+          >
+            <Send size={16} />
+          </button>
+        </div>
+      </div>
+    </div>
   );
 }
 

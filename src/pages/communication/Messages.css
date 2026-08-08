@@ -1,12 +1,23 @@
 .messages-page,
 .messages-conversation {
-  min-height: 100%;
   background: var(--color-ink-50);
 }
 
+/* ── Layout shell ──────────────────────────────────────────────── */
 .messages-layout {
   display: flex;
-  height: calc(100vh - var(--header-height, 64px));
+  /* Exactly fill the space below the header – no more, no less */
+  height: calc(100vh - var(--desktop-header-height));
+  overflow: hidden;
+}
+
+@media (max-width: 768px) {
+  .messages-layout {
+    /* On mobile the header is thinner; just fill the full viewport */
+    height: 100dvh;
+    /* dvh falls back to vh in older browsers */
+    height: 100vh;
+  }
 }
 
 .messages-layout--desktop {
@@ -17,12 +28,15 @@
   background: var(--color-surface);
 }
 
+/* ── Sidebar (desktop only) ────────────────────────────────────── */
 .messages-sidebar {
   width: 350px;
+  flex-shrink: 0;
   border-right: 1px solid var(--color-ink-100);
   display: flex;
   flex-direction: column;
   overflow-y: auto;
+  background: var(--color-surface);
 }
 
 .messages-sidebar .messages-page {
@@ -30,11 +44,14 @@
   background: var(--color-surface);
 }
 
+/* ── Main panel (desktop) ──────────────────────────────────────── */
 .messages-main {
   flex: 1;
+  min-width: 0;
   display: flex;
   flex-direction: column;
   background: var(--color-ink-50);
+  overflow: hidden;
   position: relative;
 }
 
@@ -42,10 +59,25 @@
   height: 100%;
 }
 
+/* ── Conversation / page roots ─────────────────────────────────── */
 .messages-page {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
   animation: fadeIn 0.22s ease-out both;
 }
 
+.messages-conversation {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  /* Fill the parent (sidebar on desktop, full viewport on mobile) */
+  height: 100%;
+  background: var(--color-ink-50);
+  overflow: hidden;
+}
+
+/* ── Auth / empty states ───────────────────────────────────────── */
 .messages-auth-state,
 .messages-empty-state {
   display: flex;
@@ -107,8 +139,10 @@
   background: var(--color-brand-700);
 }
 
+/* ── Header / conversation header ──────────────────────────────── */
 .messages-header,
 .conversation-header {
+  flex-shrink: 0;
   border-bottom: 1px solid var(--color-ink-100);
   background: var(--color-surface);
 }
@@ -166,7 +200,10 @@
   font-weight: 700;
 }
 
+/* ── Conversation list ─────────────────────────────────────────── */
 .messages-list-content {
+  flex: 1;
+  overflow-y: auto;
   width: 100%;
   margin-inline: auto;
 }
@@ -207,6 +244,11 @@
 .conversation-row:hover {
   border-color: var(--color-ink-300);
   box-shadow: var(--shadow-sm);
+}
+
+.conversation-row--active {
+  border-color: var(--color-brand-400);
+  background: var(--color-brand-50);
 }
 
 .conversation-row__avatar {
@@ -335,12 +377,7 @@
   color: var(--color-ink-300);
 }
 
-.messages-conversation {
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-}
-
+/* ── Conversation view ─────────────────────────────────────────── */
 .messages-conversation-state {
   padding-top: 6rem;
   text-align: center;
@@ -353,11 +390,8 @@
   padding: var(--spacing-3) var(--spacing-4);
 }
 
-.conversation-header__person--desktop,
-.conversation-composer__inner--desktop {
+.conversation-header__person--desktop {
   width: 100%;
-  max-width: 42rem;
-  margin-inline: auto;
 }
 
 .conversation-header__avatar {
@@ -392,6 +426,7 @@
   font-size: 0.75rem;
 }
 
+/* Listing context bar */
 .conversation-listing-context {
   width: 100%;
   display: flex;
@@ -433,25 +468,35 @@
   font-weight: 700;
 }
 
+/* ── Message scroll area ───────────────────────────────────────── */
 .conversation-messages {
+  /* Takes all remaining vertical space between header and composer */
   flex: 1;
+  min-height: 0; /* critical: allows flex child to shrink below content size */
   display: flex;
   flex-direction: column;
   gap: var(--spacing-3);
   overflow-y: auto;
   padding: var(--spacing-4);
+  scroll-behavior: smooth;
 }
 
 .conversation-messages--mobile {
-  padding-bottom: 6rem;
+  /* Extra bottom padding so the last message isn't hidden under the fixed composer */
+  padding-bottom: calc(var(--mobile-nav-height) + 5rem);
 }
 
 .conversation-messages--desktop {
+  /* Centred reading column */
   width: 100%;
-  max-width: 42rem;
+  max-width: 56rem;
   margin-inline: auto;
+  align-self: center;
+  box-sizing: border-box;
+  padding-inline: var(--spacing-6);
 }
 
+/* ── Message bubbles ───────────────────────────────────────────── */
 .conversation-message-row {
   display: flex;
 }
@@ -499,7 +544,9 @@
   color: rgba(255, 255, 255, 0.62);
 }
 
+/* ── Composer ──────────────────────────────────────────────────── */
 .conversation-composer {
+  flex-shrink: 0;
   padding: var(--spacing-3) var(--spacing-4);
   border-top: 1px solid var(--color-ink-200);
   background: var(--color-surface);
@@ -511,11 +558,19 @@
   bottom: var(--mobile-nav-height);
   left: 0;
   z-index: 20;
+  /* iOS safe area */
+  padding-bottom: calc(var(--spacing-3) + env(safe-area-inset-bottom, 0px));
 }
 
 .conversation-composer__inner {
   display: flex;
   gap: var(--spacing-2);
+}
+
+.conversation-composer__inner--desktop {
+  max-width: 56rem;
+  margin-inline: auto;
+  width: 100%;
 }
 
 .conversation-composer__field {
@@ -542,6 +597,7 @@
   color: var(--color-ink-800);
   font-size: 0.875rem;
   outline: none;
+  border: none;
 }
 
 .conversation-composer__input::placeholder {
@@ -574,6 +630,7 @@
   opacity: 0.4;
 }
 
+/* ── Focus rings ───────────────────────────────────────────────── */
 .messages-auth-button:focus-visible,
 .messages-back-button:focus-visible,
 .conversation-row:focus-visible,
@@ -583,16 +640,55 @@
   outline-offset: 2px;
 }
 
+/* ── Desktop padding at wider breakpoint ───────────────────────── */
 @media (min-width: 1024px) {
   .messages-header__inner--desktop,
-  .conversation-header__person--desktop,
-  .conversation-messages--desktop,
-  .conversation-composer__inner--desktop {
+  .conversation-header__person--desktop {
     padding-inline: var(--spacing-8);
   }
 }
 
-
-input{
+/* ── Global input border reset (scoped to avoid leaking) ────────── */
+.conversation-composer__input {
   border: none;
+}
+
+/* ── New conversation compose screen ─────────────────────────── */
+.new-conversation-body {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.new-conversation-hint {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 0.875rem;
+  padding: 2rem 1.5rem;
+  max-width: 22rem;
+}
+
+.new-conversation-hint__icon {
+  color: var(--color-brand-400);
+  opacity: 0.7;
+}
+
+.new-conversation-hint__text {
+  font-size: 0.9rem;
+  color: var(--color-ink-500);
+  line-height: 1.5;
+}
+
+.new-conversation-hint__text strong {
+  color: var(--color-ink-800);
+  font-weight: 600;
+}
+
+.new-conversation-error {
+  font-size: 0.8rem;
+  color: var(--color-danger);
+  padding: 0.25rem var(--spacing-4);
+  text-align: center;
 }
