@@ -1,0 +1,61 @@
+Actual selling plan fields discovered:
+- `id`, `code`, `name`, `description`
+- `price_rwf`
+- `billing_period_days`
+- `max_active_listings` (Nullable)
+- `max_listings_per_period` (Nullable)
+- `listing_period_days` (Nullable)
+- `max_sponsored_ads_per_period` (NOT NULL DEFAULT 0)
+- `sponsored_ads_period_days` (Nullable)
+- `is_free`, `is_active`
+- `features` (JSONB)
+
+Feature field mappings:
+- `max_active_listings` -> "{value} active listings"
+- `max_listings_per_period` -> "{value} listings every {period} days"
+- `max_sponsored_ads_per_period` -> "{value} sponsored ads per period"
+- `features` -> Direct string mapped from JSON values
+
+How null/unlimited values are handled:
+If `max_active_listings` or `max_listings_per_period` or `max_sponsored_ads_per_period` are null, the `buildPlanFeatures` utility explicitly returns "Unlimited active listings", "Unlimited listings", or "Unlimited sponsored ads" respectively.
+
+How zero values are handled:
+If `max_sponsored_ads_per_period` is exactly 0, the utility returns "No sponsored ads included".
+
+How singular/plural labels are handled:
+If a value equals 1, the utility formats the label as singular ("active listing", "sponsored ad"). If > 1, it formats as plural.
+
+Listing duration field exists: No
+If yes, actual field: N/A (Only `billing_period_days` and `listing_period_days` exist, which denote quotas, not the expiration duration of the listing itself).
+
+Period source: `listing_period_days` and `sponsored_ads_period_days`.
+
+Sponsored-ad source field: `max_sponsored_ads_per_period`.
+
+Hardcoded business numbers remaining: No. All numbers are pulled dynamically from the backend `plan` object.
+
+Exact Current Plan root cause: 
+When a user clicked "Select plan", the backend `subscribe` method inserted a new `user_subscriptions` row with `status = 'pending'`. The backend `getCurrentSellingPlan` query specifically filtered for `status = 'active'`, so the new subscription was completely ignored. Additionally, the old active subscription was never cancelled, causing the query to fallback to the existing 'active' Trader Plus subscription (since it picks the active subscription with the highest priority).
+
+Authoritative current-plan source: 
+The backend `user.selling_plan` (derived securely from the `user_subscriptions` table via `getCurrentSellingPlan` and sent in the `/users/me` endpoint).
+
+Role-based detection removed: Yes
+Trader Plus fallback removed: Yes
+Stale localStorage issue found: No. `AuthContext` already has logic to update local storage when `updateUser` is called.
+AuthContext synchronization fixed: Yes, by fetching `/users/me` after subscription and explicitly calling `updateUser()`.
+
+Select Free result: Old paid active subscriptions are cancelled, a new 'active' Free subscription is created, and the UI immediately updates to show Free as "Current plan".
+Select Trader Plus result: Old active subscriptions are cancelled, a new 'active' Trader Plus subscription is created, and the UI updates to show Trader Plus as "Current plan".
+Select Trader Premium result: Since `is_active` is currently false for Premium, the UI prevents selection, and the button simply displays "Coming soon".
+
+Refresh preserves correct Current Plan: Yes
+
+is_active=false → Coming Soon: Pass
+
+Frontend build: Pass
+Backend tests/build: Pass
+
+Database records deleted: No.
+Subscriptions manually deleted: No. (They are correctly marked `status = 'cancelled'`).
+Database reset/reseed performed: No.

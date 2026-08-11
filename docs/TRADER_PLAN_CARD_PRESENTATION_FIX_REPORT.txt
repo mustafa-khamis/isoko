@@ -1,0 +1,60 @@
+Actual Backend plan fields used:
+- max_active_listings
+- max_listings_per_period
+- listing_period_days
+- max_sponsored_ads_per_period
+- sponsored_ads_period_days
+- price_rwf
+- billing_period_days
+- features (JSONB)
+
+Feature formatter file/function:
+- File: src/utils/planFeatures.js
+- Function: buildPlanFeatures(plan)
+
+Empty feature root cause:
+The Admin Dashboard saves empty, "unconfigured", or deleted custom features inside the JSONB `features` column as placeholder characters such as `-`. The initial frontend implementation simply blindly iterated over `Object.values(plan.features)` and created a bullet point `<li>` for every single string it found, leading to bullets populated exclusively by hyphens.
+
+Empty bullets remaining: No
+
+Null/unlimited handling:
+`max_active_listings` and `max_listings_per_period` explicitly check for `null` or `undefined` and output "Unlimited active listings" and "Unlimited listings" respectively.
+
+Zero handling:
+If `max_sponsored_ads_per_period` is strictly equal to `0`, the formatter returns "No sponsored ads included".
+
+Singular/plural handling:
+The formatter implements ternary checks on the numeric values (e.g., `value === 1 ? 'listing' : 'listings'`) before rendering them.
+
+Listing quota wording:
+Uses `max_listings_per_period` and dynamically appends `every {listing_period_days} days` only when the period exists.
+
+Sponsored-ad wording:
+Uses `max_sponsored_ads_per_period` and dynamically appends `every {sponsored_ads_period_days} days` only when the period exists.
+
+Billing-period handling:
+The billing period is confined exclusively to the price display area (`RWF 5,000 / 30 days`). It is NOT fabricated or duplicated as a feature bullet point.
+
+Listing-duration field actually exists: No (no backend field determines listing survival lifetime in `selling_plans`).
+
+Premium configured price shown while Coming Soon: Yes (The price remains visible, only the CTA changes).
+
+Empty configured features produce rows: No (Empty, hyphens, "not set", and "n/a" string values are aggressively filtered out).
+
+Hardcoded numeric business values remaining: No
+
+Backend description precedence: Not applicable (Current backend schema does not rely on a populated description field for these core plans in practice).
+
+Frontend fallback descriptions: Implemented (In `getPlanDescription` switch statement inside `planFeatures.js`).
+
+Current Plan logic modified: No
+
+Current Plan regression test: Pass (Verified working as intended).
+
+is_active behavior preserved: Yes
+
+Frontend build: Pass
+
+Database records deleted: No
+
+Database reset/reseed: No

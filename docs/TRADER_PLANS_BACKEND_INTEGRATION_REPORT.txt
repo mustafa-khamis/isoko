@@ -1,0 +1,48 @@
+Actual plans endpoint: GET /subscriptions/plans
+Does it return inactive plans: Yes (after the recent modification to the query).
+Changes made if it did not: The `getPlans` method in `isoko-backend/src/repositories/subscription.repositories.js` was modified to remove the `WHERE is_active = true` condition so that the endpoint correctly returns inactive plans to the frontend for them to be displayed as "Coming Soon".
+
+Actual current-subscription source: The user's current selling plan is available directly in the `user.selling_plan.code` object retrieved from the `/users/me` API and propagated via the `AuthContext` as `user?.selling_plan?.code`.
+Why that source was chosen: The AuthContext efficiently caches and provides `user.selling_plan` universally, making additional redundant API calls to `GET /subscriptions/my` unnecessary for basic state checking. When a subscription occurs, we trigger `usersApi.getMe()` and update the context dynamically.
+
+Hardcoded PLANS removed: Yes
+Hardcoded isComingSoon removed: Yes
+Hardcoded prices removed: Yes
+Role-based plan detection removed: Yes
+
+is_active=true behavior: The plan card shows normal selectable behavior ("Select plan", "Current plan", "Upgrade").
+is_active=false behavior: The plan card is visually rendered, but the call-to-action is disabled and the button reads "Coming soon".
+
+Inactive plan visible: Yes
+Inactive plan selectable: No
+
+Backend rejects inactive subscriptions: Yes. `subscribe` in `isoko-backend/src/services/subscription.service.js` was updated to throw a `PLAN_NOT_AVAILABLE` AppError if `!plan.is_active`.
+
+Admin availability reflected in frontend: Yes
+Admin price reflected in frontend: Yes
+Admin limits reflected in frontend: Yes
+
+Current Free plan detection: Pass
+Current Trader Plus detection: Pass
+Current Trader Premium detection: Pass
+
+Frontend build: Pass
+Backend tests/build: Pass
+
+Database records deleted: No
+Database reset/reseed performed: No
+Existing subscriptions deleted: No
+Existing selling plans deleted: No
+
+Modified Files Summary:
+1. `isoko-backend/src/repositories/subscription.repositories.js`
+   Removed `WHERE is_active = true` condition from `getPlans` query.
+
+2. `isoko-backend/src/services/subscription.service.js`
+   Added validation logic in `subscribe` to throw an AppError if a user attempts to subscribe to a plan with `is_active = false`.
+
+3. `isoko-frontend/src/services/subscriptionsApi.js` (NEW)
+   Created a new API service for handling frontend interactions with the backend subscription endpoints.
+
+4. `isoko-frontend/src/pages/profile/TraderPlans.jsx`
+   Refactored the component entirely to remove the hardcoded mock `PLANS` data. It now uses `useEffect` to fetch dynamic plans via `subscriptionsApi.getPlans()`. It maps `is_active` correctly to the "Coming soon" state. Current plan detection now utilizes `user?.selling_plan?.code` rather than deriving it falsely from the `role`.
