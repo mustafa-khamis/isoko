@@ -142,7 +142,7 @@ function PlanCard({ plan, isCurrentPlan, isActivating, onActivate }) {
         : 'trader-plan-card__button--secondary';
 
   const planFeatures = buildPlanFeatures(plan);
-  const planDescription = getPlanDescription(plan.code);
+  const planDescription = getPlanDescription(plan);
 
   return (
     <article className={`trader-plan-card ${cardModifier}`}>

@@ -46,17 +46,23 @@ export const buildPlanFeatures = (plan) => {
   return [...new Set(cleanFeatures)];
 };
 
-export const getPlanDescription = (code) => {
-  switch (code) {
-    case 'free':
-      return 'Perfect for casual sellers who want to start selling on Isoko with the essential tools to create listings and connect with buyers.';
-    case 'trader_plus':
-    case 'trader-plus':
-      return 'Built for active sellers who need more room to grow, manage more listings, and promote their products to reach more buyers.';
-    case 'trader_premium':
-    case 'trader-premium':
-      return 'Designed for professional and high-volume sellers who want the highest selling limits, greater visibility, and the most powerful tools available on Isoko.';
-    default:
-      return 'Unlock advanced selling tools to grow your business on Isoko.';
+const PLAN_DESCRIPTION_FALLBACKS = {
+  free: 'Perfect for casual sellers who want to start selling on Isoko with the essential tools to create listings and connect with buyers.',
+  trader_plus: 'Built for active sellers who need more room to grow, manage more listings, and promote their products to reach more buyers.',
+  'trader-plus': 'Built for active sellers who need more room to grow, manage more listings, and promote their products to reach more buyers.',
+  trader_premium: 'Designed for professional and high-volume sellers who want the highest selling limits, greater visibility, and the most powerful tools available on Isoko.',
+  'trader-premium': 'Designed for professional and high-volume sellers who want the highest selling limits, greater visibility, and the most powerful tools available on Isoko.',
+};
+
+/**
+ * Returns the plan description.
+ * - Prefers plan.description from the backend (real DB value).
+ * - Falls back to frontend copy when the DB description is empty/null.
+ * - Accepts the full plan object so it can read the backend field directly.
+ */
+export const getPlanDescription = (plan) => {
+  if (plan && plan.description && plan.description.trim()) {
+    return plan.description.trim();
   }
+  return PLAN_DESCRIPTION_FALLBACKS[plan?.code] || '';
 };
