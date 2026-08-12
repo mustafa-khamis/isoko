@@ -6,6 +6,7 @@ import apiClient, {
   startAuthSession,
 } from '../services/apiClient';
 import * as authStorage from '../auth/authStorage';
+import { registerPushNotifications, unregisterPushNotifications } from '../services/pushNotifications';
 
 const AuthContext = createContext(null);
 let sessionRestorePromise = null;
@@ -57,6 +58,9 @@ export const AuthProvider = ({ children }) => {
     setSessionStatus('valid');
     setServerStatus('online');
     setIsLoading(false);
+    
+    // Register push notifications when user is authenticated
+    registerPushNotifications();
   }, []);
 
   const clearLocalAuth = useCallback(() => {
@@ -150,6 +154,9 @@ export const AuthProvider = ({ children }) => {
   };
 
   const logout = async () => {
+    // Unregister push notifications first to avoid 401 on backend call
+    await unregisterPushNotifications();
+
     clearLocalAuth();
 
     try {
