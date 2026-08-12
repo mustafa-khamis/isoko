@@ -39,6 +39,7 @@ export default function MyListings() {
   const [listings, setListings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [deletingId, setDeletingId] = useState(null);
+  const [updatingId, setUpdatingId] = useState(null); // for hide/mark-sold
 
   useEffect(() => {
     if (isLoading) return;
@@ -79,6 +80,21 @@ export default function MyListings() {
     }
   };
 
+  const handleStatusUpdate = async (listingId, newStatus) => {
+    if (updatingId) return;
+    setUpdatingId(listingId);
+    try {
+      await listingsApi.updateStatus(listingId, newStatus);
+      setListings((current) =>
+        current.map((l) => (l.id === listingId ? { ...l, status: newStatus } : l))
+      );
+    } catch (error) {
+      console.error('Status update failed', error);
+    } finally {
+      setUpdatingId(null);
+    }
+  };
+
   return (
     <div className="my-listings-page">
       <header className={`my-listings-header ${isMobile ? 'my-listings-header--sticky' : ''}`}>
@@ -99,7 +115,7 @@ export default function MyListings() {
           <div className="my-listings-quota">
             <div className="my-listings-quota__summary">
               <span className="my-listings-quota__label">Free plan &middot; {listings.length} listings</span>
-              <button className="my-listings-quota__upgrade">Upgrade &rarr;</button>
+              <button onClick={() => navigate('/trader-plans')} className="my-listings-quota__upgrade">Upgrade &rarr;</button>
             </div>
             <div className="my-listings-quota__track">
               <div className="my-listings-quota__fill" />
@@ -141,7 +157,10 @@ export default function MyListings() {
               <ListingRow
                 key={listing.id}
                 listing={listing}
+                updating={updatingId === listing.id}
                 onEdit={() => navigate(`/edit-listing/${listing.id}`)}
+                onHide={() => handleStatusUpdate(listing.id, 'hidden')}
+                onMarkSold={() => handleStatusUpdate(listing.id, 'sold')}
                 onDelete={() => setDeletingId(listing.id)}
               />
             ))}
@@ -193,7 +212,13 @@ function StatusBadge({ status }) {
   );
 }
 
-function ListingRow({ listing, onEdit, onDelete }) {
+function ListingRow({ listing, updating, onEdit, onHide, onMarkSold, onDelete }) {
+  const status = listing.status;
+  // Only show Hide if listing is not already hidden/sold/expired
+  const canHide    = !['hidden', 'sold', 'expired'].includes(status);
+  // Only show Mark sold if listing is not already sold
+  const canMarkSold = status !== 'sold';
+
   return (
     <article className="my-listing-card">
       <div className="my-listing-card__main">
@@ -227,22 +252,28 @@ function ListingRow({ listing, onEdit, onDelete }) {
       </div>
 
       <div className="my-listing-card__actions">
-        <ActionButton icon={<Pencil size={14} />} label="Edit" onClick={onEdit} />
-        <ActionButton icon={<EyeOff size={14} />} label="Hide" onClick={() => {}} />
-        <ActionButton icon={<CheckCircle size={14} />} label="Mark sold" onClick={() => {}} />
-        <ActionButton icon={<Trash2 size={14} />} label="Delete" onClick={onDelete} danger />
+        <ActionButton icon={<Pencil size={14} />} label="Edit" onClick={onEdit} disabled={updating} />
+        {canHide && (
+          <ActionButton icon={<EyeOff size={14} />} label="Hide" onClick={onHide} loading={updating} disabled={updating} />
+        )}
+        {canMarkSold && (
+          <ActionButton icon={<CheckCircle size={14} />} label="Mark sold" onClick={onMarkSold} loading={updating} disabled={updating} />
+        )}
+        <ActionButton icon={<Trash2 size={14} />} label="Delete" onClick={onDelete} danger disabled={updating} />
       </div>
     </article>
   );
 }
 
-function ActionButton({ icon, label, onClick, danger = false }) {
+
+function ActionButton({ icon, label, onClick, danger = false, disabled = false, loading = false }) {
   return (
     <button
       onClick={onClick}
-      className={`my-listing-action ${danger ? 'my-listing-action--danger' : ''}`}
+      disabled={disabled}
+      className={`my-listing-action ${danger ? 'my-listing-action--danger' : ''} ${disabled ? 'my-listing-action--disabled' : ''}`}
     >
-      {icon}{label}
+      {loading ? <RefreshCw size={13} className="my-listing-action__spinner" /> : icon}{label}
     </button>
   );
 }

@@ -347,8 +347,19 @@
   color: #ef4444;
 }
 
-.my-listing-action--danger:hover {
+.my-listing-action--danger:hover:not(:disabled) {
   background: #fef2f2;
+}
+
+.my-listing-action--disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.my-listing-action__spinner {
+  animation: spin 0.8s linear infinite;
+  flex-shrink: 0;
 }
 
 .my-listings-empty {

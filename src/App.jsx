@@ -12,6 +12,7 @@ import ListingDetail from './pages/listings/ListingDetail';
 import CreateListing from './pages/listings/CreateListing';
 import Favorites from './pages/listings/Favorites';
 import MyListings from './pages/listings/MyListings';
+import EditListing from './pages/listings/EditListing';
 import Messages from './pages/communication/Messages';
 import Notifications from './pages/communication/Notifications';
 import Profile from './pages/profile/Profile';
@@ -40,6 +41,7 @@ const AppShell = () => {
           <Route path="/create-listing" element={<CreateListing />} />
           <Route path="/favorites" element={<Favorites />} />
           <Route path="/my-listings" element={<MyListings />} />
+          <Route path="/edit-listing/:id" element={<EditListing />} />
           <Route path="/messages" element={<Messages />} />
           <Route path="/messages/:id" element={<Messages />} />
           <Route path="/notifications" element={<Notifications />} />

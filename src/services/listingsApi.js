@@ -5,8 +5,11 @@ export const listingsApi = {
   getListings: (params) => apiClient.get('/listings', { params }),
   searchListings: (params) => apiClient.get('/listings/search', { params }),
   
-  // Get a single listing by ID
+  // Get a single listing by ID (Public)
   getListing: (id) => apiClient.get(`/listings/${id}`),
+
+  // Get a single listing for editing/managing (Protected, ignores status)
+  getListingForManage: (id) => apiClient.get(`/listings/${id}/manage`),
 
   toggleFavorite: (id) => apiClient.post(`/listings/${id}/favorite`),
   
@@ -26,6 +29,9 @@ export const listingsApi = {
 
   // Delete a listing
   deleteListing: (id) => apiClient.delete(`/listings/${id}`),
+
+  // Delete a single image from a listing
+  deleteListingImage: (listingId, imageId) => apiClient.delete(`/listings/${listingId}/images/${imageId}`),
   
   // Favorites
   getFavorites: () => apiClient.get('/favorites'),

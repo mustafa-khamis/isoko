@@ -1,0 +1,705 @@
+/* ── EditListing.css ───────────────────────────────────────────────────────── */
+
+/* Page shell */
+.el-page {
+  min-height: calc(100vh - var(--desktop-header-height));
+  background: var(--color-ink-50);
+}
+
+.el-page--desktop {
+  padding-block: 2.5rem;
+}
+
+.el-inner {
+  background: var(--color-surface);
+  overflow: hidden;
+}
+
+.el-page--desktop .el-inner {
+  max-width: 42rem;
+  margin-inline: auto;
+  border-radius: var(--radius-2xl);
+  border: 1px solid var(--color-ink-200);
+  box-shadow: var(--shadow-sm);
+}
+
+/* ── Header ─────────────────────────────────────────────────────────────── */
+.el-header {
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid var(--color-ink-100);
+  background: var(--color-surface);
+}
+
+.el-header--sticky {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+}
+
+.el-back-btn {
+  width: 2.25rem;
+  height: 2.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-full);
+  color: var(--color-ink-600);
+  transition: background-color 0.15s;
+  flex-shrink: 0;
+}
+
+.el-back-btn:hover {
+  background: var(--color-ink-100);
+}
+
+.el-header-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.el-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--color-ink-950);
+  line-height: 1.2;
+}
+
+.el-subtitle {
+  font-size: 0.75rem;
+  color: var(--color-ink-400);
+  margin-top: 0.125rem;
+}
+
+.el-save-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.375rem;
+  padding: 0.5rem 1.125rem;
+  border-radius: var(--radius-lg);
+  background: var(--color-brand-600);
+  color: white;
+  font-size: 0.875rem;
+  font-weight: 600;
+  transition: background-color 0.2s, opacity 0.2s;
+  flex-shrink: 0;
+}
+
+.el-save-btn:hover:not(:disabled) {
+  background: var(--color-brand-700);
+}
+
+.el-save-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ── Tab bar ─────────────────────────────────────────────────────────────── */
+.el-tabs {
+  display: flex;
+  gap: 0.25rem;
+  padding: 0.625rem 1.25rem 0;
+  border-bottom: 1px solid var(--color-ink-100);
+  overflow-x: auto;
+  scrollbar-width: none;
+  background: var(--color-surface);
+}
+
+.el-tabs::-webkit-scrollbar { display: none; }
+
+.el-tab {
+  flex-shrink: 0;
+  padding: 0.5rem 0.875rem;
+  border-bottom: 2px solid transparent;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--color-ink-500);
+  transition: color 0.2s, border-color 0.2s;
+  white-space: nowrap;
+}
+
+.el-tab:hover {
+  color: var(--color-ink-800);
+}
+
+.el-tab--active {
+  color: var(--color-brand-600);
+  border-bottom-color: var(--color-brand-600);
+}
+
+/* ── Error banner ────────────────────────────────────────────────────────── */
+.el-error-banner {
+  margin: 0.75rem 1.25rem 0;
+  padding: 0.625rem 0.875rem;
+  border-radius: var(--radius-lg);
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #b91c1c;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  animation: fadeIn 0.15s ease-out both;
+}
+
+/* ── Body / Panel ────────────────────────────────────────────────────────── */
+.el-body {
+  padding: 1.25rem;
+}
+
+.el-page--mobile .el-body {
+  padding-bottom: 6rem; /* space for sticky footer */
+}
+
+.el-panel {
+  animation: fadeIn 0.2s ease-out both;
+}
+
+/* ── Form fields ─────────────────────────────────────────────────────────── */
+.el-field {
+  margin-bottom: 1.375rem;
+}
+
+.el-field > label {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--color-ink-600);
+  margin-bottom: 0.5rem;
+}
+
+.el-field-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+}
+
+.el-field-header label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--color-ink-600);
+}
+
+.el-char-count {
+  font-size: 0.7rem;
+  color: var(--color-ink-400);
+  font-weight: 500;
+  transition: color 0.15s;
+}
+
+.el-char-count--error { color: var(--color-danger); }
+
+.el-input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--color-ink-200);
+  border-radius: var(--radius-xl);
+  font-size: 0.875rem;
+  color: var(--color-ink-800);
+  outline: none;
+  transition: border-color 0.15s;
+  background: var(--color-surface);
+}
+
+.el-input:focus {
+  border-color: var(--color-brand-500);
+}
+
+.el-input--error {
+  border-color: var(--color-danger) !important;
+}
+
+.el-textarea {
+  resize: vertical;
+  min-height: 7rem;
+}
+
+.el-select {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--color-ink-200);
+  border-radius: var(--radius-xl);
+  font-size: 0.875rem;
+  color: var(--color-ink-800);
+  outline: none;
+  background: var(--color-surface);
+  transition: border-color 0.15s;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 1rem center;
+  padding-right: 2.5rem;
+}
+
+.el-select:focus { border-color: var(--color-brand-500); }
+
+.el-hint {
+  font-size: 0.75rem;
+  margin-top: 0.375rem;
+  animation: fadeIn 0.15s ease-out both;
+}
+
+.el-hint--error { color: var(--color-danger); }
+.el-hint--ok    { color: var(--color-success, #16a34a); }
+
+/* ── Category grid ───────────────────────────────────────────────────────── */
+.el-cat-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.5rem;
+}
+
+.el-cat-option {
+  padding: 0.625rem 0.75rem;
+  text-align: left;
+  border: 1px solid var(--color-ink-200);
+  border-radius: var(--radius-xl);
+  font-size: 0.8125rem;
+  color: var(--color-ink-700);
+  transition: border-color 0.15s, background-color 0.15s;
+}
+
+.el-cat-option:hover { background: var(--color-ink-50); }
+
+.el-cat-option--active {
+  border-color: var(--color-brand-500);
+  background: var(--color-brand-50);
+  color: var(--color-brand-700);
+  font-weight: 600;
+}
+
+/* ── Subcategory tags ────────────────────────────────────────────────────── */
+.el-tag-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.el-tag {
+  padding: 0.375rem 0.875rem;
+  border: 1px solid var(--color-ink-200);
+  border-radius: var(--radius-full);
+  font-size: 0.8125rem;
+  color: var(--color-ink-600);
+  transition: border-color 0.15s, background-color 0.15s;
+}
+
+.el-tag--active {
+  border-color: var(--color-brand-500);
+  background: var(--color-brand-50);
+  color: var(--color-brand-700);
+  font-weight: 600;
+}
+
+/* ── Price type options ──────────────────────────────────────────────────── */
+.el-price-types {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.el-price-opt {
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+  padding: 0.875rem 1rem;
+  border: 2px solid var(--color-ink-200);
+  border-radius: var(--radius-xl);
+  text-align: left;
+  transition: border-color 0.15s, background-color 0.15s;
+}
+
+.el-price-opt--active {
+  border-color: var(--color-brand-500);
+  background: var(--color-brand-50);
+}
+
+.el-radio {
+  width: 1.25rem;
+  height: 1.25rem;
+  border-radius: 50%;
+  border: 2px solid var(--color-ink-300);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: border-color 0.15s;
+}
+
+.el-price-opt--active .el-radio {
+  border-color: var(--color-brand-500);
+}
+
+.el-radio__dot {
+  width: 0.625rem;
+  height: 0.625rem;
+  border-radius: 50%;
+  background: var(--color-brand-500);
+}
+
+.el-price-opt__text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+}
+
+.el-price-opt__label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-ink-800);
+}
+
+.el-price-opt__desc {
+  font-size: 0.75rem;
+  color: var(--color-ink-500);
+}
+
+/* ── Price field ─────────────────────────────────────────────────────────── */
+.el-price-field {
+  display: flex;
+  align-items: center;
+  border: 1px solid var(--color-ink-200);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  transition: border-color 0.15s;
+}
+
+.el-price-field:focus-within { border-color: var(--color-brand-500); }
+
+.el-price-prefix {
+  padding: 0.75rem 1rem;
+  background: var(--color-ink-50);
+  border-right: 1px solid var(--color-ink-200);
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-ink-600);
+  flex-shrink: 0;
+}
+
+.el-price-input {
+  flex: 1;
+  padding: 0.75rem 1rem;
+  border: none;
+  outline: none;
+  font-size: 0.875rem;
+  color: var(--color-ink-800);
+  background: transparent;
+  min-width: 0;
+}
+
+/* ── Toggle (WhatsApp) ───────────────────────────────────────────────────── */
+.el-toggle {
+  display: flex !important;
+  align-items: center;
+  gap: 0.625rem;
+  cursor: pointer;
+  margin-bottom: 0.75rem;
+}
+
+.el-toggle input { display: none; }
+
+.el-toggle__track {
+  width: 2.5rem;
+  height: 1.375rem;
+  border-radius: var(--radius-full);
+  background: var(--color-ink-200);
+  position: relative;
+  flex-shrink: 0;
+  transition: background-color 0.2s;
+}
+
+.el-toggle input:checked + .el-toggle__track {
+  background: var(--color-brand-500);
+}
+
+.el-toggle__thumb {
+  position: absolute;
+  top: 0.1875rem;
+  left: 0.1875rem;
+  width: 1rem;
+  height: 1rem;
+  border-radius: 50%;
+  background: white;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+  transition: transform 0.2s;
+}
+
+.el-toggle input:checked + .el-toggle__track .el-toggle__thumb {
+  transform: translateX(1.125rem);
+}
+
+.el-toggle__label {
+  font-size: 0.875rem;
+  color: var(--color-ink-700);
+  font-weight: 500;
+}
+
+/* ── Phone field ─────────────────────────────────────────────────────────── */
+.el-phone-field {
+  display: flex;
+  align-items: center;
+  border: 1px solid var(--color-ink-200);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  transition: border-color 0.15s;
+}
+
+.el-phone-field:focus-within { border-color: var(--color-brand-500); }
+
+.el-phone-prefix {
+  padding: 0.75rem 0.875rem;
+  background: var(--color-ink-50);
+  border-right: 1px solid var(--color-ink-200);
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-ink-700);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.el-phone-input {
+  flex: 1;
+  padding: 0.75rem 0.75rem;
+  border: none;
+  outline: none;
+  font-size: 0.875rem;
+  color: var(--color-ink-800);
+  background: transparent;
+  min-width: 0;
+}
+
+.el-phone-count {
+  padding: 0 0.75rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--color-ink-400);
+  flex-shrink: 0;
+  transition: color 0.15s;
+}
+
+.el-phone-count--ok    { color: var(--color-success, #16a34a); }
+.el-phone-count--error { color: var(--color-danger); }
+
+/* ── Photos ──────────────────────────────────────────────────────────────── */
+.el-photos-help {
+  font-size: 0.8125rem;
+  color: var(--color-ink-500);
+  margin-bottom: 1rem;
+}
+
+.el-photo-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.625rem;
+}
+
+.el-photo-cell {
+  aspect-ratio: 1;
+  position: relative;
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  background: var(--color-ink-100);
+}
+
+.el-photo-cell--new {
+  outline: 2px dashed var(--color-brand-400);
+  outline-offset: -2px;
+}
+
+.el-photo-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.el-photo-remove {
+  position: absolute;
+  top: 0.3rem;
+  right: 0.3rem;
+  width: 1.375rem;
+  height: 1.375rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-full);
+  background: rgba(0,0,0,0.55);
+  color: white;
+  transition: background-color 0.15s;
+}
+
+.el-photo-remove:hover { background: rgba(0,0,0,0.75); }
+.el-photo-remove:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.el-photo-badge {
+  position: absolute;
+  bottom: 0.3rem;
+  left: 0.3rem;
+  padding: 0.125rem 0.375rem;
+  border-radius: var(--radius-full);
+  background: rgba(0,0,0,0.55);
+  color: white;
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.el-photo-new-badge {
+  position: absolute;
+  bottom: 0.3rem;
+  right: 0.3rem;
+  padding: 0.125rem 0.375rem;
+  border-radius: var(--radius-full);
+  background: var(--color-brand-600);
+  color: white;
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.el-photo-add {
+  aspect-ratio: 1;
+  border: 2px dashed var(--color-ink-300);
+  border-radius: var(--radius-xl);
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  overflow: hidden;
+}
+
+.el-photo-add-btn {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.3rem;
+  color: var(--color-ink-400);
+  font-size: 0.6rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  transition: background-color 0.15s, color 0.15s;
+}
+
+.el-photo-add-btn:hover {
+  background: var(--color-brand-50);
+  color: var(--color-brand-500);
+}
+
+.el-photo-add-divider {
+  width: 1px;
+  background: var(--color-ink-200);
+  align-self: stretch;
+  flex-shrink: 0;
+}
+
+.el-file-input { display: none; }
+
+/* ── Sticky mobile footer ────────────────────────────────────────────────── */
+.el-footer {
+  position: fixed;
+  bottom: calc(var(--mobile-nav-height) + env(safe-area-inset-bottom, 0px));
+  left: 0; right: 0;
+  z-index: 30;
+  padding: 0.75rem 1rem;
+  background: var(--color-surface);
+  border-top: 1px solid var(--color-ink-100);
+}
+
+.el-footer-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.875rem;
+  border-radius: var(--radius-xl);
+  background: var(--color-brand-600);
+  color: white;
+  font-size: 0.9375rem;
+  font-weight: 700;
+  transition: background-color 0.2s, opacity 0.2s;
+}
+
+.el-footer-btn:hover:not(:disabled) { background: var(--color-brand-700); }
+.el-footer-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* ── Loading screen ──────────────────────────────────────────────────────── */
+.el-loading-screen {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  color: var(--color-brand-500);
+}
+
+.el-loading-spinner,
+.el-save-spinner {
+  animation: spin 0.8s linear infinite;
+}
+
+/* ── Success screen ──────────────────────────────────────────────────────── */
+.el-success-screen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 3rem 1.5rem;
+  min-height: 60vh;
+  background: var(--color-ink-50);
+  animation: fadeIn 0.22s ease-out both;
+}
+
+.el-success-icon {
+  color: var(--color-brand-600);
+  margin-bottom: 1.25rem;
+}
+
+.el-success-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--color-ink-950);
+  margin-bottom: 0.5rem;
+}
+
+.el-success-copy {
+  color: var(--color-ink-500);
+  font-size: 0.9375rem;
+  margin-bottom: 2rem;
+  max-width: 22rem;
+}
+
+.el-success-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.875rem 2rem;
+  border-radius: var(--radius-xl);
+  background: var(--color-brand-600);
+  color: white;
+  font-weight: 700;
+  font-size: 0.9375rem;
+  transition: background-color 0.2s;
+}
+
+.el-success-btn:hover { background: var(--color-brand-700); }
+
+/* ── Focus rings ─────────────────────────────────────────────────────────── */
+.el-back-btn:focus-visible,
+.el-save-btn:focus-visible,
+.el-tab:focus-visible,
+.el-cat-option:focus-visible,
+.el-tag:focus-visible,
+.el-price-opt:focus-visible,
+.el-photo-add-btn:focus-visible,
+.el-photo-remove:focus-visible,
+.el-footer-btn:focus-visible,
+.el-success-btn:focus-visible {
+  outline: 2px solid var(--color-brand-500);
+  outline-offset: 2px;
+}
