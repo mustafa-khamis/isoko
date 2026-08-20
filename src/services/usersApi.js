@@ -14,4 +14,8 @@ export const usersApi = {
   getMyListings: (params) => apiClient.get('/users/me/listings', { params }),
   getFavorites: () => apiClient.get('/users/me/favorites'),
   deleteAccount: () => apiClient.delete('/users/me'),
+  followUser: (userId) => apiClient.post(`/users/${userId}/follow`),
+  unfollowUser: (userId) => apiClient.delete(`/users/${userId}/follow`),
+  getFollowerCount: (userId) => apiClient.get(`/users/${userId}/followers-count`),
+  isFollowing: (userId) => apiClient.get(`/users/${userId}/is-following`),
 };

@@ -1,3 +1,27 @@
+// Derive the static-files root from the API base URL.
+// e.g. "http://localhost:5000/api/v1" → "http://localhost:5000"
+const API_STATIC_ROOT = (() => {
+  const base = import.meta.env.VITE_API_BASE_URL || '';
+  try {
+    const url = new URL(base);
+    return url.origin;
+  } catch {
+    return '';
+  }
+})();
+
+/**
+ * Turns a backend image path into a fully-qualified URL.
+ * - Already-absolute URLs (http/https) are returned as-is.
+ * - Relative paths like "avatars/userId/file.png" get the static root prepended.
+ * - null/undefined returns null.
+ */
+export function resolveImageUrl(path) {
+  if (!path) return null;
+  if (/^https?:\/\//i.test(path)) return path;
+  return `${API_STATIC_ROOT}/${path.replace(/^\/+/, '')}`;
+}
+
 export function formatRWF(amount) {
   return new Intl.NumberFormat('en-RW', {
     style: 'currency',

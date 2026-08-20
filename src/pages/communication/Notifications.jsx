@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Bell, MessageCircle, CheckCircle, XCircle, Check } from 'lucide-react';
+import { ArrowLeft, Bell, MessageCircle, CheckCircle, XCircle, Check, Heart } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useUI } from '../../context/UIContext';
 import { notificationsApi } from '../../services/notificationsApi';
@@ -59,8 +59,9 @@ export default function Notifications() {
     if (!notif.is_read) {
       markRead(notif.id);
     }
-    if (notif.action_url) {
-      navigate(notif.action_url);
+    // For follow notifications, navigate to the follower's profile
+    if (notif.type === 'user_followed' && notif.data && notif.data.follower_id) {
+      navigate(`/sellers/${notif.data.follower_id}`);
     }
   };
 
@@ -123,12 +124,16 @@ function NotificationRow({ notif, onClick }) {
     'message':          <MessageCircle size={20} className="notifications-icon notifications-icon--brand" />,
     'listing-approved': <CheckCircle size={20} className="notifications-icon notifications-icon--brand" />,
     'listing-rejected': <XCircle size={20} className="notifications-icon notifications-icon--danger" />,
+    'user_followed':    <Heart size={20} className="notifications-icon notifications-icon--love" />,
+    'broadcast':        <Bell size={20} className="notifications-icon notifications-icon--brand" />,
   };
 
   const bgColors = {
     'message':          'notifications-row-icon--brand',
     'listing-approved': 'notifications-row-icon--brand',
     'listing-rejected': 'notifications-row-icon--danger',
+    'user_followed':    'notifications-row-icon--love',
+    'broadcast':        'notifications-row-icon--brand',
   };
 
   const icon = icons[notif.type] || <Bell size={20} className="notifications-icon notifications-icon--muted" />;
@@ -150,7 +155,7 @@ function NotificationRow({ notif, onClick }) {
         <p className={`notifications-row-title ${!notif.is_read ? 'notifications-row-title--unread' : ''}`}>
           {notif.title}
         </p>
-        <p className="notifications-row-message">{notif.message}</p>
+        <p className="notifications-row-message">{notif.body || notif.message}</p>
         <p className="notifications-row-time">{timeAgo(notif.created_at)}</p>
       </div>
       {!notif.is_read && (

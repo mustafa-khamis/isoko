@@ -33,8 +33,17 @@ export const requestFirebaseNotificationPermission = async () => {
   }
 
   try {
-    console.log('Requesting notification permission...');
-    const permission = await Notification.requestPermission();
+    if (Notification.permission === 'denied') {
+      console.warn('Notification permission is denied.');
+      return null;
+    }
+
+    let permission = Notification.permission;
+    if (permission !== 'granted') {
+      console.log('Requesting notification permission...');
+      permission = await Notification.requestPermission();
+    }
+
     if (permission === 'granted') {
       console.log('Notification permission granted.');
       

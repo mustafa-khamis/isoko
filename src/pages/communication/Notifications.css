@@ -246,3 +246,11 @@
   padding-block: 2.5rem;
   text-align: center;
 }
+
+.notifications-row-icon--love {
+  background: #fdf2f8;
+}
+
+.notifications-icon--love {
+  color: #e91e63;
+}

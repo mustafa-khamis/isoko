@@ -138,3 +138,64 @@
     justify-content: center;
   }
 }
+
+.seller-profile-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+.seller-profile-actions button{
+  color: black;
+  border: 1px solid rgb(151, 151, 151);
+  border-radius: 20px;
+}
+
+.seller-profile-action-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1.25rem;
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.seller-profile-action-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.seller-profile-action-button--follow {
+  background-color: var(--primary-color);
+  color: white;
+}
+
+.seller-profile-action-button--follow:hover:not(:disabled) {
+  background-color: var(--primary-dark);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+.seller-profile-action-button--unfollow {
+  background-color: var(--bg-hover);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+}
+
+.seller-profile-action-button--unfollow:hover:not(:disabled) {
+  background-color: var(--bg-secondary);
+}
+
+@media (max-width: 640px) {
+  .seller-profile-actions {
+    width: 100%;
+  }
+
+  .seller-profile-action-button {
+    flex: 1;
+  }
+}

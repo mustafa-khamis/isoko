@@ -2,7 +2,7 @@ import { Heart, MapPin, Zap } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useUI } from '../../context/UIContext';
-import { formatRWF, timeAgo } from '../../utils/formatters';
+import { formatRWF, timeAgo, resolveImageUrl } from '../../utils/formatters';
 import './ListingCard.css';
 
 export function PriceBadge({ price, priceType }) {
@@ -36,18 +36,18 @@ export default function ListingCard({ listing, compact = false, variant = 'grid'
   const handleClick = () => navigate(`/listing/${listing.id}`);
 
   // Need a fallback image if listing.images or cover_image_url is missing
-  const imageUrl = listing.cover_image_url 
-    || (listing.images && listing.images.length > 0 ? (listing.images[0].url || listing.images[0]) : null) 
+  const imageUrl = listing.cover_image_url
+    || (listing.images && listing.images.length > 0 ? (listing.images[0].url || listing.images[0]) : null)
     || '/images/default-listing.svg';
 
   if (variant === 'list') {
     return (
       <div onClick={handleClick} className="listing-card-list">
         <div className="listing-card-list-img-wrapper">
-          <img 
-            src={imageUrl} 
-            alt={listing.title} 
-            className="listing-img" 
+          <img
+            src={imageUrl}
+            alt={listing.title}
+            className="listing-img"
             loading="lazy"
             onError={(e) => { e.target.onerror = null; e.target.src = '/images/default-listing.svg'; }}
           />
@@ -107,13 +107,21 @@ export default function ListingCard({ listing, compact = false, variant = 'grid'
           <Heart size={14} fill={saved ? 'currentColor' : 'none'} />
         </button>
 
-        {listing.seller?.plan && listing.seller.plan !== 'free' && (
-          <div className="listing-badge-seller">
+        <div className="listing-badge-seller">
+          {resolveImageUrl(listing.seller_profile_image_path || listing.seller?.profile_image_path || listing.seller?.avatar_url) && (
+            <img
+              src={resolveImageUrl(listing.seller_profile_image_path || listing.seller?.profile_image_path || listing.seller?.avatar_url)}
+              alt="Seller"
+              className="listing-seller-avatar-small"
+              onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.style.display = 'none'; }}
+            />
+          )}
+          {listing.seller?.plan && listing.seller.plan !== 'free' && (
             <span>
               {listing.seller.plan === 'trader-premium' ? '★ Premium' : '★ Trader'}
             </span>
-          </div>
-        )}
+          )}
+        </div>
       </div>
 
       <div className="listing-card-info">

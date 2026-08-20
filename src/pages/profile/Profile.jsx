@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom';
+import { useState } from 'react';
 import {
   Bell,
   Calendar,
@@ -11,6 +12,7 @@ import {
   Megaphone,
   Package,
   Pencil,
+  Share2,
   Shield,
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
@@ -21,6 +23,29 @@ export default function Profile() {
   const { user, logout, isLoading } = useAuth();
   const { isMobile, showAuth } = useUI();
   const navigate = useNavigate();
+  const [copied, setCopied] = useState(false);
+
+  const handleShareProfile = async () => {
+    // Generate the public seller profile URL
+    const profileUrl = `${window.location.origin}/seller/${user.id}`;
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: `${user.name || user.full_name}'s Profile`, url: profileUrl });
+      } else {
+        await navigator.clipboard.writeText(profileUrl);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      }
+    } catch (err) {
+      try {
+        await navigator.clipboard.writeText(profileUrl);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      } catch {
+        // ignore
+      }
+    }
+  };
 
   if (isLoading) {
     return <div className="profile-page-loading" style={{ minHeight: '100vh' }}></div>;
@@ -56,9 +81,18 @@ export default function Profile() {
         <header className="profile-header">
           <div className="profile-header__inner">
             <h1 className="profile-header__title">Profile</h1>
-            <button onClick={() => navigate('/profile/edit')} className="profile-header__edit-button">
-              <Pencil size={14} />Edit
-            </button>
+            <div className="profile-header__actions">
+              <button
+                onClick={handleShareProfile}
+                className={`profile-header__share-button ${copied ? 'profile-header__share-button--copied' : ''}`}
+                title="Copy profile link"
+              >
+                {copied ? <Check size={14} /> : <Share2 size={14} />}
+              </button>
+              <button onClick={() => navigate('/profile/edit')} className="profile-header__edit-button">
+                <Pencil size={14} />Edit
+              </button>
+            </div>
           </div>
         </header>
       )}
@@ -80,9 +114,19 @@ export default function Profile() {
                 />
               </div>
               {!isMobile && (
-                <button onClick={() => navigate('/profile/edit')} className="profile-card__edit-button">
-                  <Pencil size={14} />Edit profile
-                </button>
+                <div className="profile-card__action-buttons">
+                  <button
+                    onClick={handleShareProfile}
+                    className={`profile-card__share-button ${copied ? 'profile-card__share-button--copied' : ''}`}
+                    title="Copy profile link"
+                  >
+                    {copied ? <Check size={14} /> : <Share2 size={14} />}
+                    {copied ? 'Copied!' : 'Share profile'}
+                  </button>
+                  <button onClick={() => navigate('/profile/edit')} className="profile-card__edit-button">
+                    <Pencil size={14} />Edit profile
+                  </button>
+                </div>
               )}
             </div>
 
