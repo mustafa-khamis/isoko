@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Heart, Share2, MapPin, Clock, ChevronLeft, ChevronRight, X, Eye, MessageCircle, Zap } from 'lucide-react';
+import { ArrowLeft, Heart, Share2, MapPin, Clock, ChevronLeft, ChevronRight, X, Eye, MessageCircle, Zap, User } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useUI } from '../../context/UIContext';
 import { listingsApi } from '../../services/listingsApi';
@@ -219,11 +219,31 @@ export default function ListingDetail() {
             <div className="ld-seller-avatar">
               {resolveImageUrl(listing.seller_profile_image_path) ? (
                 <img 
-                  src={resolveImageUrl(listing.seller_profile_image_path)} 
+                  src={resolveImageUrl(listing.seller_profile_image_path)}
                   alt={listing.seller_name || 'Seller'} 
-                  onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.style.display = 'none'; }}
+                  onError={(e) => { 
+                    e.currentTarget.onerror = null; 
+                    e.currentTarget.style.display = 'none'; 
+                    e.currentTarget.nextSibling.style.display = 'flex'; 
+                  }}
                 />
               ) : null}
+              {/* Fallback avatar shown if no image path or on error */}
+              <div 
+                className="ld-seller-avatar-fallback" 
+                style={{ 
+                  display: resolveImageUrl(listing.seller_profile_image_path) ? 'none' : 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  width: '100%',
+                  height: '100%',
+                  backgroundColor: '#f3f4f6',
+                  color: '#9ca3af',
+                  borderRadius: '50%'
+                }}
+              >
+                <User size={24} />
+              </div>
             </div>
             <div className="ld-seller-info">
               <div><span className="name">{listing.seller_name || 'Anonymous Seller'}</span></div>
