@@ -107,21 +107,7 @@ export default function ListingCard({ listing, compact = false, variant = 'grid'
           <Heart size={14} fill={saved ? 'currentColor' : 'none'} />
         </button>
 
-        <div className="listing-badge-seller">
-          {resolveImageUrl(listing.seller_profile_image_path || listing.seller?.profile_image_path || listing.seller?.avatar_url) && (
-            <img
-              src={resolveImageUrl(listing.seller_profile_image_path || listing.seller?.profile_image_path || listing.seller?.avatar_url)}
-              alt="Seller"
-              className="listing-seller-avatar-small"
-              onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.style.display = 'none'; }}
-            />
-          )}
-          {listing.seller?.plan && listing.seller.plan !== 'free' && (
-            <span>
-              {listing.seller.plan === 'trader-premium' ? '★ Premium' : '★ Trader'}
-            </span>
-          )}
-        </div>
+        
       </div>
 
       <div className="listing-card-info">
