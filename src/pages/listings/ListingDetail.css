@@ -219,8 +219,11 @@
 .ld-seller-avatar {
   width: 2.75rem;
   height: 2.75rem;
-  border-radius: var(--radius-xl);
+  border-radius: 50%;
   background-color: var(--color-ink-200);
+}
+.ld-seller-avatar img{
+  border-radius: 50%;
 }
 
 .ld-seller-info-row .name {
