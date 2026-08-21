@@ -125,14 +125,7 @@ export default function SellerProfile() {
   // URL param is string, currentUser.id might be a number from the API in some setups.
   const isSelf = Boolean(!authLoading && currentUser && String(currentUser.id) === String(id));
 
-  // Debugging log so the user can verify the exact runtime path variables
-  console.log('[DEBUG] SellerProfile runtime audit:', {
-    urlId: id,
-    currentUserId: currentUser?.id,
-    authLoading,
-    isSelf,
-    willRenderFollowButton: !isSelf
-  });
+
 
   return (
     <div className="seller-profile-container">
