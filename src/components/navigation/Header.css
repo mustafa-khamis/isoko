@@ -49,6 +49,16 @@
   margin-bottom: -5px;
   margin-left: -5px;
 }
+@media (max-width:650px) {
+  .header-logo-icon-bg{
+    width: 1.5rem;
+    height: 1.5rem;
+  }
+  .header-logo-text{
+    font-size: 1rem;
+    font-weight: 700;
+  }
+}
 
 .header-search-container {
   flex: 1;
@@ -296,5 +306,11 @@
 .header-mobile-notification-btn {
   flex-shrink: 0;
   margin-left: var(--spacing-2);
+}
+
+@media (max-width: 650px) {
+  .header-mobile-notification-btn{
+    margin-left: -5px;
+  }
 }
 
