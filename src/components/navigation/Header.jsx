@@ -31,7 +31,7 @@ export default function Header() {
   };
 
   const handleSell = () => {
-    if (!user) { showAuth('Sign in to start selling on Isoko.'); return; }
+    if (!user) { showAuth('Sign in to start selling on RwanMart.'); return; }
     navigate('/create-listing');
   };
 
@@ -58,9 +58,11 @@ export default function Header() {
       <div className="header-main">
         <button onClick={() => navigate('/')} className="header-logo-btn">
           <div className="header-logo-icon-bg">
-            <ShoppingBag size={16} strokeWidth={2.5} color="white" />
+            <img src="/logo.jpg" alt="RwanMart Logo" className="header-logo-icon" />
           </div>
-          <span className="header-logo-text">isoko</span>
+          <span className="header-logo-text">
+            <span style={{ color: '#1a4e28' }}>Rwan</span><span style={{ color: '#4caf50' }}>Mart</span>
+          </span>
         </button>
 
         <div className="header-search-container">

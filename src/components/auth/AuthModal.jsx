@@ -233,9 +233,11 @@ export default function AuthModal({ onClose, reason, initialMode = 'signin' }) {
         </button>
         <div className="auth-logo">
           <div className="auth-logo-icon">
-            <ShoppingBag size={12} strokeWidth={2.5} color="white" />
+            <img src="/logo.jpg" alt="RwanMart Logo" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
           </div>
-          <span>isoko</span>
+          <span className="auth-logo-text">
+            <span style={{ color: '#1a4e28' }}>Rwan</span><span style={{ color: '#4caf50' }}>Mart</span>
+          </span>
         </div>
         <div className="auth-header__spacer" aria-hidden="true" />
       </div>
@@ -340,7 +342,7 @@ function SignInForm({ email, password, showPass, errors, loading, onEmail, onPas
   return (
     <div className="auth-panel">
       <h1 className="auth-title">Welcome back</h1>
-      <p className="auth-subtitle auth-subtitle--left">Sign in to your Isoko account.</p>
+      <p className="auth-subtitle auth-subtitle--left">Sign in to your RwanMart account.</p>
       <GoogleSignInButton onSuccess={onClose} />
       <Divider />
       <div className="auth-form">

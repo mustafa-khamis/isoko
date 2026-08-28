@@ -109,7 +109,7 @@ export default function ListingDetail() {
       if (navigator.share) {
         await navigator.share({
           title: listing.title,
-          text: `Check out ${listing.title} on Isoko!`,
+          text: `Check out ${listing.title} on RwanMart!`,
           url: window.location.href,
         });
       } else {

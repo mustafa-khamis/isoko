@@ -260,7 +260,7 @@ export const normalizeApiError = (error) => {
     return {
       status: 0,
       code: 'SERVICE_UNAVAILABLE',
-      message: 'The Isoko API is unavailable. Check the backend and try again.',
+      message: 'The RwanMart API is unavailable. Check the backend and try again.',
       fieldErrors: [],
     };
   }

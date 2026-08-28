@@ -47,11 +47,11 @@ export const buildPlanFeatures = (plan) => {
 };
 
 const PLAN_DESCRIPTION_FALLBACKS = {
-  free: 'Perfect for casual sellers who want to start selling on Isoko with the essential tools to create listings and connect with buyers.',
+  free: 'Perfect for casual sellers who want to start selling on RwanMart with the essential tools to create listings and connect with buyers.',
   trader_plus: 'Built for active sellers who need more room to grow, manage more listings, and promote their products to reach more buyers.',
   'trader-plus': 'Built for active sellers who need more room to grow, manage more listings, and promote their products to reach more buyers.',
-  trader_premium: 'Designed for professional and high-volume sellers who want the highest selling limits, greater visibility, and the most powerful tools available on Isoko.',
-  'trader-premium': 'Designed for professional and high-volume sellers who want the highest selling limits, greater visibility, and the most powerful tools available on Isoko.',
+  trader_premium: 'Designed for professional and high-volume sellers who want the highest selling limits, greater visibility, and the most powerful tools available on RwanMart.',
+  'trader-premium': 'Designed for professional and high-volume sellers who want the highest selling limits, greater visibility, and the most powerful tools available on RwanMart.',
 };
 
 /**
