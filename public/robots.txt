@@ -9,4 +9,4 @@ Disallow: /favorites
 Disallow: /my-listings
 
 # Sitemap
-Sitemap: https://www.rwanmart.com/sitemap.xml
+Sitemap: https://rwanmart.com/sitemap.xml

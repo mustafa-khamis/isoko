@@ -63,22 +63,22 @@ export default function Home() {
           {
             "@context": "https://schema.org",
             "@type": "WebSite",
-            "@id": "https://www.rwanmart.com/#website",
+            "@id": "https://rwanmart.com/#website",
             "name": "RwanMart",
-            "url": "https://www.rwanmart.com/",
+            "url": "https://rwanmart.com/",
             "potentialAction": {
               "@type": "SearchAction",
-              "target": "https://www.rwanmart.com/browse?search={search_term_string}",
+              "target": "https://rwanmart.com/browse?search={search_term_string}",
               "query-input": "required name=search_term_string"
             }
           },
           {
             "@context": "https://schema.org",
             "@type": "Organization",
-            "@id": "https://www.rwanmart.com/#organization",
+            "@id": "https://rwanmart.com/#organization",
             "name": "RwanMart",
-            "url": "https://www.rwanmart.com/",
-            "logo": "https://www.rwanmart.com/favicon.png"
+            "url": "https://rwanmart.com/",
+            "logo": "https://rwanmart.com/favicon.png"
           }
         ]}
       />
@@ -86,8 +86,8 @@ export default function Home() {
       {!isMobile && (
         <div className="home-hero-section">
           <div className="home-hero-inner">
-            <h1 className="home-hero-title">Find anything in Rwanda.</h1>
-            <p className="home-hero-subtitle">Browse thousands of listings from verified sellers across the country.</p>
+            <h1 className="home-hero-title">RwanMart: Buy and Sell in Rwanda.</h1>
+            <p className="home-hero-subtitle">Rwanda's trusted online marketplace. Browse thousands of products from local sellers, or list your own items for sale today.</p>
             
             <div className="hero-search-wrapper">
               <div className="hero-search-input-group">
@@ -184,6 +184,15 @@ export default function Home() {
           <button onClick={() => navigate('/browse')} className="home-browse-more__button">
             Browse more listings
           </button>
+        </div>
+
+        <div className="home-seo-entity-block" style={{ padding: '2rem 1rem', background: 'var(--color-ink-50)', borderRadius: '12px', marginTop: '2rem', textAlign: 'left' }}>
+          <h2 style={{ fontSize: '1.25rem', marginBottom: '0.75rem', color: 'var(--color-ink-900)' }}>About RwanMart</h2>
+          <p style={{ color: 'var(--color-ink-600)', lineHeight: '1.6', fontSize: '0.9rem', margin: 0 }}>
+            <strong>RwanMart</strong> is a Rwanda-based online marketplace dedicated to connecting local buyers and sellers. 
+            Whether you are looking to buy mobile phones, laptops, electronics, cars, property, or home items, our platform makes it easy to find great deals from sellers across Rwanda. 
+            Anyone can create an account to list their products, reach buyers directly, and grow their local business. Experience safe, reliable, and fast online shopping in Rwanda with RwanMart.
+          </p>
         </div>
       </div>
     </div>

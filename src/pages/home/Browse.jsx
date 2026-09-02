@@ -96,7 +96,7 @@ export default function Browse() {
     "@type": "CollectionPage",
     "name": seoTitle,
     "description": seoDescription,
-    "url": `https://www.rwanmart.com${canonicalPath}`
+    "url": `https://rwanmart.com${canonicalPath}`
   };
 
   const seoComponent = (

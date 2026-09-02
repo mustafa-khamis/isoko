@@ -171,7 +171,7 @@ export default function ListingDetail() {
     "@context": "https://schema.org",
     "@type": "Product",
     "name": listing.title,
-    "image": images.length > 0 ? images : ['https://www.rwanmart.com/favicon.png'],
+    "image": images.length > 0 ? images : ['https://rwanmart.com/favicon.png'],
     "description": listing.description || `Buy ${listing.title} on RwanMart.`,
     "category": listing.category,
     "offers": {
@@ -179,7 +179,7 @@ export default function ListingDetail() {
       "priceCurrency": "RWF",
       "price": listing.price,
       "availability": "https://schema.org/InStock",
-      "url": `https://www.rwanmart.com/listing/${listing.id}`
+      "url": `https://rwanmart.com/listing/${listing.id}`
     }
   };
 

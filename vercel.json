@@ -5,10 +5,10 @@
       "has": [
         {
           "type": "host",
-          "value": "^rwanmart\\.com$"
+          "value": "^www\\.rwanmart\\.com$"
         }
       ],
-      "destination": "https://www.rwanmart.com/$1",
+      "destination": "https://rwanmart.com/$1",
       "permanent": true
     }
   ],
@@ -16,6 +16,22 @@
     {
       "source": "/sitemap.xml",
       "destination": "/api/sitemap"
+    },
+    {
+      "source": "/listing/:id",
+      "destination": "/api/render"
+    },
+    {
+      "source": "/browse",
+      "destination": "/api/render"
+    },
+    {
+      "source": "/seller/:id",
+      "destination": "/api/render"
+    },
+    {
+      "source": "/",
+      "destination": "/api/render"
     },
     {
       "source": "/(.*)",

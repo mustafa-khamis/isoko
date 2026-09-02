@@ -136,7 +136,7 @@ export default function SellerProfile() {
     "mainEntity": {
       "@type": "Person",
       "name": profile.full_name || "Anonymous Seller",
-      "image": sellerImage || "https://www.rwanmart.com/favicon.png",
+      "image": sellerImage || "https://rwanmart.com/favicon.png",
       "interactionStatistic": {
         "@type": "InteractionCounter",
         "interactionType": "https://schema.org/FollowAction",
@@ -151,7 +151,7 @@ export default function SellerProfile() {
         title={seoTitle}
         description={seoDescription}
         canonicalUrl={`/seller/${id}`}
-        ogImage={sellerImage || 'https://www.rwanmart.com/favicon.png'}
+        ogImage={sellerImage || 'https://rwanmart.com/favicon.png'}
         schemaList={[profileSchema]}
       />
       <div className="seller-profile-header-actions">

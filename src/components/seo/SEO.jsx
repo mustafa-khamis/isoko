@@ -6,7 +6,7 @@ const SEO = ({
   description,
   canonicalUrl,
   ogType = 'website',
-  ogImage = 'https://www.rwanmart.com/favicon.png',
+  ogImage = 'https://rwanmart.com/favicon.png',
   schemaList = [],
 }) => {
   // If title exactly equals the homepage title, we don't append suffix
@@ -18,8 +18,8 @@ const SEO = ({
   
   // Ensure the canonical URL always uses www
   const finalCanonicalUrl = canonicalUrl 
-    ? (canonicalUrl.startsWith('http') ? canonicalUrl.replace(/^https?:\/\/(?:www\.)?rwanmart\.com/, 'https://www.rwanmart.com') : `https://www.rwanmart.com${canonicalUrl}`)
-    : 'https://www.rwanmart.com/';
+    ? (canonicalUrl.startsWith('http') ? canonicalUrl.replace(/^https?:\/\/(?:www\.)?rwanmart\.com/, 'https://rwanmart.com') : `https://rwanmart.com${canonicalUrl}`)
+    : 'https://rwanmart.com/';
 
   return (
     <Helmet>

@@ -1,5 +1,5 @@
 export default async function handler(req, res) {
-  const baseUrl = 'https://www.rwanmart.com';
+  const baseUrl = 'https://rwanmart.com';
   let urls = [
     { loc: `${baseUrl}/`, priority: '1.0' },
     { loc: `${baseUrl}/browse`, priority: '0.9' },
