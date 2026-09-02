@@ -6,17 +6,17 @@ export default async function handler(req, res) {
   const searchParams = new URL(req.url, 'http://localhost').searchParams;
   const apiBase = process.env.VITE_API_BASE_URL || process.env.API_BASE_URL || 'http://localhost:5000/api/v1';
   
-  // Try to find the index.html file
-  let indexPath = path.join(process.cwd(), 'index.html');
-  if (!fs.existsSync(indexPath)) {
-    indexPath = path.join(process.cwd(), 'dist', 'index.html');
-  }
-  
+  const protocol = req.headers['x-forwarded-proto'] || 'https';
+  const host = req.headers['x-forwarded-host'] || req.headers.host || 'rwanmart.com';
+  const baseUrl = `${protocol}://${host}`;
+
   let html = '';
   try {
-    html = fs.readFileSync(indexPath, 'utf8');
+    const indexRes = await fetch(`${baseUrl}/index.html`);
+    if (!indexRes.ok) throw new Error(`HTTP error ${indexRes.status}`);
+    html = await indexRes.text();
   } catch (err) {
-    console.error('Failed to read index.html', err);
+    console.error('Failed to fetch index.html from edge', err);
     return res.status(500).send('Internal Server Error: Missing SPA shell');
   }
 
