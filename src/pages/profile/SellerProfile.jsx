@@ -6,6 +6,7 @@ import { useUI } from '../../context/UIContext';
 import { usersApi } from '../../services/usersApi';
 import ListingCard from '../../components/listings/ListingCard';
 import { resolveImageUrl } from '../../utils/formatters';
+import SEO from '../../components/seo/SEO';
 import './SellerProfile.css';
 
 export default function SellerProfile() {
@@ -125,10 +126,34 @@ export default function SellerProfile() {
   // URL param is string, currentUser.id might be a number from the API in some setups.
   const isSelf = Boolean(!authLoading && currentUser && String(currentUser.id) === String(id));
 
+  const seoTitle = profile.full_name ? `Listings by ${profile.full_name}` : 'Seller Profile';
+  const seoDescription = `View products and listings by ${profile.full_name || 'Anonymous Seller'} on RwanMart.`;
+  const sellerImage = resolveImageUrl(profile.profile_image_path || profile.avatar_url);
 
+  const profileSchema = {
+    "@context": "https://schema.org",
+    "@type": "ProfilePage",
+    "mainEntity": {
+      "@type": "Person",
+      "name": profile.full_name || "Anonymous Seller",
+      "image": sellerImage || "https://www.rwanmart.com/favicon.png",
+      "interactionStatistic": {
+        "@type": "InteractionCounter",
+        "interactionType": "https://schema.org/FollowAction",
+        "userInteractionCount": followerCount
+      }
+    }
+  };
 
   return (
     <div className="seller-profile-container">
+      <SEO 
+        title={seoTitle}
+        description={seoDescription}
+        canonicalUrl={`/seller/${id}`}
+        ogImage={sellerImage || 'https://www.rwanmart.com/favicon.png'}
+        schemaList={[profileSchema]}
+      />
       <div className="seller-profile-header-actions">
         <button onClick={() => navigate(-1)} className="seller-profile-back">
           <ArrowLeft size={20} /> Back

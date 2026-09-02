@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import ListingCard, { SkeletonCard } from '../../components/listings/ListingCard';
 import { useUI } from '../../context/UIContext';
 import { listingsApi } from '../../services/listingsApi';
+import SEO from '../../components/seo/SEO';
 import './Home.css';
 
 const POPULAR_SEARCHES = ['iPhone', 'Toyota', 'Laptop', 'Sofa', 'Kigali apartment'];
@@ -54,6 +55,33 @@ export default function Home() {
 
   return (
     <div className="home-container">
+      <SEO 
+        title="RwanMart | Buy & Sell Online in Rwanda"
+        description="RwanMart is an online marketplace in Rwanda where people can buy and sell products and discover local sellers."
+        canonicalUrl="/"
+        schemaList={[
+          {
+            "@context": "https://schema.org",
+            "@type": "WebSite",
+            "@id": "https://www.rwanmart.com/#website",
+            "name": "RwanMart",
+            "url": "https://www.rwanmart.com/",
+            "potentialAction": {
+              "@type": "SearchAction",
+              "target": "https://www.rwanmart.com/browse?search={search_term_string}",
+              "query-input": "required name=search_term_string"
+            }
+          },
+          {
+            "@context": "https://schema.org",
+            "@type": "Organization",
+            "@id": "https://www.rwanmart.com/#organization",
+            "name": "RwanMart",
+            "url": "https://www.rwanmart.com/",
+            "logo": "https://www.rwanmart.com/favicon.png"
+          }
+        ]}
+      />
       {/* Desktop Hero Search Section */}
       {!isMobile && (
         <div className="home-hero-section">

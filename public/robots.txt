@@ -1,0 +1,12 @@
+User-agent: *
+Allow: /
+
+# Private areas to block
+Disallow: /admin
+Disallow: /messages
+Disallow: /profile/edit
+Disallow: /favorites
+Disallow: /my-listings
+
+# Sitemap
+Sitemap: https://www.rwanmart.com/sitemap.xml

@@ -20,6 +20,7 @@ import ProfileEdit from './pages/profile/ProfileEdit';
 import TraderPlans from './pages/profile/TraderPlans';
 import SponsoredAd from './pages/profile/SponsoredAd';
 import SellerProfile from './pages/profile/SellerProfile';
+import NotFound from './pages/NotFound';
 
 // We will import pages here later
 
@@ -51,7 +52,7 @@ const AppShell = () => {
           <Route path="/sponsored-ad" element={<SponsoredAd />} />
           <Route path="/seller/:id" element={<SellerProfile />} />
           {/* Add more routes here */}
-          <Route path="*" element={<Navigate to="/" replace />} />
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </main>
 

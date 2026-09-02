@@ -1,5 +1,22 @@
 {
+  "redirects": [
+    {
+      "source": "/(.*)",
+      "has": [
+        {
+          "type": "host",
+          "value": "^rwanmart\\.com$"
+        }
+      ],
+      "destination": "https://www.rwanmart.com/$1",
+      "permanent": true
+    }
+  ],
   "rewrites": [
+    {
+      "source": "/sitemap.xml",
+      "destination": "/api/sitemap"
+    },
     {
       "source": "/(.*)",
       "destination": "/index.html"

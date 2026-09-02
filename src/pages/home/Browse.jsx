@@ -6,6 +6,8 @@ import { useUI } from '../../context/UIContext';
 import { listingsApi } from '../../services/listingsApi';
 import { categoriesApi } from '../../services/categoriesApi';
 import { locationsApi } from '../../services/locationsApi';
+import SEO from '../../components/seo/SEO';
+import { Helmet } from 'react-helmet-async';
 import './Browse.css';
 
 export default function Browse() {
@@ -82,9 +84,41 @@ export default function Browse() {
     </div>
   );
 
+  const isIndexable = !searchQuery && !priceMin && !priceMax && (sortBy === 'newest');
+  const seoTitle = cat 
+    ? (province ? `${cat.label} for Sale in ${province}` : `${cat.label} for Sale in Rwanda`)
+    : (province ? `Buy & Sell in ${province}` : 'Browse Listings in Rwanda');
+  const seoDescription = `Discover ${cat ? cat.label.toLowerCase() : 'great deals and products'} ${province ? `in ${province}` : 'across Rwanda'} on RwanMart.`;
+  const canonicalPath = cat ? `/browse?category=${cat.id}` : '/browse';
+
+  const categorySchema = {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    "name": seoTitle,
+    "description": seoDescription,
+    "url": `https://www.rwanmart.com${canonicalPath}`
+  };
+
+  const seoComponent = (
+    <>
+      <SEO 
+        title={seoTitle}
+        description={seoDescription}
+        canonicalUrl={canonicalPath}
+        schemaList={[categorySchema]}
+      />
+      {!isIndexable && (
+        <Helmet>
+          <meta name="robots" content="noindex, follow" />
+        </Helmet>
+      )}
+    </>
+  );
+
   if (isMobile) {
     return (
       <div className="browse-mobile-container">
+        {seoComponent}
         {/* Mobile header */}
         <div className="browse-mobile-header">
           <div className="browse-mobile-top">
@@ -158,6 +192,7 @@ export default function Browse() {
   // Desktop
   return (
     <div className="browse-desktop-container">
+      {seoComponent}
       <div className="browse-desktop-inner">
         {/* Search bar */}
         <div className="browse-desktop-top">

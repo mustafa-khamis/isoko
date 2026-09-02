@@ -6,6 +6,8 @@ import { useUI } from '../../context/UIContext';
 import { listingsApi } from '../../services/listingsApi';
 import ListingCard, { PriceBadge } from '../../components/listings/ListingCard';
 import { timeAgo, resolveImageUrl } from '../../utils/formatters';
+import SEO from '../../components/seo/SEO';
+import { Helmet } from 'react-helmet-async';
 import './ListingDetail.css';
 
 function WhatsAppIcon() {
@@ -122,7 +124,17 @@ export default function ListingDetail() {
   };
 
   if (loading) return <div className="listing-detail-state">Loading...</div>;
-  if (error || !listing) return <div className="listing-detail-state listing-detail-state--error">{error || 'Listing not found'}</div>;
+  if (error || !listing) {
+    return (
+      <div className="listing-detail-state listing-detail-state--error">
+        <Helmet>
+          <meta name="robots" content="noindex, follow" />
+          <title>Listing Not Found | RwanMart</title>
+        </Helmet>
+        {error || 'Listing not found'}
+      </div>
+    );
+  }
 
   const images = listing.images || [];
   const displayImage = images.length > 0 ? images[currentImg] : '/images/default-listing.svg';
@@ -155,9 +167,32 @@ export default function ListingDetail() {
     );
   };
 
+  const productSchema = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    "name": listing.title,
+    "image": images.length > 0 ? images : ['https://www.rwanmart.com/favicon.png'],
+    "description": listing.description || `Buy ${listing.title} on RwanMart.`,
+    "category": listing.category,
+    "offers": {
+      "@type": "Offer",
+      "priceCurrency": "RWF",
+      "price": listing.price,
+      "availability": "https://schema.org/InStock",
+      "url": `https://www.rwanmart.com/listing/${listing.id}`
+    }
+  };
+
   if (isMobile) {
     return (
       <div className="listing-detail-mobile">
+        <SEO 
+          title={listing.title}
+          description={listing.description}
+          canonicalUrl={`/listing/${listing.id}`}
+          ogImage={displayImage}
+          schemaList={[productSchema]}
+        />
         <div className="listing-detail-header-mobile">
           <button onClick={() => navigate(-1)} className="ld-header-btn">
             <ArrowLeft size={20} />
@@ -300,6 +335,13 @@ export default function ListingDetail() {
   // Desktop
   return (
     <div className="ld-desktop-container">
+      <SEO 
+        title={listing.title}
+        description={listing.description}
+        canonicalUrl={`/listing/${listing.id}`}
+        ogImage={displayImage}
+        schemaList={[productSchema]}
+      />
       <div className="ld-desktop-inner">
         <button onClick={() => navigate(-1)} className="ld-back-link">
           <ArrowLeft size={16} /> Back to listings
