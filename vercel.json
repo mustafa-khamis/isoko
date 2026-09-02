@@ -1,15 +1,9 @@
 {
-  "redirects": [
+  "source": "/(.*)",
+  "has": [
     {
-      "source": "/(.*)",
-      "has": [
-        {
-          "type": "host",
-          "value": "^www\\.rwanmart\\.com$"
-        }
-      ],
-      "destination": "https://rwanmart.com/$1",
-      "permanent": true
+      "type": "host",
+      "value": "^www\\.rwanmart\\.com$"
     }
   ],
   "rewrites": [
