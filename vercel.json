@@ -1,11 +1,4 @@
 {
-  "source": "/(.*)",
-  "has": [
-    {
-      "type": "host",
-      "value": "^www\\.rwanmart\\.com$"
-    }
-  ],
   "rewrites": [
     {
       "source": "/sitemap.xml",
