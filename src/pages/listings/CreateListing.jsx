@@ -57,6 +57,10 @@ export default function CreateListing() {
     return false;
   };
   const validateStep = (stepToValidate = step) => {
+    if (stepToValidate === 1 && draft.images.length === 0) {
+      return setStepError('Add at least one image before continuing.');
+    }
+
     if (stepToValidate === 2) {
       const title = draft.title.trim();
       const description = draft.description.trim();
@@ -136,7 +140,7 @@ export default function CreateListing() {
 
   const handleSubmit = async () => {
     if (submitting) return;
-    for (let stepToValidate = 2; stepToValidate <= 3; stepToValidate += 1) {
+    for (let stepToValidate = 1; stepToValidate <= 3; stepToValidate += 1) {
       if (!validateStep(stepToValidate)) {
         setStep(stepToValidate);
         return;
