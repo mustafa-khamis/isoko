@@ -6,6 +6,8 @@ import { useUI } from '../../context/UIContext';
 import { categoriesApi } from '../../services/categoriesApi';
 import './Header.css';
 
+const POPULAR_SEARCHES = ['iPhone', 'Toyota', 'Laptop', 'Sofa', 'Kigali apartment'];
+
 export default function Header() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -26,9 +28,23 @@ export default function Header() {
     setAvatarFailed(false);
   }, [avatarUrl]);
 
+  useEffect(() => {
+    setSearchQuery(new URLSearchParams(location.search).get('search') || '');
+  }, [location.search]);
+
   const handleSearch = () => {
-    if (searchQuery.trim()) navigate(`/browse?search=${searchQuery.trim()}`);
+    const query = searchQuery.trim();
+    if (query) navigate(`/browse?search=${encodeURIComponent(query)}`);
+    else navigate('/browse');
+    setSearchFocused(false);
   };
+
+  const searchSuggestions = [
+    ...POPULAR_SEARCHES,
+    ...categories.map(category => category.name || category.label).filter(Boolean)
+  ].filter((suggestion, index, all) => all.indexOf(suggestion) === index)
+    .filter(suggestion => !searchQuery.trim() || suggestion.toLowerCase().includes(searchQuery.trim().toLowerCase()))
+    .slice(0, 6);
 
   const handleSell = () => {
     if (!user) { showAuth('Sign in to start selling on RwanMart.'); return; }
@@ -74,7 +90,7 @@ export default function Header() {
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
               onFocus={() => setSearchFocused(true)}
-              onBlur={() => setSearchFocused(false)}
+              onBlur={() => window.setTimeout(() => setSearchFocused(false), 120)}
               onKeyDown={e => e.key === 'Enter' && handleSearch()}
               className="header-search-input"
             />
@@ -88,6 +104,28 @@ export default function Header() {
               </button>
             )}
           </div>
+          {searchFocused && (
+            <div className="header-search-suggestions" role="listbox">
+              <div className="header-search-suggestions-heading">{searchQuery ? 'Suggested searches' : 'Popular on RwanMart'}</div>
+              {searchSuggestions.length > 0 ? searchSuggestions.map(suggestion => (
+                <button
+                  key={suggestion}
+                  type="button"
+                  className="header-search-suggestion"
+                  onMouseDown={() => {
+                    setSearchQuery(suggestion);
+                    navigate(`/browse?search=${encodeURIComponent(suggestion)}`);
+                    setSearchFocused(false);
+                  }}
+                >
+                  <Search size={15} />
+                  <span>{suggestion}</span>
+                </button>
+              )) : (
+                <div className="header-search-no-results">Press Enter to search for “{searchQuery}”</div>
+              )}
+            </div>
+          )}
         </div>
 
         {isMobile && (

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Search, MapPin, ChevronDown, ArrowRight, TrendingUp } from 'lucide-react';
+import { ArrowRight, TrendingUp, ShieldCheck, Users, BadgeCheck } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import ListingCard, { SkeletonCard } from '../../components/listings/ListingCard';
 import { useUI } from '../../context/UIContext';
@@ -7,13 +7,9 @@ import { listingsApi } from '../../services/listingsApi';
 import SEO from '../../components/seo/SEO';
 import './Home.css';
 
-const POPULAR_SEARCHES = ['iPhone', 'Toyota', 'Laptop', 'Sofa', 'Kigali apartment'];
-
-
 export default function Home() {
   const navigate = useNavigate();
   const { isMobile } = useUI();
-  const [searchQuery, setSearchQuery] = useState('');
   const [listings, setListings] = useState([]);
   const [sponsoredAds, setSponsoredAds] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -41,11 +37,6 @@ export default function Home() {
     };
     fetchListings();
   }, []);
-
-  const handleSearch = () => {
-    if (searchQuery.trim()) navigate(`/browse?search=${encodeURIComponent(searchQuery.trim())}`);
-    else navigate('/browse');
-  };
 
   const renderSkeletons = () => (
     <div className="listings-grid">
@@ -82,46 +73,32 @@ export default function Home() {
           }
         ]}
       />
-      {/* Desktop Hero Search Section */}
-      {!isMobile && (
-        <div className="home-hero-section">
-          <div className="home-hero-inner">
-            <h1 className="home-hero-title">RwanMart: Buy and Sell in Rwanda.</h1>
-            <p className="home-hero-subtitle">Rwanda's trusted online marketplace. Browse thousands of products from local sellers, or list your own items for sale today.</p>
-            
-            <div className="hero-search-wrapper">
-              <div className="hero-search-input-group">
-                <Search size={16} color="var(--color-ink-400)" />
-                <input
-                  type="text"
-                  placeholder="What are you looking for?"
-                  value={searchQuery}
-                  onChange={e => setSearchQuery(e.target.value)}
-                  onKeyDown={e => e.key === 'Enter' && handleSearch()}
-                  className="hero-search-input"
-                />
-              </div>
-              <div className="hero-location-divider">
-                <button className="hero-location-btn">
-                  <MapPin size={16} color="var(--color-brand-500)" />
-                  All of Rwanda
-                  <ChevronDown size={14} />
-                </button>
-              </div>
-              <button onClick={handleSearch} className="hero-search-btn">Search</button>
-            </div>
-
-            <div className="hero-popular">
-              <span className="hero-popular-label"><TrendingUp size={12} /> Popular:</span>
-              {POPULAR_SEARCHES.map(term => (
-                <button key={term} onClick={() => navigate(`/browse?search=${term}`)} className="hero-popular-tag">
-                  {term}
-                </button>
-              ))}
+      <div className="home-hero-section">
+        <div className="home-hero-inner">
+          <div className="home-hero-copy">
+            <span className="home-hero-eyebrow">RWANDA'S LOCAL MARKETPLACE</span>
+            <h1 className="home-hero-title">Find what matters.<br /><em>Sell what moves.</em></h1>
+            <p className="home-hero-subtitle">A better way to discover trusted local sellers, compare real listings, and trade with confidence across Rwanda.</p>
+            <div className="home-hero-actions">
+              <button onClick={() => navigate('/browse')} className="home-hero-primary">Explore listings <ArrowRight size={16} /></button>
+              <button onClick={() => navigate('/create-listing')} className="home-hero-secondary">Start selling</button>
             </div>
           </div>
+          {!isMobile && (
+            <div className="home-hero-panel">
+              <div className="home-hero-panel-mark"><ShieldCheck size={18} /></div>
+              <span className="home-hero-panel-label">Trade closer to home</span>
+              <strong>Local finds.<br />Real connections.</strong>
+              <div className="home-hero-panel-footer"><BadgeCheck size={15} /> Built for Rwanda</div>
+            </div>
+          )}
         </div>
-      )}
+        <div className="home-trust-strip">
+          <span><ShieldCheck size={16} /> Safer local trading</span>
+          <span><Users size={16} /> Sellers across Rwanda</span>
+          <span><BadgeCheck size={16} /> Listings worth your time</span>
+        </div>
+      </div>
 
       {/* Main Content */}
       <div className="home-section">

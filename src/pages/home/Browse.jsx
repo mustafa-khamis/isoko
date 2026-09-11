@@ -126,15 +126,8 @@ export default function Browse() {
             <button onClick={() => navigate('/')} className="browse-back-btn">
               <ArrowLeft size={20} />
             </button>
-            <div className="browse-search-bar">
-              <Search size={16} color="var(--color-ink-400)" />
-              <input
-                type="text"
-                placeholder="Search listings…"
-                value={searchQuery}
-                onChange={e => setSearchQuery(e.target.value)}
-              />
-              {searchQuery && <button onClick={() => setSearchQuery('')}><X size={16} color="var(--color-ink-400)" /></button>}
+            <div className="browse-query-summary">
+              <span>{searchQuery ? `Results for “${searchQuery}”` : 'All listings'}</span>
             </div>
             <button onClick={() => setShowFilters(true)} className="browse-filter-btn">
               <SlidersHorizontal size={16} />
@@ -197,15 +190,10 @@ export default function Browse() {
       <div className="browse-desktop-inner">
         {/* Search bar */}
         <div className="browse-desktop-top">
-          <div className="browse-search-bar">
-            <Search size={16} color="var(--color-ink-400)" />
-            <input
-              type="text"
-              placeholder="Search listings…"
-              value={searchQuery}
-              onChange={e => setSearchQuery(e.target.value)}
-            />
-            {searchQuery && <button onClick={() => setSearchQuery('')}><X size={16} color="var(--color-ink-400)" /></button>}
+          <div className="browse-query-summary browse-query-summary--desktop">
+            <Search size={16} color="var(--color-brand-600)" />
+            <span>{searchQuery ? `Results for “${searchQuery}”` : 'Browse all listings'}</span>
+            <small>Search from the header</small>
           </div>
           <SortSelect value={sortBy} onChange={setSortBy} />
         </div>
