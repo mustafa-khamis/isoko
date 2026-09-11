@@ -94,16 +94,16 @@ export default function Home() {
             </p>
             <div className="home-hero-actions">
               <button
-                onClick={() => navigate("/browse")}
+                onClick={() => navigate("/create-listing")}
                 className="home-hero-primary"
               >
-                Browse listings <ArrowRight size={16} />
+                <Tag size={15} /> Start selling
               </button>
               <button
-                onClick={() => navigate("/create-listing")}
+                onClick={() => navigate("/browse")}
                 className="home-hero-secondary"
               >
-                <Tag size={15} /> Start selling
+                Browse products <ArrowRight size={16} />
               </button>
             </div>
           </div>
