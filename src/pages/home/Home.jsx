@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { ArrowRight, TrendingUp, ShieldCheck, Users, BadgeCheck } from 'lucide-react';
+import { ArrowRight, TrendingUp, Tag, ShoppingBag } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import ListingCard, { SkeletonCard } from '../../components/listings/ListingCard';
 import { useUI } from '../../context/UIContext';
@@ -76,27 +76,29 @@ export default function Home() {
       <div className="home-hero-section">
         <div className="home-hero-inner">
           <div className="home-hero-copy">
-            <span className="home-hero-eyebrow">RWANDA'S LOCAL MARKETPLACE</span>
-            <h1 className="home-hero-title">Find what matters.<br /><em>Sell what moves.</em></h1>
-            <p className="home-hero-subtitle">A better way to discover trusted local sellers, compare real listings, and trade with confidence across Rwanda.</p>
+            <span className="home-hero-eyebrow">WELCOME TO RWANMART</span>
+            <h1 className="home-hero-title">Buy and sell<br /><em>close to home.</em></h1>
+            <p className="home-hero-subtitle">Browse products from sellers across Rwanda, or put your own item in front of local buyers.</p>
             <div className="home-hero-actions">
-              <button onClick={() => navigate('/browse')} className="home-hero-primary">Explore listings <ArrowRight size={16} /></button>
-              <button onClick={() => navigate('/create-listing')} className="home-hero-secondary">Start selling</button>
+              <button onClick={() => navigate('/browse')} className="home-hero-primary">Browse listings <ArrowRight size={16} /></button>
+              <button onClick={() => navigate('/create-listing')} className="home-hero-secondary"><Tag size={15} /> Post an item</button>
             </div>
           </div>
           {!isMobile && (
-            <div className="home-hero-panel">
-              <div className="home-hero-panel-mark"><ShieldCheck size={18} /></div>
-              <span className="home-hero-panel-label">Trade closer to home</span>
-              <strong>Local finds.<br />Real connections.</strong>
-              <div className="home-hero-panel-footer"><BadgeCheck size={15} /> Built for Rwanda</div>
+            <div className="home-hero-panel" aria-label="Marketplace shortcuts">
+              <span className="home-hero-panel-label">What are you here to do?</span>
+              <button onClick={() => navigate('/browse')} className="home-hero-panel-link">
+                <ShoppingBag size={17} />
+                <span><strong>Find something</strong><small>Browse the latest listings</small></span>
+                <ArrowRight size={15} />
+              </button>
+              <button onClick={() => navigate('/create-listing')} className="home-hero-panel-link">
+                <Tag size={17} />
+                <span><strong>Sell something</strong><small>Reach buyers in Rwanda</small></span>
+                <ArrowRight size={15} />
+              </button>
             </div>
           )}
-        </div>
-        <div className="home-trust-strip">
-          <span><ShieldCheck size={16} /> Safer local trading</span>
-          <span><Users size={16} /> Sellers across Rwanda</span>
-          <span><BadgeCheck size={16} /> Listings worth your time</span>
         </div>
       </div>
 
