@@ -32,6 +32,15 @@ export default function Header() {
     setSearchQuery(new URLSearchParams(location.search).get('search') || '');
   }, [location.search]);
 
+  const updateBrowseSearch = (value) => {
+    if (location.pathname !== '/browse') return;
+
+    const params = new URLSearchParams(location.search);
+    if (value) params.set('search', value);
+    else params.delete('search');
+    navigate(`/browse${params.toString() ? `?${params.toString()}` : ''}`, { replace: true });
+  };
+
   const handleSearch = () => {
     const query = searchQuery.trim();
     if (query) navigate(`/browse?search=${encodeURIComponent(query)}`);
@@ -88,7 +97,11 @@ export default function Header() {
               type="text"
               placeholder="Search listings…"
               value={searchQuery}
-              onChange={e => setSearchQuery(e.target.value)}
+              onChange={e => {
+                const value = e.target.value;
+                setSearchQuery(value);
+                updateBrowseSearch(value);
+              }}
               onFocus={() => setSearchFocused(true)}
               onBlur={() => window.setTimeout(() => setSearchFocused(false), 120)}
               onKeyDown={e => e.key === 'Enter' && handleSearch()}
@@ -96,7 +109,10 @@ export default function Header() {
             />
             {searchQuery && (
               <button
-                onClick={() => setSearchQuery('')}
+                onClick={() => {
+                  setSearchQuery('');
+                  updateBrowseSearch('');
+                }}
                 className="header-search-clear-button"
                 aria-label="Clear search"
               >

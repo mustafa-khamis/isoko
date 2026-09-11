@@ -15,10 +15,9 @@ export default function Browse() {
   const navigate = useNavigate();
   const { isMobile } = useUI();
   
-  const initialSearch = searchParams.get('search') || '';
   const initialCategory = searchParams.get('category') || '';
 
-  const [searchQuery, setSearchQuery] = useState(initialSearch);
+  const searchQuery = searchParams.get('search') || '';
   const [activeCategory, setActiveCategory] = useState(initialCategory);
   const [sortBy, setSortBy] = useState('newest');
   const [priceMin, setPriceMin] = useState('');
@@ -66,13 +65,16 @@ export default function Browse() {
     return () => clearTimeout(timeout);
   }, [searchQuery, activeCategory, priceMin, priceMax, province, sortBy]);
 
-  // Sync state to URL params if needed, or just let API call handle it
+  // Keep category navigation in the URL without overwriting the current search.
   useEffect(() => {
-    const params = {};
-    if (searchQuery) params.search = searchQuery;
-    if (activeCategory) params.category = activeCategory;
+    const currentCategory = searchParams.get('category') || '';
+    if (currentCategory === activeCategory) return;
+
+    const params = new URLSearchParams(searchParams);
+    if (activeCategory) params.set('category', activeCategory);
+    else params.delete('category');
     setSearchParams(params, { replace: true });
-  }, [searchQuery, activeCategory, setSearchParams]);
+  }, [activeCategory, searchParams, setSearchParams]);
 
   const cat = categories.find(c => c.id === activeCategory);
   const categoryLabel = cat?.name || cat?.label || '';
