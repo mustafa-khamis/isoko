@@ -75,6 +75,7 @@ export default function Browse() {
   }, [searchQuery, activeCategory, setSearchParams]);
 
   const cat = categories.find(c => c.id === activeCategory);
+  const categoryLabel = cat?.name || cat?.label || '';
   const activeFiltersCount = [activeCategory, province, priceMin, priceMax].filter(Boolean).length;
   const clearFilters = () => { setActiveCategory(''); setProvince(''); setPriceMin(''); setPriceMax(''); };
 
@@ -86,9 +87,9 @@ export default function Browse() {
 
   const isIndexable = !searchQuery && !priceMin && !priceMax && (sortBy === 'newest');
   const seoTitle = cat 
-    ? (province ? `${cat.label} for Sale in ${province}` : `${cat.label} for Sale in Rwanda`)
+    ? (province ? `${categoryLabel} for Sale in ${province}` : `${categoryLabel} for Sale in Rwanda`)
     : (province ? `Buy & Sell in ${province}` : 'Browse Listings in Rwanda');
-  const seoDescription = `Discover ${cat ? cat.label.toLowerCase() : 'great deals and products'} ${province ? `in ${province}` : 'across Rwanda'} on RwanMart.`;
+  const seoDescription = `Discover ${categoryLabel ? categoryLabel.toLowerCase() : 'great deals and products'} ${province ? `in ${province}` : 'across Rwanda'} on RwanMart.`;
   const canonicalPath = cat ? `/browse?category=${cat.id}` : '/browse';
 
   const categorySchema = {
@@ -143,7 +144,7 @@ export default function Browse() {
 
           {cat && (
             <div className="browse-active-cat">
-              <span>{cat.label}</span>
+              <span>{categoryLabel || 'Category'}</span>
               <button onClick={() => setActiveCategory('')}><X size={12} /></button>
             </div>
           )}
@@ -211,7 +212,7 @@ export default function Browse() {
 
         {/* Heading */}
         <div className="browse-desktop-heading">
-          <h1>{cat ? cat.label : searchQuery ? `Results for "${searchQuery}"` : 'All Listings'}</h1>
+          <h1>{cat ? (categoryLabel || 'Category') : searchQuery ? `Results for "${searchQuery}"` : 'All Listings'}</h1>
           <span>{listings.length} listings</span>
         </div>
 
