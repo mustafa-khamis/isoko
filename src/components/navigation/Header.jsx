@@ -91,10 +91,15 @@ export default function Header() {
         </div>
 
         {isMobile && (
-          <button onClick={handleNotifications} className="header-icon-btn header-mobile-notification-btn">
-            <Bell size={20} />
-            {unreadNotificationCount > 0 && <span className="header-notification-dot" />}
-          </button>
+          <div className="header-mobile-actions">
+            <button onClick={handleFavorites} className="header-icon-btn" aria-label="Open saved listings">
+              <Heart size={20} />
+            </button>
+            <button onClick={handleNotifications} className="header-icon-btn header-mobile-notification-btn" aria-label="Open notifications">
+              <Bell size={20} />
+              {unreadNotificationCount > 0 && <span className="header-notification-dot" />}
+            </button>
+          </div>
         )}
 
         <button

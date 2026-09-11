@@ -64,6 +64,7 @@
   flex: 1;
   max-width: 36rem;
   position: relative;
+  min-width: 0;
 }
 
 .header-search-box {
@@ -85,6 +86,7 @@
 
 .header-search-input {
   flex: 1;
+  min-width: 0;
   background: transparent;
   border: none;
   font-size: 0.875rem;
@@ -280,7 +282,16 @@
 
 @media (max-width: 768px) {
   .header-main {
-    display: flex;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 0.625rem 0.75rem;
+    height: auto;
+    padding-top: 0.625rem;
+    padding-bottom: 0.625rem;
+  }
+
+  .header-logo-btn {
+    justify-self: start;
   }
 
   /* On mobile: hide the location, action icons, and sell button
@@ -293,7 +304,22 @@
 
   /* Give the search container full width on mobile */
   .header-search-container {
+    grid-column: 1 / -1;
     max-width: none;
+    width: 100%;
+    grid-row: 2;
+  }
+
+  .header-mobile-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  .header-mobile-notification-btn {
+    margin-left: 0;
   }
 }
 
@@ -305,12 +331,7 @@
 
 .header-mobile-notification-btn {
   flex-shrink: 0;
-  margin-left: var(--spacing-2);
+  margin-left: 0;
 }
 
-@media (max-width: 650px) {
-  .header-mobile-notification-btn{
-    margin-left: -5px;
-  }
-}
 
