@@ -9,7 +9,7 @@ import { onForegroundMessage } from '../utils/firebase';
 const UIContext = createContext(null);
 const displayedForegroundNotifications = new Set();
 
-const showForegroundNotification = (payload) => {
+const showForegroundNotification = async (payload) => {
   if (typeof Notification === 'undefined' || Notification.permission !== 'granted') return;
   const data = payload?.data || {};
   const notificationId = data.notificationId || `${data.type}:${data.title}:${data.body}`;
@@ -19,17 +19,17 @@ const showForegroundNotification = (payload) => {
     displayedForegroundNotifications.delete(displayedForegroundNotifications.values().next().value);
   }
 
-  const notification = new Notification(data.title || 'RwanMart', {
-    body: data.body || 'You have a new RwanMart notification.',
-    icon: '/favicon.ico',
-    tag: notificationId,
-    data: { url: data.url || '/notifications' },
-  });
-  notification.onclick = () => {
-    window.focus();
-    window.location.assign(notification.data.url);
-    notification.close();
-  };
+  try {
+    const registration = await navigator.serviceWorker.ready;
+    await registration.showNotification(data.title || 'RwanMart', {
+      body: data.body || 'You have a new RwanMart notification.',
+      icon: '/favicon.ico',
+      tag: notificationId,
+      data: { url: data.url || '/notifications' },
+    });
+  } catch (error) {
+    console.error('Failed to display foreground notification:', error);
+  }
 };
 
 function useIsMobile() {
