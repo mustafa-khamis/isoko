@@ -4,6 +4,7 @@ import { usersApi } from '../services/usersApi';
 import { listingsApi } from '../services/listingsApi';
 import { messagesApi } from '../services/messagesApi';
 import { notificationsApi } from '../services/notificationsApi';
+import { onForegroundMessage } from '../utils/firebase';
 
 const UIContext = createContext(null);
 
@@ -35,6 +36,7 @@ export const UIProvider = ({ children }) => {
 
     let isMounted = true;
     let pollInterval;
+    let unsubscribeForeground = () => {};
 
     if (user) {
       // Fetch favorites
@@ -59,6 +61,10 @@ export const UIProvider = ({ children }) => {
       };
       
       fetchUnread();
+      onForegroundMessage(() => fetchUnread()).then(unsubscribe => {
+        if (isMounted) unsubscribeForeground = unsubscribe;
+        else unsubscribe();
+      });
       pollInterval = setInterval(fetchUnread, 15000); // poll every 15s
     } else {
       setFavorites([]);
@@ -69,6 +75,7 @@ export const UIProvider = ({ children }) => {
     return () => {
       isMounted = false;
       if (pollInterval) clearInterval(pollInterval);
+      if (unsubscribeForeground) unsubscribeForeground();
     };
   }, [user, isLoading]);
 

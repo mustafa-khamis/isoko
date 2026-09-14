@@ -1,5 +1,5 @@
 import { initializeApp } from 'firebase/app';
-import { getMessaging, getToken, onMessage } from 'firebase/messaging';
+import { getMessaging, getToken, isSupported, onMessage } from 'firebase/messaging';
 
 // Note: Ensure these environment variables are set in your .env file
 const firebaseConfig = {
@@ -11,14 +11,16 @@ const firebaseConfig = {
   appId: import.meta.env.VITE_FIREBASE_APP_ID,
 };
 
-// Initialize Firebase only if config is provided to avoid crashing the app if missing
+const hasCompleteConfig = Object.values(firebaseConfig).every(Boolean);
+
+// Initialize Firebase only if config is provided to avoid crashing the app if missing.
 let app = null;
 let messaging = null;
+let messagingSupportPromise = null;
 
 try {
-  if (firebaseConfig.apiKey) {
+  if (hasCompleteConfig) {
     app = initializeApp(firebaseConfig);
-    messaging = getMessaging(app);
   } else {
     console.warn('Firebase config is missing. Push notifications will not work. Please add VITE_FIREBASE_* env variables.');
   }
@@ -26,29 +28,47 @@ try {
   console.error('Failed to initialize Firebase', error);
 }
 
-export const requestFirebaseNotificationPermission = async () => {
-  if (!messaging) {
-    console.warn('Firebase Messaging is not initialized. Cannot request permission.');
+const getMessagingClient = async () => {
+  if (!app || typeof window === 'undefined' || !('serviceWorker' in navigator)) return null;
+  if (!messagingSupportPromise) messagingSupportPromise = isSupported();
+  if (!(await messagingSupportPromise)) return null;
+  if (!messaging) messaging = getMessaging(app);
+  return messaging;
+};
+
+const registerMessagingWorker = async () => {
+  const config = encodeURIComponent(JSON.stringify(firebaseConfig));
+  const registration = await navigator.serviceWorker.register(
+    `/firebase-messaging-sw.js?config=${config}`,
+    { scope: '/' }
+  );
+  await navigator.serviceWorker.ready;
+  if (!registration.active) {
+    throw new Error('Firebase messaging service worker did not become active');
+  }
+  return registration;
+};
+
+export const requestFirebaseNotificationPermission = async ({ requestPermission = true } = {}) => {
+  const client = await getMessagingClient();
+  if (!client || typeof Notification === 'undefined') {
+    console.warn('Firebase Messaging is not supported in this browser.');
     return null;
   }
 
   try {
-    if (Notification.permission === 'denied') {
-      console.warn('Notification permission is denied.');
-      return null;
-    }
-
     let permission = Notification.permission;
-    if (permission !== 'granted') {
-      console.log('Requesting notification permission...');
+    if (permission !== 'granted' && requestPermission && permission !== 'denied') {
       permission = await Notification.requestPermission();
     }
 
     if (permission === 'granted') {
       console.log('Notification permission granted.');
       
-      const currentToken = await getToken(messaging, {
+      const serviceWorkerRegistration = await registerMessagingWorker();
+      const currentToken = await getToken(client, {
         vapidKey: import.meta.env.VITE_FIREBASE_VAPID_KEY,
+        serviceWorkerRegistration,
       });
 
       if (currentToken) {
@@ -67,13 +87,10 @@ export const requestFirebaseNotificationPermission = async () => {
   }
 };
 
-export const onMessageListener = () =>
-  new Promise((resolve) => {
-    if (messaging) {
-      onMessage(messaging, (payload) => {
-        resolve(payload);
-      });
-    }
-  });
+export const onForegroundMessage = async (callback) => {
+  const client = await getMessagingClient();
+  if (!client) return () => {};
+  return onMessage(client, callback);
+};
 
 export { messaging };

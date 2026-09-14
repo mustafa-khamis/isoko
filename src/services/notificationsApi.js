@@ -5,8 +5,8 @@ export const notificationsApi = {
   getUnreadCount: () => apiClient.get('/notifications/unread-count'),
   markAsRead: (id) => apiClient.patch(`/notifications/${id}/read`),
   markAllAsRead: () => apiClient.post('/notifications/read-all'),
-  registerDevice: (token, deviceType = 'web') => 
-    apiClient.post('/notifications/devices/register', { token, deviceType }),
+  registerDevice: (token, deviceType = 'web', browser, platform) =>
+    apiClient.post('/notifications/devices/register', { token, deviceType, browser, platform }),
   unregisterDevice: (token) => 
     apiClient.post('/notifications/devices/unregister', { token }),
 };

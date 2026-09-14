@@ -59,8 +59,7 @@ export const AuthProvider = ({ children }) => {
     setServerStatus('online');
     setIsLoading(false);
     
-    // Register push notifications when user is authenticated
-    registerPushNotifications();
+    registerPushNotifications({ requestPermission: true });
   }, []);
 
   const clearLocalAuth = useCallback(() => {
@@ -85,6 +84,7 @@ export const AuthProvider = ({ children }) => {
           setUser(normalized);
           setSessionStatus('valid');
           setServerStatus('online');
+            registerPushNotifications({ requestPermission: true });
         }
       } catch (error) {
         if (!isActive) return;

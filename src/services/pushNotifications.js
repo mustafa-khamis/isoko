@@ -3,12 +3,12 @@ import { requestFirebaseNotificationPermission } from '../utils/firebase';
 
 let registeredToken = null;
 
-export const registerPushNotifications = async () => {
+export const registerPushNotifications = async ({ requestPermission = false } = {}) => {
   try {
-    const token = await requestFirebaseNotificationPermission();
+    const token = await requestFirebaseNotificationPermission({ requestPermission });
     if (token) {
       if (token !== registeredToken) {
-        await notificationsApi.registerDevice(token, 'web');
+        await notificationsApi.registerDevice(token, 'web', navigator.userAgent, navigator.platform);
         registeredToken = token;
         console.log('FCM token registered with backend successfully.');
       }
@@ -17,6 +17,8 @@ export const registerPushNotifications = async () => {
     console.error('Failed to register push notifications:', error);
   }
 };
+
+export const enablePushNotifications = () => registerPushNotifications({ requestPermission: true });
 
 export const unregisterPushNotifications = async () => {
   if (registeredToken) {

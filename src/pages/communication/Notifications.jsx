@@ -4,6 +4,7 @@ import { ArrowLeft, Bell, MessageCircle, CheckCircle, XCircle, Check, Heart } fr
 import { useAuth } from '../../context/AuthContext';
 import { useUI } from '../../context/UIContext';
 import { notificationsApi } from '../../services/notificationsApi';
+import { enablePushNotifications } from '../../services/pushNotifications';
 import { timeAgo } from '../../utils/formatters';
 import './Notifications.css';
 
@@ -14,6 +15,9 @@ export default function Notifications() {
   
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [pushStatus, setPushStatus] = useState(() =>
+    typeof Notification === 'undefined' ? 'unsupported' : Notification.permission
+  );
 
   useEffect(() => {
     if (isLoading) return;
@@ -59,10 +63,18 @@ export default function Notifications() {
     if (!notif.is_read) {
       markRead(notif.id);
     }
-    // For follow notifications, navigate to the follower's profile
-    if (notif.type === 'user_followed' && notif.data && notif.data.follower_id) {
-      navigate(`/sellers/${notif.data.follower_id}`);
+    if (notif.data?.url) {
+      navigate(notif.data.url);
+    } else if (notif.type === 'user_followed' && notif.data?.follower_id) {
+      navigate(`/seller/${notif.data.follower_id}`);
+    } else if (notif.type === 'new_message') {
+      navigate('/messages');
     }
+  };
+
+  const enableBrowserNotifications = async () => {
+    await enablePushNotifications();
+    setPushStatus(typeof Notification === 'undefined' ? 'unsupported' : Notification.permission);
   };
 
   if (!user) {
@@ -91,6 +103,11 @@ export default function Notifications() {
             </button>
           )}
           <h1 className="notifications-title">Notifications</h1>
+          {pushStatus !== 'granted' && pushStatus !== 'unsupported' && pushStatus !== 'denied' && (
+            <button onClick={enableBrowserNotifications} className="notifications-mark-all-button">
+              <Bell size={14} /> Enable browser notifications
+            </button>
+          )}
           {unreadCount > 0 && (
             <span className="notifications-count-badge">{unreadCount}</span>
           )}
