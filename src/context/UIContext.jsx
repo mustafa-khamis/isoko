@@ -7,6 +7,30 @@ import { notificationsApi } from '../services/notificationsApi';
 import { onForegroundMessage } from '../utils/firebase';
 
 const UIContext = createContext(null);
+const displayedForegroundNotifications = new Set();
+
+const showForegroundNotification = (payload) => {
+  if (typeof Notification === 'undefined' || Notification.permission !== 'granted') return;
+  const data = payload?.data || {};
+  const notificationId = data.notificationId || `${data.type}:${data.title}:${data.body}`;
+  if (displayedForegroundNotifications.has(notificationId)) return;
+  displayedForegroundNotifications.add(notificationId);
+  if (displayedForegroundNotifications.size > 100) {
+    displayedForegroundNotifications.delete(displayedForegroundNotifications.values().next().value);
+  }
+
+  const notification = new Notification(data.title || 'RwanMart', {
+    body: data.body || 'You have a new RwanMart notification.',
+    icon: '/favicon.ico',
+    tag: notificationId,
+    data: { url: data.url || '/notifications' },
+  });
+  notification.onclick = () => {
+    window.focus();
+    window.location.assign(notification.data.url);
+    notification.close();
+  };
+};
 
 function useIsMobile() {
   const [isMobile, setIsMobile] = useState(() =>
@@ -61,7 +85,10 @@ export const UIProvider = ({ children }) => {
       };
       
       fetchUnread();
-      onForegroundMessage(() => fetchUnread()).then(unsubscribe => {
+      onForegroundMessage((payload) => {
+        showForegroundNotification(payload);
+        fetchUnread();
+      }).then(unsubscribe => {
         if (isMounted) unsubscribeForeground = unsubscribe;
         else unsubscribe();
       });
