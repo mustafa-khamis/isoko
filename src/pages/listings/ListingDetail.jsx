@@ -206,13 +206,13 @@ export default function ListingDetail() {
         </div>
 
         <div className="ld-gallery-preview" onClick={() => setShowGallery(true)}>
-          <img src={displayImage} alt={listing.title} />
-          {images.length > 1 && (
+          <img key={displayImage} src={displayImage} alt={listing.title} className="ld-gallery-image" />
+          {images.length > 0 && (
             <>
-              <button onClick={e => { e.stopPropagation(); setCurrentImg(i => Math.max(0, i - 1)); }} className="ld-gallery-nav ld-gallery-nav--previous" aria-label="Previous image">
+              <button disabled={currentImg === 0} onClick={e => { e.stopPropagation(); setCurrentImg(i => Math.max(0, i - 1)); }} className="ld-gallery-nav ld-gallery-nav--previous" aria-label="Previous image">
                 <ChevronLeft size={20} />
               </button>
-              <button onClick={e => { e.stopPropagation(); setCurrentImg(i => Math.min(images.length - 1, i + 1)); }} className="ld-gallery-nav ld-gallery-nav--next" aria-label="Next image">
+              <button disabled={currentImg === images.length - 1} onClick={e => { e.stopPropagation(); setCurrentImg(i => Math.min(images.length - 1, i + 1)); }} className="ld-gallery-nav ld-gallery-nav--next" aria-label="Next image">
                 <ChevronRight size={20} />
               </button>
               <div className="ld-gallery-indicator">{currentImg + 1}/{images.length}</div>
@@ -222,6 +222,16 @@ export default function ListingDetail() {
             <span className="ld-promoted-badge"><Zap size={12} /> Promoted</span>
           )}
         </div>
+
+        {images.length > 1 && (
+          <div className="ld-thumbnails ld-thumbnails--mobile" aria-label="Listing images">
+            {images.map((img, i) => (
+              <button key={i} onClick={() => setCurrentImg(i)} className={i === currentImg ? 'ld-thumbnail--active' : ''} aria-label={`View image ${i + 1}`}>
+                <img src={img} alt="" />
+              </button>
+            ))}
+          </div>
+        )}
 
         <div className="ld-info-section">
           <h1>{listing.title}</h1>
@@ -325,7 +335,26 @@ export default function ListingDetail() {
               <span>{currentImg + 1} / {images.length}</span>
               <div className="listing-gallery-header__spacer" aria-hidden="true" />
             </div>
-            <img src={images[currentImg]} alt="" />
+            {images.length > 0 && (
+              <>
+                <img key={images[currentImg]} src={images[currentImg]} alt="" className="ld-fullscreen-image" />
+                <button disabled={currentImg === 0} onClick={() => setCurrentImg(i => Math.max(0, i - 1))} className="ld-gallery-nav ld-gallery-nav--previous" aria-label="Previous image">
+                  <ChevronLeft size={28} />
+                </button>
+                <button disabled={currentImg === images.length - 1} onClick={() => setCurrentImg(i => Math.min(images.length - 1, i + 1))} className="ld-gallery-nav ld-gallery-nav--next" aria-label="Next image">
+                  <ChevronRight size={28} />
+                </button>
+                {images.length > 1 && (
+                  <div className="ld-thumbnails ld-thumbnails--fullscreen" aria-label="Listing images">
+                    {images.map((img, i) => (
+                      <button key={i} onClick={() => setCurrentImg(i)} className={i === currentImg ? 'ld-thumbnail--active' : ''} aria-label={`View image ${i + 1}`}>
+                        <img src={img} alt="" />
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </>
+            )}
           </div>
         )}
       </div>
@@ -351,13 +380,13 @@ export default function ListingDetail() {
           {/* Left Column */}
           <div className="ld-main-col">
             <div className="ld-desktop-gallery" onClick={() => setShowGallery(true)}>
-              <img src={displayImage} alt={listing.title} />
-              {images.length > 1 && (
+                <img key={displayImage} src={displayImage} alt={listing.title} className="ld-gallery-image" />
+              {images.length > 0 && (
                 <>
-                  <button onClick={e => { e.stopPropagation(); setCurrentImg(i => Math.max(0, i - 1)); }} className="ld-gallery-nav ld-gallery-nav--previous" aria-label="Previous image">
+                  <button disabled={currentImg === 0} onClick={e => { e.stopPropagation(); setCurrentImg(i => Math.max(0, i - 1)); }} className="ld-gallery-nav ld-gallery-nav--previous" aria-label="Previous image">
                     <ChevronLeft size={24} />
                   </button>
-                  <button onClick={e => { e.stopPropagation(); setCurrentImg(i => Math.min(images.length - 1, i + 1)); }} className="ld-gallery-nav ld-gallery-nav--next" aria-label="Next image">
+                  <button disabled={currentImg === images.length - 1} onClick={e => { e.stopPropagation(); setCurrentImg(i => Math.min(images.length - 1, i + 1)); }} className="ld-gallery-nav ld-gallery-nav--next" aria-label="Next image">
                     <ChevronRight size={24} />
                   </button>
                   <div className="ld-gallery-indicator">{currentImg + 1} / {images.length}</div>
@@ -456,7 +485,22 @@ export default function ListingDetail() {
             <span>{currentImg + 1} / {images.length}</span>
           </div>
           <div className="ld-fullscreen-content">
-            <img src={images[currentImg]} alt="" />
+            <img key={images[currentImg]} src={images[currentImg]} alt="" className="ld-fullscreen-image" />
+            <button disabled={currentImg === 0} onClick={() => setCurrentImg(i => Math.max(0, i - 1))} className="ld-gallery-nav ld-gallery-nav--previous" aria-label="Previous image">
+              <ChevronLeft size={28} />
+            </button>
+            <button disabled={currentImg === images.length - 1} onClick={() => setCurrentImg(i => Math.min(images.length - 1, i + 1))} className="ld-gallery-nav ld-gallery-nav--next" aria-label="Next image">
+              <ChevronRight size={28} />
+            </button>
+            {images.length > 1 && (
+              <div className="ld-thumbnails ld-thumbnails--fullscreen" aria-label="Listing images">
+                {images.map((img, i) => (
+                  <button key={i} onClick={() => setCurrentImg(i)} className={i === currentImg ? 'ld-thumbnail--active' : ''} aria-label={`View image ${i + 1}`}>
+                    <img src={img} alt="" />
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       )}
