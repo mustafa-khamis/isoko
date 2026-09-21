@@ -26,7 +26,7 @@ const INITIAL_DRAFT = {
 
 export default function CreateListing() {
   const navigate = useNavigate();
-  const { isMobile, showAuth } = useUI();
+  const { isMobile } = useUI();
   const { user, isLoading } = useAuth();
   
   const [step, setStep] = useState(1);
@@ -133,7 +133,7 @@ export default function CreateListing() {
         </div>
         <h3 className="listing-create-auth-state__title">Sign in to post a listing</h3>
         <p className="listing-create-auth-state__copy">You need an account to create listings and manage your store.</p>
-        <button onClick={() => showAuth()} className="listing-create-auth-state__button">Sign In</button>
+        <button onClick={() => navigate('/login', { state: { from: '/create-listing' } })} className="listing-create-auth-state__button">Sign In</button>
       </div>
     );
   }

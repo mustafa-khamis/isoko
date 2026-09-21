@@ -56,7 +56,10 @@ export default function Header() {
     .slice(0, 6);
 
   const handleSell = () => {
-    if (!user) { showAuth('Sign in to start selling on RwanMart.'); return; }
+    if (!user) {
+      navigate('/login', { state: { from: '/create-listing' } });
+      return;
+    }
     navigate('/create-listing');
   };
 

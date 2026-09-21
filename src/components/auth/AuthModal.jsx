@@ -6,7 +6,7 @@ import { authApi } from '../../services/authApi';
 import GoogleSignInButton from './GoogleSignInButton';
 import './AuthModal.css';
 
-export default function AuthModal({ onClose, reason, initialMode = 'signin' }) {
+export default function AuthModal({ onClose, onAuthenticated, reason, initialMode = 'signin' }) {
   const { login } = useAuth();
   const { isMobile } = useUI();
   
@@ -77,6 +77,7 @@ export default function AuthModal({ onClose, reason, initialMode = 'signin' }) {
       const res = await authApi.login({ email, password, client_type: 'web' });
       login(res.data.data.user, res.data.data.accessToken);
       onClose();
+      onAuthenticated?.();
     } catch (err) {
       const status = err.response?.status;
       const msg = err.response?.data?.message || 'Invalid credentials or login failed.';
@@ -109,6 +110,7 @@ export default function AuthModal({ onClose, reason, initialMode = 'signin' }) {
         // Server created a session on first-time verification — log the user in now
         login(data.user, data.accessToken);
         onClose();
+        onAuthenticated?.();
       } else {
         // Idempotent path (already verified) — just move to success screen
         setMode('success');
@@ -295,7 +297,7 @@ function SignUpForm({ name, email, password, showPass, errors, loading, onName, 
     <div className="auth-panel">
       <h1 className="auth-title">Create your account</h1>
       <p className="auth-subtitle auth-subtitle--left">Only your name, email, and password — that's it.</p>
-      <GoogleSignInButton onSuccess={onClose} />
+      <GoogleSignInButton onSuccess={() => { onClose(); onAuthenticated?.(); }} />
       <Divider />
       <div className="auth-form">
         <div>
@@ -343,7 +345,7 @@ function SignInForm({ email, password, showPass, errors, loading, onEmail, onPas
     <div className="auth-panel">
       <h1 className="auth-title">Welcome back</h1>
       <p className="auth-subtitle auth-subtitle--left">Sign in to your RwanMart account.</p>
-      <GoogleSignInButton onSuccess={onClose} />
+      <GoogleSignInButton onSuccess={() => { onClose(); onAuthenticated?.(); }} />
       <Divider />
       <div className="auth-form">
         <div>

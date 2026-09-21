@@ -33,7 +33,7 @@ const TABS = [
 export default function MyListings() {
   const navigate = useNavigate();
   const { user, isLoading } = useAuth();
-  const { isMobile, showAuth } = useUI();
+  const { isMobile } = useUI();
 
   const [activeTab, setActiveTab] = useState('all');
   const [listings, setListings] = useState([]);
@@ -45,7 +45,7 @@ export default function MyListings() {
     if (isLoading) return;
 
     if (!user) {
-      showAuth('Sign in to view your listings.');
+      navigate('/login', { state: { from: '/my-listings' } });
       return;
     }
 
@@ -63,7 +63,7 @@ export default function MyListings() {
     };
 
     fetchMyListings();
-  }, [user, isLoading, showAuth]);
+  }, [user, isLoading, navigate]);
 
   if (!user) return null;
 

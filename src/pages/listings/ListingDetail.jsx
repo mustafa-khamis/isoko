@@ -143,8 +143,8 @@ export default function ListingDetail() {
     if (isOwner) {
       return (
         <div className="listing-contact-actions">
-          <button onClick={() => navigate('/admin')} className="listing-contact-button">
-            Manage your listing
+          <button onClick={() => navigate('/my-listings')} className="listing-contact-button listing-contact-button--manage">
+            Manage
           </button>
         </div>
       );
@@ -323,7 +323,7 @@ export default function ListingDetail() {
                 )}
               </>
             ) : (
-              <button onClick={() => navigate('/admin')} className="btn-message">Manage</button>
+              <button onClick={() => navigate('/my-listings')} className="btn-message">Manage</button>
             )}
           </div>
         </div>

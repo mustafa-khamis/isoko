@@ -1,0 +1,33 @@
+.auth-page {
+  min-height: calc(100vh - 8rem);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 2.5rem 1rem 4rem;
+  background: var(--color-ink-50);
+}
+
+.auth-page__card {
+  width: 100%;
+  max-width: 28rem;
+  overflow: hidden;
+  background: var(--color-surface);
+  border: 1px solid var(--color-ink-100);
+  border-radius: var(--radius-3xl);
+  box-shadow: var(--shadow-lg);
+}
+
+@media (max-width: 767px) {
+  .auth-page {
+    min-height: calc(100vh - 5rem);
+    padding: 0;
+    background: var(--color-surface);
+  }
+
+  .auth-page__card {
+    max-width: none;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+  }
+}

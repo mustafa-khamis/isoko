@@ -11,7 +11,10 @@ export default function BottomNav() {
   const { showAuth, unreadMessageCount } = useUI();
 
   const handleSell = () => {
-    if (!user) { showAuth('Create a free account to start listing your items.'); return; }
+    if (!user) {
+      navigate('/login', { state: { from: '/create-listing' } });
+      return;
+    }
     navigate('/create-listing');
   };
 

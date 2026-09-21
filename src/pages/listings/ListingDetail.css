@@ -522,6 +522,14 @@
   transition: background-color 0.15s;
 }
 
+.listing-contact-button--manage {
+  background: var(--color-brand-600);
+}
+
+.listing-contact-button--manage:hover {
+  background: var(--color-brand-700);
+}
+
 .listing-contact-button--message {
   background: var(--color-brand-600);
 }
