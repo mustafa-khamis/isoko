@@ -258,18 +258,25 @@ export default function Home() {
         </div>
 
         <div className="sell-cta-banner">
-          <div>
+          <div className="sell-cta-content">
             <h3 className="sell-cta-title">Have something to sell?</h3>
             <p className="sell-cta-subtitle">
               Post your first 2 listings for free. No subscription needed.
             </p>
+            <button
+              onClick={() => navigate("/create-listing")}
+              className="sell-cta-btn"
+            >
+              Start selling
+            </button>
           </div>
-          <button
-            onClick={() => navigate("/create-listing")}
-            className="sell-cta-btn"
-          >
-            Start selling
-          </button>
+          <div className="sell-cta-image-wrap">
+            <img
+              src="/images/ctaimage.jpg"
+              alt="People connecting through an online marketplace"
+              className="sell-cta-image"
+            />
+          </div>
         </div>
 
         <div
