@@ -417,6 +417,63 @@
   gap: 0.75rem;
 }
 
+.browse-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 2rem;
+}
+
+.browse-pagination__pages {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.browse-pagination__ellipsis {
+  width: 1.25rem;
+  text-align: center;
+  color: var(--color-ink-400);
+  font-size: 0.8125rem;
+}
+
+.browse-pagination__button {
+  width: 2.25rem;
+  height: 2.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--color-ink-200);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: var(--color-ink-600);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  transition: background-color 0.15s, border-color 0.15s, color 0.15s;
+}
+
+.browse-pagination__button:hover:not(:disabled) {
+  border-color: var(--color-brand-300);
+  color: var(--color-brand-700);
+  background: var(--color-brand-50);
+}
+
+.browse-pagination__button--active {
+  border-color: var(--color-brand-600);
+  background: var(--color-brand-600);
+  color: var(--color-surface);
+}
+
+.browse-pagination__button:disabled {
+  cursor: not-allowed;
+  opacity: 0.4;
+}
+
+.browse-pagination__arrow {
+  border-radius: var(--radius-lg);
+}
+
 /* Filter Sheet */
 .filter-sheet-overlay {
   position: fixed;

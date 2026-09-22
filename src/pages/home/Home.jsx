@@ -248,6 +248,15 @@ export default function Home() {
           </>
         )}
 
+        <div className="home-browse-more">
+          <button
+            onClick={() => navigate("/browse")}
+            className="home-browse-more__button"
+          >
+            Browse more listings
+          </button>
+        </div>
+
         <div className="sell-cta-banner">
           <div>
             <h3 className="sell-cta-title">Have something to sell?</h3>
@@ -260,15 +269,6 @@ export default function Home() {
             className="sell-cta-btn"
           >
             Start selling
-          </button>
-        </div>
-
-        <div className="home-browse-more">
-          <button
-            onClick={() => navigate("/browse")}
-            className="home-browse-more__button"
-          >
-            Browse more listings
           </button>
         </div>
 
@@ -299,14 +299,11 @@ export default function Home() {
               margin: 0,
             }}
           >
-            <strong>RwanMart</strong> is a Rwanda-based online marketplace
-            dedicated to connecting local buyers and sellers. Whether you are
-            looking to buy mobile phones, laptops, electronics, cars, property,
-            or home items, our platform makes it easy to find great deals from
-            sellers across Rwanda. Anyone can create an account to list their
-            products, reach buyers directly, and grow their local business.
-            Experience safe, reliable, and fast online shopping in Rwanda with
-            RwanMart.
+            <strong>RwanMart</strong> is Rwanda's online marketplace for
+            discovering products from local sellers. Browse mobile phones,
+            laptops, electronics, cars, property, and home essentials, or
+            create a listing to reach buyers across the country. Shop locally,
+            connect directly, and find your next great deal in Rwanda.
           </p>
         </div>
       </div>

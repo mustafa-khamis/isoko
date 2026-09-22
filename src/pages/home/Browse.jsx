@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
-import { Search, SlidersHorizontal, X, ChevronDown, ArrowLeft, PackageSearch } from 'lucide-react';
+import { Search, SlidersHorizontal, X, ChevronDown, ChevronLeft, ChevronRight, ArrowLeft, PackageSearch } from 'lucide-react';
 import ListingCard, { SkeletonCard } from '../../components/listings/ListingCard';
 import { useUI } from '../../context/UIContext';
 import { listingsApi } from '../../services/listingsApi';
@@ -26,6 +26,8 @@ export default function Browse() {
   
   const [showFilters, setShowFilters] = useState(false);
   const [listings, setListings] = useState([]);
+  const [page, setPage] = useState(1);
+  const [pagination, setPagination] = useState({ page: 1, total: 0, total_pages: 1 });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   
@@ -37,12 +39,19 @@ export default function Browse() {
     locationsApi.getProvinces().then(res => setProvinces(res.data?.data || [])).catch(console.error);
   }, []);
 
-  // Fetch listings when filters change
+  useEffect(() => {
+    setPage(1);
+  }, [searchQuery, activeCategory, priceMin, priceMax, province, sortBy]);
+
+  // Fetch the selected page when filters or pagination change.
   useEffect(() => {
     const fetchListings = async () => {
       setLoading(true);
+      setError('');
       try {
         const params = {};
+        params.page = page;
+        params.limit = 20;
         if (searchQuery) params.q = searchQuery;
         if (activeCategory) params.category_id = activeCategory;
         if (priceMin) params.min_price = priceMin;
@@ -52,6 +61,7 @@ export default function Browse() {
 
         const res = await listingsApi.getListings(params);
         setListings(res.data.data || []);
+        setPagination(res.data.pagination || { page, total: 0, total_pages: 1 });
       } catch (err) {
         console.error('Fetch listings failed', err);
         setError('Failed to load listings.');
@@ -63,7 +73,7 @@ export default function Browse() {
     // Debounce search slightly
     const timeout = setTimeout(fetchListings, 300);
     return () => clearTimeout(timeout);
-  }, [searchQuery, activeCategory, priceMin, priceMax, province, sortBy]);
+  }, [searchQuery, activeCategory, priceMin, priceMax, province, sortBy, page]);
 
   // Keep category navigation in the URL without overwriting the current search.
   useEffect(() => {
@@ -80,6 +90,7 @@ export default function Browse() {
   const categoryLabel = cat?.name || cat?.label || '';
   const activeFiltersCount = [activeCategory, province, priceMin, priceMax].filter(Boolean).length;
   const clearFilters = () => { setActiveCategory(''); setProvince(''); setPriceMin(''); setPriceMax(''); };
+  const totalPages = pagination.total_pages || 1;
 
   const renderSkeletons = () => (
     <div className="listings-grid browse-grid">
@@ -156,7 +167,7 @@ export default function Browse() {
         {/* Results */}
         <div className="browse-mobile-results">
           <div className="browse-results-header">
-            <span className="browse-results-count">{listings.length} listings</span>
+            <span className="browse-results-count">{pagination.total} listings</span>
             <SortSelect value={sortBy} onChange={setSortBy} />
           </div>
 
@@ -167,6 +178,9 @@ export default function Browse() {
               <div className="listings-grid browse-grid-mobile">
                 {listings.map(l => <ListingCard key={l.id} listing={l} compact />)}
               </div>
+          )}
+          {!loading && !error && listings.length > 0 && totalPages > 1 && (
+            <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
           )}
         </div>
 
@@ -203,7 +217,7 @@ export default function Browse() {
         {/* Heading */}
         <div className="browse-desktop-heading">
           <h1>{cat ? (categoryLabel || 'Category') : searchQuery ? `Results for "${searchQuery}"` : 'All Listings'}</h1>
-          <span>{listings.length} listings</span>
+          <span>{pagination.total} listings</span>
         </div>
 
         {activeFiltersCount > 0 && (
@@ -269,6 +283,9 @@ export default function Browse() {
                   {listings.map(l => <ListingCard key={l.id} listing={l} />)}
                 </div>
             )}
+            {!loading && !error && listings.length > 0 && totalPages > 1 && (
+              <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
+            )}
           </div>
         </div>
       </div>
@@ -297,6 +314,55 @@ function SortSelect({ value, onChange }) {
       <ChevronDown size={14} className="sort-icon" />
     </div>
   );
+}
+
+function Pagination({ page, totalPages, onPageChange }) {
+  const pages = getPaginationItems(page, totalPages);
+
+  return (
+    <nav className="browse-pagination" aria-label="Listings pagination">
+      <button
+        type="button"
+        className="browse-pagination__button browse-pagination__arrow"
+        onClick={() => onPageChange(page - 1)}
+        disabled={page === 1}
+        aria-label="Previous page"
+      >
+        <ChevronLeft size={16} />
+      </button>
+      <div className="browse-pagination__pages">
+        {pages.map((pageNumber, index) => pageNumber === 'ellipsis' ? (
+          <span key={`ellipsis-${index}`} className="browse-pagination__ellipsis" aria-hidden="true">...</span>
+        ) : (
+          <button
+            type="button"
+            key={pageNumber}
+            className={`browse-pagination__button ${pageNumber === page ? 'browse-pagination__button--active' : ''}`}
+            onClick={() => onPageChange(pageNumber)}
+            aria-current={pageNumber === page ? 'page' : undefined}
+          >
+            {pageNumber}
+          </button>
+        ))}
+      </div>
+      <button
+        type="button"
+        className="browse-pagination__button browse-pagination__arrow"
+        onClick={() => onPageChange(page + 1)}
+        disabled={page === totalPages}
+        aria-label="Next page"
+      >
+        <ChevronRight size={16} />
+      </button>
+    </nav>
+  );
+}
+
+function getPaginationItems(page, totalPages) {
+  if (totalPages <= 7) return Array.from({ length: totalPages }, (_, index) => index + 1);
+  if (page <= 4) return [1, 2, 3, 4, 5, 'ellipsis', totalPages];
+  if (page >= totalPages - 3) return [1, 'ellipsis', totalPages - 4, totalPages - 3, totalPages - 2, totalPages - 1, totalPages];
+  return [1, 'ellipsis', page - 1, page, page + 1, 'ellipsis', totalPages];
 }
 
 function EmptyState() {
