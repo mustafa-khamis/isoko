@@ -43,6 +43,10 @@ export default function Browse() {
     setPage(1);
   }, [searchQuery, activeCategory, priceMin, priceMax, province, sortBy]);
 
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [page]);
+
   // Fetch the selected page when filters or pagination change.
   useEffect(() => {
     const fetchListings = async () => {

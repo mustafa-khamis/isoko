@@ -92,6 +92,10 @@ export default function CreateListing() {
   };
 
   useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [step]);
+
+  useEffect(() => {
     Promise.all([
       categoriesApi.getCategories(),
       locationsApi.getProvinces()
