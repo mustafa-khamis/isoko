@@ -39,6 +39,19 @@ export function initializeAndRenderGoogleButton(clientId, containerElement, call
   // Clear any existing content in the container to avoid duplicate iframes
   if (containerElement) {
     containerElement.innerHTML = '';
+
+    // Google draws the button at a fixed pixel width baked into the iframe's
+    // content. Without an explicit width, it auto-sizes to the button's text,
+    // so the personalized "Continue as <name>" state renders much narrower
+    // than the generic "Continue with Google" state. Passing the container's
+    // own width (clamped to Google's supported 200-400px range) keeps both
+    // states the same size.
+    // The container itself is `display:none` until loading finishes, which
+    // would measure as 0 width, so prefer the always-visible parent wrapper.
+    const measuredWidth = containerElement.parentElement?.getBoundingClientRect().width
+      || containerElement.getBoundingClientRect().width;
+    const width = Math.round(Math.min(400, Math.max(200, measuredWidth || 400)));
+
     window.google.accounts.id.renderButton(containerElement, {
       type: 'standard',
       theme: 'outline',
@@ -46,6 +59,7 @@ export function initializeAndRenderGoogleButton(clientId, containerElement, call
       text: 'continue_with',
       shape: 'rectangular',
       logo_alignment: 'left',
+      width,
     });
   }
 }
