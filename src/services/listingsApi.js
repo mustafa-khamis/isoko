@@ -13,8 +13,8 @@ export const listingsApi = {
 
   toggleFavorite: (id) => apiClient.post(`/listings/${id}/favorite`),
   
-  // Create a listing (JSON)
-  createListing: (data) => apiClient.post('/listings', data),
+  // Create a listing with its images: FormData with a JSON `data` field and one or more `images` files
+  createListing: (formData) => apiClient.post('/listings', formData),
 
   // Upload images for a listing (multipart/form-data expected)
   uploadListingImages: (id, formData) => {

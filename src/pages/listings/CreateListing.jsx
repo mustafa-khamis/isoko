@@ -9,6 +9,16 @@ import { categoriesApi } from '../../services/categoriesApi';
 import { locationsApi } from '../../services/locationsApi';
 import './CreateListing.css';
 
+// Backend errors caused by the photos; the user is sent back to step 1 to fix them.
+const IMAGE_ERROR_CODES = new Set([
+  'LISTING_IMAGE_REQUIRED',
+  'IMAGE_LIMIT_EXCEEDED',
+  'FILE_TOO_LARGE',
+  'UNSUPPORTED_MEDIA_TYPE',
+  'STORAGE_UPLOAD_FAILED',
+  'STORAGE_UNAVAILABLE',
+]);
+
 const INITIAL_DRAFT = {
   images: [],
   imageUrls: [],
@@ -144,6 +154,12 @@ export default function CreateListing() {
 
   const handleSubmit = async () => {
     if (submitting) return;
+    // Never send a listing without photos: stop here and take the user back to step 1.
+    if (draft.images.length === 0) {
+      setError('Add at least one photo before submitting your listing.');
+      setStep(1);
+      return;
+    }
     for (let stepToValidate = 1; stepToValidate <= 3; stepToValidate += 1) {
       if (!validateStep(stepToValidate)) {
         setStep(stepToValidate);
@@ -169,16 +185,13 @@ export default function CreateListing() {
         whatsapp_number_override: draft.whatsappEnabled ? optionalText(draft.whatsapp) : null,
       };
       
-      const res = await listingsApi.createListing(payload);
-      const listingId = res.data.data.id;
-
-      if (draft.images.length > 0) {
-        const formData = new FormData();
-        draft.images.forEach(img => {
-          formData.append('images', img);
-        });
-        await listingsApi.uploadListingImages(listingId, formData);
-      }
+      // Details and photos go in one request so the backend creates both or neither.
+      const formData = new FormData();
+      formData.append('data', JSON.stringify(payload));
+      draft.images.forEach(img => {
+        formData.append('images', img);
+      });
+      await listingsApi.createListing(formData);
 
       setSubmitted(true);
     } catch (err) {
@@ -201,6 +214,9 @@ export default function CreateListing() {
         errorMsg += ` (${firstErr.field}: ${firstErr.message})`;
       }
       setError(errorMsg);
+      if (IMAGE_ERROR_CODES.has(responseCode) || [413, 415].includes(err.response?.status)) {
+        setStep(1);
+      }
     } finally {
       setSubmitting(false);
     }

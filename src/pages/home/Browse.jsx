@@ -49,6 +49,7 @@ export default function Browse() {
 
   // Fetch the selected page when filters or pagination change.
   useEffect(() => {
+    let isCurrent = true;
     const fetchListings = async () => {
       setLoading(true);
       setError('');
@@ -64,19 +65,24 @@ export default function Browse() {
         if (sortBy) params.sort = sortBy;
 
         const res = await listingsApi.getListings(params);
+        if (!isCurrent) return;
         setListings(res.data.data || []);
         setPagination(res.data.pagination || { page, total: 0, total_pages: 1 });
       } catch (err) {
+        if (!isCurrent) return;
         console.error('Fetch listings failed', err);
         setError('Failed to load listings.');
       } finally {
-        setLoading(false);
+        if (isCurrent) setLoading(false);
       }
     };
-    
+
     // Debounce search slightly
     const timeout = setTimeout(fetchListings, 300);
-    return () => clearTimeout(timeout);
+    return () => {
+      isCurrent = false;
+      clearTimeout(timeout);
+    };
   }, [searchQuery, activeCategory, priceMin, priceMax, province, sortBy, page]);
 
   // Keep category navigation in the URL without overwriting the current search.
