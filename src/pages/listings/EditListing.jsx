@@ -17,6 +17,9 @@ import { locationsApi } from '../../services/locationsApi';
 import { externalPlatformsApi } from '../../services/externalPlatformsApi';
 import ExternalProductFields from '../../components/listings/ExternalProductFields';
 import { LISTING_TYPE, isValidExternalUrl } from '../../utils/externalProducts';
+import { usersApi } from '../../services/usersApi';
+import OfferFields from '../../components/listings/OfferFields';
+import { offersAllowed, validateOffer } from '../../utils/offers';
 import './EditListing.css';
 
 /* ─── Helpers ─────────────────────────────────────────────────────────────── */
@@ -67,10 +70,18 @@ export default function EditListing() {
     externalPlatformId: '',
     externalPlatformOtherName: '',
     externalUrl:    '',
+    offerEnabled:   false,
+    previousPrice:  '',
   });
   const [touched, setTouched] = useState({});
   const [platforms, setPlatforms] = useState([]);
   const isExternal = form.listingType === LISTING_TYPE.EXTERNAL;
+  // The offer as loaded, so an unchanged offer can be kept even when the
+  // seller's plan no longer includes offers.
+  const [loadedOffer, setLoadedOffer] = useState({ previousPrice: '', price: '' });
+  const [planStatus, setPlanStatus] = useState('loading');
+  const [offerAllowed, setOfferAllowed] = useState(false);
+  const [planRequest, setPlanRequest] = useState(0);
 
   /* ── Image state ──────────────────────────────────────────────────────── */
   const [existingImages, setExistingImages] = useState([]);
@@ -137,6 +148,12 @@ export default function EditListing() {
           externalPlatformId: l.external_platform_id || '',
           externalPlatformOtherName: l.external_platform_other_name || '',
           externalUrl:     l.external_url || '',
+          offerEnabled:    l.previous_price != null,
+          previousPrice:   l.previous_price != null ? String(Number(l.previous_price)) : '',
+        });
+        setLoadedOffer({
+          previousPrice: l.previous_price != null ? Number(l.previous_price) : '',
+          price: l.price != null ? Number(l.price) : '',
         });
 
         const imgs = (l.images || []).map(img =>
@@ -149,6 +166,29 @@ export default function EditListing() {
       .catch(() => navigate('/my-listings'))
       .finally(() => setPageLoading(false));
   }, [id, user, authLoading, navigate]);
+
+  /* ── Load the seller's plan (offer availability) ─────────────────────── */
+  const userId = user?.id;
+  useEffect(() => {
+    if (!userId) return;
+    let active = true;
+    usersApi.getSellingUsage()
+      .then(res => {
+        if (!active) return;
+        setOfferAllowed(offersAllowed(res.data?.data));
+        setPlanStatus('ready');
+      })
+      .catch(err => {
+        console.error(err);
+        if (active) setPlanStatus('error');
+      });
+    return () => { active = false; };
+  }, [userId, planRequest]);
+
+  const retryPlan = () => {
+    setPlanStatus('loading');
+    setPlanRequest(n => n + 1);
+  };
 
   /* ── Load platforms for external products ────────────────────────────── */
   useEffect(() => {
@@ -172,6 +212,16 @@ export default function EditListing() {
     return false;
   };
 
+  const enableOffer = () => update({ offerEnabled: true, previousPrice: form.price, price: '' });
+  const removeOffer = () => update({ offerEnabled: false, previousPrice: '', price: form.price || form.previousPrice });
+  const choosePriceType = (priceType) => update(priceType === 'contact'
+    ? { priceType, offerEnabled: false, previousPrice: '' }
+    : { priceType });
+  const offerChanged = () => form.offerEnabled && (
+    Number(form.previousPrice) !== loadedOffer.previousPrice
+    || Number(form.price) !== loadedOffer.price
+  );
+
   const validate = () => {
     const title = form.title.trim();
     const desc  = form.description.trim();
@@ -182,6 +232,18 @@ export default function EditListing() {
       const p = Number.parseFloat(form.price);
       if (form.price.trim() === '' || Number.isNaN(p) || p < 0) {
         return fail(isExternal ? 'Enter the product price.' : 'Enter a valid price, or choose "Contact for price".', 'pricing');
+      }
+      if (form.offerEnabled) {
+        const offerError = validateOffer(form.previousPrice, form.price);
+        if (offerError) return fail(offerError, 'pricing');
+        if (offerChanged() && !(planStatus === 'ready' && offerAllowed)) {
+          return fail(
+            planStatus === 'ready'
+              ? 'Your plan no longer includes offers. Remove the offer to change these prices.'
+              : "We couldn't confirm your plan yet, so the offer can't be changed. Try again in a moment.",
+            'pricing'
+          );
+        }
       }
     }
     if (isExternal) {
@@ -258,11 +320,15 @@ export default function EditListing() {
       const parsedPrice = Number.parseFloat(form.price);
       const priceVal    = Number.isNaN(parsedPrice) ? null : parsedPrice;
 
+      const hasOffer = form.offerEnabled && form.priceType !== 'contact';
       const common = {
         title:                    form.title.trim(),
         description:              form.description.trim(),
         category_id:              form.category_id || undefined,
         subcategory_id:           optionalUuid(form.subcategory_id),
+        // true keeps/sets the offer, false removes any stored offer.
+        offer_enabled:            hasOffer,
+        ...(hasOffer && { previous_price: Number.parseFloat(form.previousPrice) }),
       };
       await listingsApi.updateListing(id, isExternal
         ? {
@@ -480,7 +546,7 @@ export default function EditListing() {
                     <button
                       key={pt.key}
                       type="button"
-                      onClick={() => update({ priceType: pt.key })}
+                      onClick={() => choosePriceType(pt.key)}
                       className={`el-price-opt ${form.priceType === pt.key ? 'el-price-opt--active' : ''}`}
                     >
                       <span className="el-radio">
@@ -498,7 +564,7 @@ export default function EditListing() {
 
               {form.priceType !== 'contact' && (
                 <div className="el-field">
-                  <label htmlFor="el-price-input">Amount (RWF) *</label>
+                  <label htmlFor="el-price-input">{form.offerEnabled ? 'Current price (RWF) *' : 'Amount (RWF) *'}</label>
                   <div className="el-price-field">
                     <span className="el-price-prefix">RWF</span>
                     <input
@@ -515,6 +581,23 @@ export default function EditListing() {
                     <p className="el-hint">Use the current price on the external store. Buyers see the final price there.</p>
                   )}
                 </div>
+              )}
+
+              {form.priceType !== 'contact' && (
+                <OfferFields
+                  planStatus={planStatus}
+                  allowed={offerAllowed}
+                  enabled={form.offerEnabled}
+                  previousPrice={form.previousPrice}
+                  price={form.price}
+                  priceType={form.priceType}
+                  onEnable={enableOffer}
+                  onRemove={removeOffer}
+                  onPreviousPriceChange={value => update({ previousPrice: value })}
+                  onRetry={retryPlan}
+                  fieldClassName="el-field"
+                  inputClassName="el-input"
+                />
               )}
             </div>
           )}

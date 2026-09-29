@@ -19,6 +19,7 @@ import { listingsApi } from '../../services/listingsApi';
 import { usersApi } from '../../services/usersApi';
 import { formatRWF, timeAgo } from '../../utils/formatters';
 import { isExternalProduct } from '../../utils/externalProducts';
+import { OfferBadge } from '../../components/listings/ListingCard';
 import './MyListings.css';
 
 const TABS = [
@@ -243,6 +244,7 @@ function ListingRow({ listing, updating, onEdit, onHide, onMarkSold, onDelete })
             {listing.price
               ? <span className="my-listing-card__price-value">{formatRWF(listing.price)}</span>
               : <span className="my-listing-card__price-contact">Contact for price</span>}
+            <OfferBadge previousPrice={listing.previous_price} price={listing.price} className="listing-badge-offer--inline" />
           </div>
           <div className="my-listing-card__metadata">
             <span className="my-listing-card__views"><Eye size={12} />{listing.views || 0}</span>

@@ -11,6 +11,8 @@ import { usersApi } from '../../services/usersApi';
 import { externalPlatformsApi } from '../../services/externalPlatformsApi';
 import ExternalProductFields from '../../components/listings/ExternalProductFields';
 import ListingTypePicker from '../../components/listings/ListingTypePicker';
+import OfferFields from '../../components/listings/OfferFields';
+import { offersAllowed, validateOffer } from '../../utils/offers';
 import { LISTING_TYPE, externalProductAllowance, isValidExternalUrl } from '../../utils/externalProducts';
 import './CreateListing.css';
 
@@ -40,6 +42,8 @@ const INITIAL_DRAFT = {
   description: '',
   priceType: 'fixed',
   price: '',
+  offerEnabled: false,
+  previousPrice: '',
   province_id: '',
   city_id: '',
   whatsappEnabled: false,
@@ -52,6 +56,7 @@ export default function CreateListing() {
   const { isMobile } = useUI();
   const { user, isLoading } = useAuth();
   const [externalAllowance, setExternalAllowance] = useState({ enabled: false });
+  const [offerAllowed, setOfferAllowed] = useState(false);
   const [allowanceStatus, setAllowanceStatus] = useState('loading');
   const [allowanceRequest, setAllowanceRequest] = useState(0);
   const [platforms, setPlatforms] = useState([]);
@@ -81,6 +86,13 @@ export default function CreateListing() {
   };
   const isExternal = draft.listingType === LISTING_TYPE.EXTERNAL;
   const selectedPlatform = platforms.find(p => p.id === draft.externalPlatformId);
+  // Adding an offer keeps the entered price as the previous price and clears
+  // the current price for the offer price; removing it keeps a current price.
+  const enableOffer = () => update({ offerEnabled: true, previousPrice: draft.price, price: '' });
+  const removeOffer = () => update({ offerEnabled: false, previousPrice: '', price: draft.price || draft.previousPrice });
+  const choosePriceType = (priceType) => update(priceType === 'contact'
+    ? { priceType, offerEnabled: false, previousPrice: '' }
+    : { priceType });
   const chooseListingType = (listingType) => {
     setError('');
     update(listingType === LISTING_TYPE.EXTERNAL
@@ -115,6 +127,11 @@ export default function CreateListing() {
       const parsedPrice = Number.parseFloat(draft.price);
       if (draft.price.trim() === '' || Number.isNaN(parsedPrice) || parsedPrice < 0) {
         return setStepError(isExternal ? 'Enter the product price.' : 'Enter a valid price, or choose contact for price.');
+      }
+      if (draft.offerEnabled) {
+        if (!offerAllowed) return setStepError('Your plan does not include offers. Remove the offer to continue.');
+        const offerError = validateOffer(draft.previousPrice, draft.price);
+        if (offerError) return setStepError(offerError);
       }
     }
 
@@ -162,6 +179,7 @@ export default function CreateListing() {
         if (!active) return;
         const allowance = externalProductAllowance(res.data?.data);
         setExternalAllowance(allowance);
+        setOfferAllowed(offersAllowed(res.data?.data));
         setAllowanceStatus('ready');
         if (!allowance.enabled) return;
         if (searchParams.get('type') === LISTING_TYPE.EXTERNAL && allowance.remaining > 0) {
@@ -262,6 +280,10 @@ export default function CreateListing() {
           external_platform_other_name: selectedPlatform?.is_other ? optionalText(draft.externalPlatformOtherName) : null,
           external_url: draft.externalUrl.trim(),
         }),
+        ...(draft.offerEnabled && draft.priceType !== 'contact' && {
+          offer_enabled: true,
+          previous_price: Number.parseFloat(draft.previousPrice),
+        }),
       };
       
       // Details and photos go in one request so the backend creates both or neither.
@@ -295,6 +317,11 @@ export default function CreateListing() {
       setError(errorMsg);
       if (IMAGE_ERROR_CODES.has(responseCode) || [413, 415].includes(err.response?.status)) {
         setStep(1);
+      } else if (
+        responseCode === 'PROMOTIONAL_OFFERS_NOT_AVAILABLE'
+        || apiError.fieldErrors.some(fieldError => String(fieldError.field).includes('previous_price'))
+      ) {
+        setStep(3);
       } else if (
         EXTERNAL_DETAIL_ERROR_CODES.has(responseCode)
         || apiError.fieldErrors.some(fieldError => String(fieldError.field).includes('external_'))
@@ -362,6 +389,21 @@ export default function CreateListing() {
   }
 
   const stepTitle = ['Add photos', 'Listing details', 'Set price', isExternal ? 'Store & link' : 'Location & contact', 'Review & submit'][step - 1];
+
+  const offerFields = (
+    <OfferFields
+      planStatus={allowanceStatus}
+      allowed={offerAllowed}
+      enabled={draft.offerEnabled}
+      previousPrice={draft.previousPrice}
+      price={draft.price}
+      priceType={draft.priceType}
+      onEnable={enableOffer}
+      onRemove={removeOffer}
+      onPreviousPriceChange={value => update({ previousPrice: value })}
+      onRetry={retryAllowance}
+    />
+  );
 
   return (
     <div className={`create-listing-container ${isMobile ? 'create-listing-container--mobile' : 'create-listing-container--desktop'}`}>
@@ -539,10 +581,11 @@ export default function CreateListing() {
           {step === 3 && isExternal && (
             <div className="cl-step">
               <div className="form-group">
-                <label>Price (RWF) *</label>
-                <input type="number" min="0" placeholder="0" value={draft.price} onChange={e => update({ price: e.target.value })} />
+                <label htmlFor="cl-price">{draft.offerEnabled ? 'Current price (RWF) *' : 'Price (RWF) *'}</label>
+                <input id="cl-price" type="number" min="0" placeholder="0" value={draft.price} onChange={e => update({ price: e.target.value })} />
                 <p className="cl-field-hint">Use the current price on the external store. Buyers see the final price there.</p>
               </div>
+              {offerFields}
             </div>
           )}
 
@@ -554,7 +597,7 @@ export default function CreateListing() {
                   {['fixed', 'negotiable', 'contact'].map(pt => (
                     <button
                       key={pt}
-                      onClick={() => update({ priceType: pt })}
+                      onClick={() => choosePriceType(pt)}
                       className={`cl-price-type ${draft.priceType === pt ? 'cl-price-type--active' : ''}`}
                     >
                       <span className="radio"><span className="inner"/></span>
@@ -564,10 +607,13 @@ export default function CreateListing() {
                 </div>
               </div>
               {draft.priceType !== 'contact' && (
-                <div className="form-group">
-                  <label>Price (RWF) *</label>
-                  <input type="number" placeholder="0" value={draft.price} onChange={e => update({ price: e.target.value })} />
-                </div>
+                <>
+                  <div className="form-group">
+                    <label htmlFor="cl-price">{draft.offerEnabled ? 'Current price (RWF) *' : 'Price (RWF) *'}</label>
+                    <input id="cl-price" type="number" min="0" placeholder="0" value={draft.price} onChange={e => update({ price: e.target.value })} />
+                  </div>
+                  {offerFields}
+                </>
               )}
             </div>
           )}
@@ -662,6 +708,11 @@ export default function CreateListing() {
               <div className="cl-review-box">
                 <b>Price:</b> {draft.priceType} {draft.price && `(RWF ${draft.price})`}
               </div>
+              {draft.offerEnabled && (
+                <div className="cl-review-box">
+                  <b>Offer:</b> was RWF {draft.previousPrice}, now RWF {draft.price}
+                </div>
+              )}
               <div className="cl-review-box">
                 <b>Photos:</b> {draft.images.length}
               </div>

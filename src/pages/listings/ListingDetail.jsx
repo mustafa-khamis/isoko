@@ -4,7 +4,8 @@ import { ArrowLeft, Heart, Share2, MapPin, Clock, ChevronLeft, ChevronRight, X, 
 import { useAuth } from '../../context/AuthContext';
 import { useUI } from '../../context/UIContext';
 import { listingsApi } from '../../services/listingsApi';
-import ListingCard, { PriceBadge } from '../../components/listings/ListingCard';
+import ListingCard, { OfferBadge, PriceBadge } from '../../components/listings/ListingCard';
+import { hasOffer } from '../../utils/offers';
 import { BuyExternalButton, ExternalPurchaseDisclosure } from '../../components/listings/ExternalPurchase';
 import { timeAgo, resolveImageUrl } from '../../utils/formatters';
 import { isExternalProduct } from '../../utils/externalProducts';
@@ -194,7 +195,17 @@ export default function ListingDetail() {
         "priceCurrency": "RWF",
         "price": listing.price,
         "availability": "https://schema.org/InStock",
-        "url": `https://rwanmart.com/listing/${listing.id}`
+        "url": `https://rwanmart.com/listing/${listing.id}`,
+        // On offer, the current price stays the offer price; the previous one
+        // is marked as the strikethrough (original) price.
+        ...(hasOffer(listing) && {
+          "priceSpecification": {
+            "@type": "UnitPriceSpecification",
+            "priceType": "https://schema.org/StrikethroughPrice",
+            "price": listing.previous_price,
+            "priceCurrency": "RWF"
+          }
+        })
       }
     })
   };
@@ -251,7 +262,10 @@ export default function ListingDetail() {
 
         <div className="ld-info-section">
           <h1>{listing.title}</h1>
-          <div className="listing-detail-price"><PriceBadge price={listing.price} priceType={listing.price_type} /></div>
+          <div className="listing-detail-price">
+            <PriceBadge price={listing.price} priceType={listing.price_type} previousPrice={listing.previous_price} />
+            <OfferBadge previousPrice={listing.previous_price} price={listing.price} className="listing-badge-offer--detail" />
+          </div>
 
           <div className="ld-meta">
             {listing.location && <span><MapPin size={12} />{listing.location}</span>}
@@ -327,7 +341,7 @@ export default function ListingDetail() {
         {/* Sticky Actions */}
         <div className="ld-sticky-actions">
           <div className="ld-sticky-price">
-            <PriceBadge price={listing.price} priceType={listing.price_type} />
+            <PriceBadge price={listing.price} priceType={listing.price_type} previousPrice={listing.previous_price} />
           </div>
           <div className="ld-sticky-btns">
             {!isOwner && external ? (
@@ -460,7 +474,8 @@ export default function ListingDetail() {
           {/* Right Column - Sticky Sidebar */}
           <div className="ld-sidebar">
             <div className="ld-sidebar-inner">
-              <PriceBadge price={listing.price} priceType={listing.price_type} />
+              <PriceBadge price={listing.price} priceType={listing.price_type} previousPrice={listing.previous_price} />
+              <OfferBadge previousPrice={listing.previous_price} price={listing.price} className="listing-badge-offer--detail" />
 
               <div className="ld-sidebar-actions">
                 <ContactActions />

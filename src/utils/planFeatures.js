@@ -42,6 +42,11 @@ export const buildPlanFeatures = (plan) => {
     }
   }
 
+  // Promotional offers (a capability flag in the plan's features config)
+  if (plan.features?.promotional_offers === true) {
+    rawFeatures.push('Promotional offers');
+  }
+
   // Additional generic JSON features, if present
   if (plan.features && typeof plan.features === 'object') {
     Object.values(plan.features).forEach(val => {

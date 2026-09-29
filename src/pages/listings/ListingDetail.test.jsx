@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { HelmetProvider } from 'react-helmet-async';
 import ListingDetail from './ListingDetail';
@@ -19,6 +19,12 @@ vi.mock('../../context/UIContext', () => ({
 }));
 vi.mock('../../services/listingsApi', () => ({
   listingsApi: { getListing: vi.fn(), getListings: vi.fn() },
+}));
+// Renders the structured data the page passes to SEO (Helmet does not flush <head> in jsdom).
+vi.mock('../../components/seo/SEO', () => ({
+  default: ({ schemaList = [] }) => (
+    <script type="application/ld+json" data-testid="page-schema">{JSON.stringify(schemaList)}</script>
+  ),
 }));
 
 const baseListing = {
@@ -91,6 +97,52 @@ describe('ListingDetail for external products', () => {
 
     await screen.findByText(externalListing.description);
     expect(screen.queryByRole('link', { name: /Buy from/ })).not.toBeInTheDocument();
+  });
+
+  it('shows an external product offer without changing how it is bought', async () => {
+    const { container } = renderDetail({ ...externalListing, price: '15000.00', previous_price: '20000.00' });
+
+    expect(await screen.findByRole('link', { name: /Buy from Amazon/ }))
+      .toHaveAttribute('href', externalListing.external_url);
+    expect(screen.getAllByText('25% OFF').length).toBeGreaterThan(0);
+    expect(container.querySelector('del')).toHaveTextContent(/20,000/);
+    expect(screen.queryByRole('button', { name: /Message/ })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /WhatsApp/ })).not.toBeInTheDocument();
+  });
+
+  it('shows a regular listing offer and keeps its contact actions', async () => {
+    const { container } = renderDetail({
+      ...baseListing, listing_type: 'regular', price: '80.00', previous_price: '100.00', whatsapp_enabled: true, seller_phone: '788000000',
+    });
+
+    expect(await screen.findByRole('button', { name: /Message seller/ })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /WhatsApp seller/ })).toBeInTheDocument();
+    expect(screen.getAllByText('20% OFF').length).toBeGreaterThan(0);
+    expect(container.querySelector('del')).toBeInTheDocument();
+  });
+
+  it('publishes the current price as the offer price in structured data', async () => {
+    renderDetail({ ...baseListing, listing_type: 'regular', price: '15000.00', previous_price: '20000.00' });
+
+    const product = await waitFor(() => {
+      const schema = JSON.parse(screen.getByTestId('page-schema').textContent)
+        .find((entry) => entry['@type'] === 'Product');
+      expect(schema).toBeDefined();
+      return schema;
+    });
+    expect(product.offers.price).toBe('15000.00');
+    expect(product.offers.priceSpecification).toMatchObject({
+      priceType: 'https://schema.org/StrikethroughPrice',
+      price: '20000.00',
+    });
+  });
+
+  it('shows no offer badge or struck price without an offer', async () => {
+    const { container } = renderDetail({ ...baseListing, listing_type: 'regular', previous_price: null });
+
+    await screen.findByText(baseListing.description);
+    expect(container.querySelector('del')).toBeNull();
+    expect(screen.queryByText(/% OFF/)).not.toBeInTheDocument();
   });
 
   it('keeps messaging and WhatsApp for regular listings', async () => {

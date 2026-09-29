@@ -4,15 +4,25 @@ import { useAuth } from '../../context/AuthContext';
 import { useUI } from '../../context/UIContext';
 import { formatRWF, timeAgo, resolveImageUrl } from '../../utils/formatters';
 import { isExternalProduct } from '../../utils/externalProducts';
+import { getOfferDiscount, offerBadgeLabel } from '../../utils/offers';
 import './ListingCard.css';
 
-export function PriceBadge({ price, priceType }) {
+export function PriceBadge({ price, priceType, previousPrice }) {
   if (priceType === 'contact') {
     return <span className="listing-price-contact">Contact for price</span>;
   }
+  // On offer: the previous price is struck through and the current price leads.
+  const onOffer = getOfferDiscount(previousPrice, price) !== null;
   return (
     <div className="listing-price-container">
-      <span className="listing-price">
+      {onOffer && (
+        <del className="listing-price-previous">
+          <span className="listing-sr-only">Previous price: </span>
+          {formatRWF(previousPrice)}
+        </del>
+      )}
+      <span className={`listing-price ${onOffer ? 'listing-price--offer' : ''}`}>
+        {onOffer && <span className="listing-sr-only">Current price: </span>}
         {price ? formatRWF(price) : '—'}
       </span>
       {priceType === 'negotiable' && (
@@ -20,6 +30,12 @@ export function PriceBadge({ price, priceType }) {
       )}
     </div>
   );
+}
+
+export function OfferBadge({ previousPrice, price, className = '' }) {
+  const discount = getOfferDiscount(previousPrice, price);
+  if (discount === null) return null;
+  return <span className={`listing-badge-offer ${className}`.trim()}>{offerBadgeLabel(discount)}</span>;
 }
 
 export default function ListingCard({ listing, compact = false, variant = 'grid' }) {
@@ -56,7 +72,8 @@ export default function ListingCard({ listing, compact = false, variant = 'grid'
         <div className="listing-card-list-content">
           <p className="listing-title listing-title--clamped">{listing.title}</p>
           <div className="listing-price-wrapper">
-            <PriceBadge price={listing.price} priceType={listing.price_type || listing.priceType} />
+            <PriceBadge price={listing.price} priceType={listing.price_type || listing.priceType} previousPrice={listing.previous_price} />
+            <OfferBadge previousPrice={listing.previous_price} price={listing.price} className="listing-badge-offer--inline" />
           </div>
           <div className="listing-meta">
             {listing.location && (
@@ -97,6 +114,7 @@ export default function ListingCard({ listing, compact = false, variant = 'grid'
         />
 
         <div className="listing-badges">
+          <OfferBadge previousPrice={listing.previous_price} price={listing.price} />
           {listing.isPromoted && (
             <span className="listing-badge-promoted">
               <Zap size={10} />Promoted
@@ -124,7 +142,7 @@ export default function ListingCard({ listing, compact = false, variant = 'grid'
         <p className="listing-title listing-title--clamped">
           {listing.title}
         </p>
-        <PriceBadge price={listing.price} priceType={listing.price_type || listing.priceType} />
+        <PriceBadge price={listing.price} priceType={listing.price_type || listing.priceType} previousPrice={listing.previous_price} />
         <div className="listing-meta listing-meta--pushed">
           {listing.location && (
             <>

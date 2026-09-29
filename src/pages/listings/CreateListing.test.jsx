@@ -46,6 +46,16 @@ const sellingUsage = (externalProducts) => ({
   data: { data: { plan: { code: 'trader_plus' }, active_listings_count: 0, external_products: externalProducts } },
 });
 const PLUS_ALLOWANCE = { enabled: true, limit: 20, period_days: 30, used: 0, pending: 0, remaining: 20 };
+const usageWith = ({ offers }) => ({
+  data: {
+    data: {
+      plan: { code: 'plan' },
+      active_listings_count: 0,
+      external_products: { enabled: false },
+      promotional_offers: { enabled: offers },
+    },
+  },
+});
 
 const renderPage = () => render(
   <MemoryRouter initialEntries={['/create-listing']}>
@@ -60,6 +70,18 @@ const addPhoto = (container) => {
 };
 
 const clickContinue = () => fireEvent.click(screen.getByRole('button', { name: /continue/i }));
+
+const goToPriceStep = async (container) => {
+  addPhoto(container);
+  clickContinue();
+  fireEvent.change(screen.getByPlaceholderText('Enter a clear title for your listing'), { target: { value: 'Wireless headphones' } });
+  fireEvent.click(await screen.findByRole('button', { name: 'Electronics' }));
+  fireEvent.change(screen.getByPlaceholderText(/Describe your item/), {
+    target: { value: 'Noise cancelling over-ear headphones with 30h battery.' },
+  });
+  clickContinue();
+  await screen.findByText('Step 3 of 5');
+};
 
 const fillDetailsAndPrice = async () => {
   fireEvent.change(screen.getByPlaceholderText('Enter a clear title for your listing'), { target: { value: 'Wireless headphones' } });
@@ -188,6 +210,84 @@ describe('CreateListing', () => {
 
     expect(await screen.findByRole('button', { name: /20 of 20 left this period/ })).toBeEnabled();
     expect(usersApi.getSellingUsage).toHaveBeenCalledTimes(2);
+  });
+
+  it('keeps "Add offer" unusable until the plan is known', async () => {
+    usersApi.getSellingUsage.mockReturnValue(new Promise(() => {}));
+    const { container } = renderPage();
+    await goToPriceStep(container);
+
+    expect(screen.getByRole('button', { name: 'Add offer, checking your plan' })).toBeDisabled();
+    expect(screen.queryByText('Upgrade to unlock offers')).not.toBeInTheDocument();
+  });
+
+  it('lets a Plus seller add an offer and sends it with the listing', async () => {
+    usersApi.getSellingUsage.mockResolvedValue(usageWith({ offers: true }));
+    const { container } = renderPage();
+    await goToPriceStep(container);
+
+    fireEvent.change(screen.getByLabelText('Price (RWF) *'), { target: { value: '20000' } });
+    fireEvent.click(await screen.findByRole('button', { name: /Add offer/ }));
+    expect(screen.getByLabelText('Previous price (RWF) *')).toHaveValue(20000);
+    fireEvent.change(screen.getByLabelText('Current price (RWF) *'), { target: { value: '15000' } });
+    expect(screen.getByText('25% OFF')).toBeInTheDocument();
+
+    clickContinue(); // price
+    clickContinue(); // location & contact
+    fireEvent.click(await screen.findByRole('button', { name: 'Submit for review' }));
+
+    await waitFor(() => expect(listingsApi.createListing).toHaveBeenCalledTimes(1));
+    expect(JSON.parse(listingsApi.createListing.mock.calls[0][0].get('data'))).toMatchObject({
+      price: 15000,
+      offer_enabled: true,
+      previous_price: 20000,
+    });
+  });
+
+  it('shows a free seller an upgrade link instead of the offer', async () => {
+    usersApi.getSellingUsage.mockResolvedValue(usageWith({ offers: false }));
+    const { container } = renderPage();
+    await goToPriceStep(container);
+
+    expect(await screen.findByRole('link', { name: 'Upgrade to unlock offers' })).toHaveAttribute('href', '/trader-plans');
+    expect(screen.queryByRole('button', { name: /Add offer/ })).not.toBeInTheDocument();
+  });
+
+  it('does not allow offers when the plan cannot be loaded', async () => {
+    usersApi.getSellingUsage.mockRejectedValue(new Error('network'));
+    const { container } = renderPage();
+    await goToPriceStep(container);
+
+    expect(await screen.findByText(/couldn.t load your plan, so offers are unavailable/)).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /Add offer/ })).not.toBeInTheDocument();
+  });
+
+  it('blocks an offer price that is not lower than the previous price', async () => {
+    usersApi.getSellingUsage.mockResolvedValue(usageWith({ offers: true }));
+    const { container } = renderPage();
+    await goToPriceStep(container);
+
+    fireEvent.change(screen.getByLabelText('Price (RWF) *'), { target: { value: '20000' } });
+    fireEvent.click(await screen.findByRole('button', { name: /Add offer/ }));
+    fireEvent.change(screen.getByLabelText('Current price (RWF) *'), { target: { value: '20000' } });
+    clickContinue();
+
+    expect(screen.getAllByText('The offer price must be lower than the previous price.').length).toBeGreaterThan(0);
+    expect(screen.getByText('Step 3 of 5')).toBeInTheDocument();
+  });
+
+  it('keeps only the current price after removing the offer', async () => {
+    usersApi.getSellingUsage.mockResolvedValue(usageWith({ offers: true }));
+    const { container } = renderPage();
+    await goToPriceStep(container);
+
+    fireEvent.change(screen.getByLabelText('Price (RWF) *'), { target: { value: '20000' } });
+    fireEvent.click(await screen.findByRole('button', { name: /Add offer/ }));
+    fireEvent.change(screen.getByLabelText('Current price (RWF) *'), { target: { value: '15000' } });
+    fireEvent.click(screen.getByRole('button', { name: /Remove offer/ }));
+
+    expect(screen.queryByLabelText('Previous price (RWF) *')).not.toBeInTheDocument();
+    expect(screen.getByLabelText('Price (RWF) *')).toHaveValue(15000);
   });
 
   it('disables the option once the period allowance is used up', async () => {
