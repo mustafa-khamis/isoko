@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { Search, SlidersHorizontal, X, ChevronDown, ChevronLeft, ChevronRight, ArrowLeft, PackageSearch } from 'lucide-react';
 import ListingCard, { SkeletonCard } from '../../components/listings/ListingCard';
@@ -15,10 +15,18 @@ export default function Browse() {
   const navigate = useNavigate();
   const { isMobile } = useUI();
   
-  const initialCategory = searchParams.get('category') || '';
-
   const searchQuery = searchParams.get('search') || '';
-  const [activeCategory, setActiveCategory] = useState(initialCategory);
+  // The URL is the only source of the category, so the header's category menu
+  // can switch it while this page stays open.
+  const activeCategory = searchParams.get('category') || '';
+  const setActiveCategory = useCallback((categoryId) => {
+    setSearchParams((current) => {
+      const next = new URLSearchParams(current);
+      if (categoryId) next.set('category', categoryId);
+      else next.delete('category');
+      return next;
+    }, { replace: true });
+  }, [setSearchParams]);
   const [sortBy, setSortBy] = useState('newest');
   const [priceMin, setPriceMin] = useState('');
   const [priceMax, setPriceMax] = useState('');
@@ -84,17 +92,6 @@ export default function Browse() {
       clearTimeout(timeout);
     };
   }, [searchQuery, activeCategory, priceMin, priceMax, province, sortBy, page]);
-
-  // Keep category navigation in the URL without overwriting the current search.
-  useEffect(() => {
-    const currentCategory = searchParams.get('category') || '';
-    if (currentCategory === activeCategory) return;
-
-    const params = new URLSearchParams(searchParams);
-    if (activeCategory) params.set('category', activeCategory);
-    else params.delete('category');
-    setSearchParams(params, { replace: true });
-  }, [activeCategory, searchParams, setSearchParams]);
 
   const cat = categories.find(c => c.id === activeCategory);
   const categoryLabel = cat?.name || cat?.label || '';
