@@ -8,10 +8,23 @@ import { enablePushNotifications } from '../../services/pushNotifications';
 import { timeAgo } from '../../utils/formatters';
 import './Notifications.css';
 
+// The API reports read state as read_at; is_read is kept for older payloads.
+const isRead = (notification) => Boolean(notification.read_at || notification.is_read);
+const markedRead = (notification) => ({
+  ...notification,
+  read_at: notification.read_at || new Date().toISOString(),
+});
+
 export default function Notifications() {
   const navigate = useNavigate();
   const { user, isLoading } = useAuth();
-  const { isMobile, showAuth } = useUI();
+  const {
+    isMobile,
+    showAuth,
+    markAllNotificationsRead,
+    refreshUnreadCounts,
+    whenNotificationsMarkedRead,
+  } = useUI();
   
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -28,6 +41,8 @@ export default function Notifications() {
     }
     const fetchNotifs = async () => {
       try {
+        // Opening this page from the bell marks everything read first.
+        await whenNotificationsMarkedRead();
         const res = await notificationsApi.getNotifications();
         if (res.data && res.data.data) {
           setNotifications(res.data.data || []);
@@ -42,25 +57,23 @@ export default function Notifications() {
   }, [user]);
 
   const markAllRead = async () => {
-    try {
-      await notificationsApi.markAllAsRead();
-      setNotifications(ns => ns.map(n => ({ ...n, is_read: true })));
-    } catch (err) {
-      console.error(err);
+    if (await markAllNotificationsRead()) {
+      setNotifications(ns => ns.map(markedRead));
     }
   };
 
   const markRead = async (id) => {
     try {
       await notificationsApi.markAsRead(id);
-      setNotifications(ns => ns.map(n => n.id === id ? { ...n, is_read: true } : n));
+      setNotifications(ns => ns.map(n => n.id === id ? markedRead(n) : n));
+      refreshUnreadCounts();
     } catch (err) {
       console.error(err);
     }
   };
 
   const handleNotifClick = (notif) => {
-    if (!notif.is_read) {
+    if (!isRead(notif)) {
       markRead(notif.id);
     }
     if (notif.data?.url) {
@@ -90,7 +103,7 @@ export default function Notifications() {
     );
   }
 
-  const unreadCount = notifications.filter(n => !n.is_read).length;
+  const unreadCount = notifications.filter(n => !isRead(n)).length;
 
   return (
     <div className="notifications-page">
@@ -155,12 +168,13 @@ function NotificationRow({ notif, onClick }) {
 
   const icon = icons[notif.type] || <Bell size={20} className="notifications-icon notifications-icon--muted" />;
   const bg = bgColors[notif.type] || 'notifications-row-icon--muted';
+  const unread = !isRead(notif);
 
   return (
     <button
       onClick={onClick}
       className={`notifications-row ${
-        !notif.is_read
+        unread
           ? 'notifications-row--unread'
           : 'notifications-row--read'
       }`}
@@ -169,13 +183,13 @@ function NotificationRow({ notif, onClick }) {
         {icon}
       </div>
       <div className="notifications-row-content">
-        <p className={`notifications-row-title ${!notif.is_read ? 'notifications-row-title--unread' : ''}`}>
+        <p className={`notifications-row-title ${unread ? 'notifications-row-title--unread' : ''}`}>
           {notif.title}
         </p>
         <p className="notifications-row-message">{notif.body || notif.message}</p>
         <p className="notifications-row-time">{timeAgo(notif.created_at)}</p>
       </div>
-      {!notif.is_read && (
+      {unread && (
         <div className="notifications-unread-dot" />
       )}
     </button>

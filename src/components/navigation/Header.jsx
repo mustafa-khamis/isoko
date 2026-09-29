@@ -12,7 +12,7 @@ export default function Header() {
   const navigate = useNavigate();
   const location = useLocation();
   const { user } = useAuth();
-  const { showAuth, isMobile, unreadNotificationCount } = useUI();
+  const { showAuth, isMobile, unreadNotificationCount, markAllNotificationsRead } = useUI();
   
   const [categories, setCategories] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -75,6 +75,7 @@ export default function Header() {
 
   const handleNotifications = () => {
     if (!user) { showAuth('Sign in to see your notifications.'); return; }
+    markAllNotificationsRead();
     navigate('/notifications');
   };
 

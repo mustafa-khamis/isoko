@@ -31,6 +31,17 @@ export const buildPlanFeatures = (plan) => {
     );
   }
 
+  // External products (listings bought on another platform)
+  if (plan.max_external_products_per_period !== undefined && plan.max_external_products_per_period !== null) {
+    const externalLimit = Number(plan.max_external_products_per_period);
+    if (externalLimit > 0) {
+      const periodText = plan.external_products_period_days ? ` every ${plan.external_products_period_days} days` : '';
+      rawFeatures.push(`${externalLimit} external ${externalLimit === 1 ? 'product' : 'products'}${periodText}`);
+    } else {
+      rawFeatures.push('External products not available');
+    }
+  }
+
   // Additional generic JSON features, if present
   if (plan.features && typeof plan.features === 'object') {
     Object.values(plan.features).forEach(val => {

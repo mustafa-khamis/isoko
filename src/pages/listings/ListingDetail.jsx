@@ -5,7 +5,9 @@ import { useAuth } from '../../context/AuthContext';
 import { useUI } from '../../context/UIContext';
 import { listingsApi } from '../../services/listingsApi';
 import ListingCard, { PriceBadge } from '../../components/listings/ListingCard';
+import { BuyExternalButton, ExternalPurchaseDisclosure } from '../../components/listings/ExternalPurchase';
 import { timeAgo, resolveImageUrl } from '../../utils/formatters';
+import { isExternalProduct } from '../../utils/externalProducts';
 import SEO from '../../components/seo/SEO';
 import { Helmet } from 'react-helmet-async';
 import './ListingDetail.css';
@@ -138,6 +140,8 @@ export default function ListingDetail() {
 
   const images = listing.images || [];
   const displayImage = images.length > 0 ? images[currentImg] : '/images/default-listing.svg';
+  // External products are bought on another platform: no messaging, no WhatsApp.
+  const external = isExternalProduct(listing);
 
   const ContactActions = () => {
     if (isOwner) {
@@ -146,6 +150,14 @@ export default function ListingDetail() {
           <button onClick={() => navigate('/my-listings')} className="listing-contact-button listing-contact-button--manage">
             Manage
           </button>
+        </div>
+      );
+    }
+
+    if (external) {
+      return (
+        <div className="listing-contact-actions">
+          <BuyExternalButton listing={listing} className="listing-contact-button listing-contact-button--message" />
         </div>
       );
     }
@@ -174,13 +186,17 @@ export default function ListingDetail() {
     "image": images.length > 0 ? images : ['https://rwanmart.com/favicon.png'],
     "description": listing.description || `Buy ${listing.title} on RwanMart.`,
     "category": listing.category,
-    "offers": {
-      "@type": "Offer",
-      "priceCurrency": "RWF",
-      "price": listing.price,
-      "availability": "https://schema.org/InStock",
-      "url": `https://rwanmart.com/listing/${listing.id}`
-    }
+    // External products are sold elsewhere, so RwanMart makes no offer,
+    // price or availability claim for them.
+    ...(!external && {
+      "offers": {
+        "@type": "Offer",
+        "priceCurrency": "RWF",
+        "price": listing.price,
+        "availability": "https://schema.org/InStock",
+        "url": `https://rwanmart.com/listing/${listing.id}`
+      }
+    })
   };
 
   if (isMobile) {
@@ -255,6 +271,7 @@ export default function ListingDetail() {
           <h2>Description</h2>
           <p className={!showDesc ? 'listing-description--collapsed' : ''}>{listing.description}</p>
           <button onClick={() => setShowDesc(!showDesc)}>{showDesc ? 'Show less' : 'Show more'}</button>
+          {external && <ExternalPurchaseDisclosure listing={listing} />}
         </div>
 
         {/* Seller Info */}
@@ -313,7 +330,9 @@ export default function ListingDetail() {
             <PriceBadge price={listing.price} priceType={listing.price_type} />
           </div>
           <div className="ld-sticky-btns">
-            {!isOwner ? (
+            {!isOwner && external ? (
+              <BuyExternalButton listing={listing} className="btn-message" />
+            ) : !isOwner ? (
               <>
                 <button onClick={handleMessage} className="btn-message">
                   <MessageCircle size={16} /> Message
@@ -425,6 +444,7 @@ export default function ListingDetail() {
               {listing.description?.length > 200 && (
                 <button onClick={() => setShowDesc(!showDesc)}>{showDesc ? 'Show less' : 'Read more'}</button>
               )}
+              {external && <ExternalPurchaseDisclosure listing={listing} />}
             </div>
 
             {related.length > 0 && (

@@ -279,6 +279,128 @@
   font-size: 0.875rem;
 }
 
+.cl-review-box--wrap {
+  overflow-wrap: anywhere;
+}
+
+/* Regular listing / external product choice */
+.cl-listing-types {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.5rem;
+}
+
+.cl-listing-type {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 0.75rem;
+  text-align: left;
+  border: 1px solid var(--color-ink-200);
+  border-radius: var(--radius-xl);
+  color: var(--color-ink-700);
+}
+
+.cl-listing-type--active {
+  border-color: var(--color-brand-500);
+  background-color: var(--color-brand-50);
+  color: var(--color-brand-700);
+}
+
+.cl-listing-type:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.cl-listing-type__title {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.cl-listing-type__copy {
+  font-size: 0.75rem;
+  line-height: 1rem;
+  color: var(--color-ink-500);
+}
+
+.cl-listing-type:focus-visible {
+  outline: 2px solid var(--color-brand-500);
+  outline-offset: 2px;
+}
+
+/* Waiting for the seller's plan: keep the card at full strength and shimmer
+   only where its text will appear. */
+.cl-listing-type--loading:disabled {
+  opacity: 1;
+  cursor: progress;
+}
+
+.cl-listing-type__skeleton {
+  display: block;
+  width: 80%;
+  height: 0.75rem;
+  margin-block: 0.125rem;
+  border-radius: var(--radius-md);
+  background: linear-gradient(90deg, var(--color-ink-100) 25%, var(--color-ink-50) 50%, var(--color-ink-100) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+.cl-listing-type__resolved {
+  animation: fadeIn 0.2s ease-out both;
+}
+
+/* Not included in the seller's plan (or the plan couldn't be checked). */
+.cl-listing-type--locked {
+  background-color: var(--color-ink-50);
+  color: var(--color-ink-500);
+  cursor: default;
+}
+
+.cl-listing-type--locked .cl-listing-type__copy {
+  color: var(--color-ink-400);
+}
+
+.cl-listing-type__cta {
+  align-self: flex-start;
+  margin-top: 0.125rem;
+  padding: 0;
+  background: none;
+  border: 0;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--color-brand-600);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+}
+
+.cl-listing-type__cta:hover {
+  color: var(--color-brand-700);
+}
+
+.cl-listing-type__cta:focus-visible {
+  outline: 2px solid var(--color-brand-500);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm, 4px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cl-listing-type__skeleton,
+  .cl-listing-type__resolved {
+    animation: none;
+  }
+}
+
+@media (max-width: 360px) {
+  .cl-listing-types {
+    grid-template-columns: 1fr;
+  }
+}
+
 /* Mobile specific */
 .create-listing-container--mobile .cl-header {
   position: sticky;

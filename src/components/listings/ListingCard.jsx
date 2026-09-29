@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useUI } from '../../context/UIContext';
 import { formatRWF, timeAgo, resolveImageUrl } from '../../utils/formatters';
+import { isExternalProduct } from '../../utils/externalProducts';
 import './ListingCard.css';
 
 export function PriceBadge({ price, priceType }) {
@@ -65,6 +66,12 @@ export default function ListingCard({ listing, compact = false, variant = 'grid'
             )}
             <span className="listing-meta-dot">·</span>
             <span>{timeAgo(listing.created_at || listing.postedAt || new Date())}</span>
+            {isExternalProduct(listing) && listing.external_platform_name && (
+              <>
+                <span className="listing-meta-dot">·</span>
+                <span className="listing-meta-external">via {listing.external_platform_name}</span>
+              </>
+            )}
           </div>
         </div>
         <button
@@ -97,6 +104,9 @@ export default function ListingCard({ listing, compact = false, variant = 'grid'
           )}
           {listing.isNew && (
             <span className="listing-badge-new">New</span>
+          )}
+          {isExternalProduct(listing) && listing.external_platform_name && (
+            <span className="listing-badge-external">via {listing.external_platform_name}</span>
           )}
         </div>
 

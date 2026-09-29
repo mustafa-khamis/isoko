@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
 import { useAuth } from './AuthContext';
 import { usersApi } from '../services/usersApi';
 import { listingsApi } from '../services/listingsApi';
@@ -54,6 +54,11 @@ export const UIProvider = ({ children }) => {
   const [favorites, setFavorites] = useState([]);
   const [unreadMessageCount, setUnreadMessageCount] = useState(0);
   const [unreadNotificationCount, setUnreadNotificationCount] = useState(0);
+  const refreshUnreadRef = useRef(() => {});
+  // Bumped when notifications are marked read, so an unread-count response
+  // requested before that cannot bring the badge back.
+  const notificationCountVersion = useRef(0);
+  const markAllReadRequest = useRef(null);
 
   useEffect(() => {
     if (isLoading) return;
@@ -70,6 +75,7 @@ export const UIProvider = ({ children }) => {
 
       // Fetch unread messages and notifications
       const fetchUnread = async () => {
+        const countVersion = notificationCountVersion.current;
         try {
           const [msgRes, notifRes] = await Promise.all([
             messagesApi.getUnreadCount(),
@@ -77,13 +83,16 @@ export const UIProvider = ({ children }) => {
           ]);
           if (isMounted) {
             setUnreadMessageCount(msgRes.data?.data?.count || 0);
-            setUnreadNotificationCount(notifRes.data?.data?.count || 0);
+            if (countVersion === notificationCountVersion.current && !markAllReadRequest.current) {
+              setUnreadNotificationCount(notifRes.data?.data?.count || 0);
+            }
           }
         } catch (err) {
           console.error('Failed to load unread counts', err);
         }
       };
-      
+      refreshUnreadRef.current = fetchUnread;
+
       fetchUnread();
       onForegroundMessage((payload) => {
         showForegroundNotification(payload);
@@ -101,10 +110,41 @@ export const UIProvider = ({ children }) => {
 
     return () => {
       isMounted = false;
+      refreshUnreadRef.current = () => {};
       if (pollInterval) clearInterval(pollInterval);
       if (unsubscribeForeground) unsubscribeForeground();
     };
   }, [user, isLoading]);
+
+  const refreshUnreadCounts = useCallback(() => refreshUnreadRef.current(), []);
+
+  // Clears the notification badge straight away and marks everything read on
+  // the server. Resolves to false (and restores the real count) on failure.
+  const markAllNotificationsRead = useCallback(() => {
+    if (markAllReadRequest.current) return markAllReadRequest.current;
+    notificationCountVersion.current += 1;
+    setUnreadNotificationCount(0);
+
+    const request = notificationsApi.markAllAsRead()
+      .then(() => true, (err) => {
+        console.error('Failed to mark notifications as read', err);
+        return false;
+      })
+      .then((ok) => {
+        markAllReadRequest.current = null;
+        notificationCountVersion.current += 1;
+        if (!ok) refreshUnreadRef.current();
+        return ok;
+      });
+    markAllReadRequest.current = request;
+    return request;
+  }, []);
+
+  // Lets the notifications page load after a pending "mark all read" lands.
+  const whenNotificationsMarkedRead = useCallback(
+    () => markAllReadRequest.current || Promise.resolve(true),
+    []
+  );
 
   const showAuth = useCallback((reason = '') => {
     setAuthReason(reason);
@@ -147,7 +187,10 @@ export const UIProvider = ({ children }) => {
       toggleFavorite,
       isFavorite,
       unreadMessageCount,
-      unreadNotificationCount
+      unreadNotificationCount,
+      refreshUnreadCounts,
+      markAllNotificationsRead,
+      whenNotificationsMarkedRead
     }}>
       {children}
     </UIContext.Provider>

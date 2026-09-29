@@ -18,6 +18,7 @@ import { useUI } from '../../context/UIContext';
 import { listingsApi } from '../../services/listingsApi';
 import { usersApi } from '../../services/usersApi';
 import { formatRWF, timeAgo } from '../../utils/formatters';
+import { isExternalProduct } from '../../utils/externalProducts';
 import './MyListings.css';
 
 const TABS = [
@@ -247,6 +248,12 @@ function ListingRow({ listing, updating, onEdit, onHide, onMarkSold, onDelete })
             <span className="my-listing-card__views"><Eye size={12} />{listing.views || 0}</span>
             <span aria-hidden="true">&middot;</span>
             <span>{timeAgo(listing.created_at)}</span>
+            {isExternalProduct(listing) && (
+              <>
+                <span aria-hidden="true">&middot;</span>
+                <span>External{listing.external_platform_name ? ` · ${listing.external_platform_name}` : ''}</span>
+              </>
+            )}
           </div>
         </div>
       </div>

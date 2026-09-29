@@ -21,7 +21,7 @@ import './Profile.css';
 
 export default function Profile() {
   const { user, logout, isLoading } = useAuth();
-  const { isMobile, showAuth } = useUI();
+  const { isMobile, showAuth, markAllNotificationsRead } = useUI();
   const navigate = useNavigate();
   const [copied, setCopied] = useState(false);
 
@@ -68,7 +68,7 @@ export default function Profile() {
   const menuItems = [
     { icon: <Package size={16} />, label: 'My Listings', onClick: () => navigate('/my-listings') },
     { icon: <Heart size={16} />, label: 'Saved Listings', onClick: () => navigate('/favorites') },
-    { icon: <Bell size={16} />, label: 'Notifications', onClick: () => navigate('/notifications') },
+    { icon: <Bell size={16} />, label: 'Notifications', onClick: () => { markAllNotificationsRead(); navigate('/notifications'); } },
     { icon: <Crown size={16} />, label: 'Trader Plans', onClick: () => navigate('/trader-plans'), premium: true },
     ...(user.role !== 'buyer'
       ? [{ icon: <Megaphone size={16} />, label: 'Sponsored Ads', onClick: () => navigate('/sponsored-ad') }]

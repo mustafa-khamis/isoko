@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { ArrowLeft, ImagePlus, Camera, X, ChevronRight, CheckCircle, Loader2 } from 'lucide-react';
 import { useUI } from '../../context/UIContext';
 import { useAuth } from '../../context/AuthContext';
@@ -7,7 +7,15 @@ import { normalizeApiError } from '../../services/apiClient';
 import { listingsApi } from '../../services/listingsApi';
 import { categoriesApi } from '../../services/categoriesApi';
 import { locationsApi } from '../../services/locationsApi';
+import { usersApi } from '../../services/usersApi';
+import { externalPlatformsApi } from '../../services/externalPlatformsApi';
+import ExternalProductFields from '../../components/listings/ExternalProductFields';
+import ListingTypePicker from '../../components/listings/ListingTypePicker';
+import { LISTING_TYPE, externalProductAllowance, isValidExternalUrl } from '../../utils/externalProducts';
 import './CreateListing.css';
+
+// External-product errors that the seller fixes on the "Store & link" step.
+const EXTERNAL_DETAIL_ERROR_CODES = new Set(['EXTERNAL_PLATFORM_INVALID', 'EXTERNAL_PLATFORM_NAME_REQUIRED']);
 
 // Backend errors caused by the photos; the user is sent back to step 1 to fix them.
 const IMAGE_ERROR_CODES = new Set([
@@ -20,6 +28,10 @@ const IMAGE_ERROR_CODES = new Set([
 ]);
 
 const INITIAL_DRAFT = {
+  listingType: LISTING_TYPE.REGULAR,
+  externalPlatformId: '',
+  externalPlatformOtherName: '',
+  externalUrl: '',
   images: [],
   imageUrls: [],
   title: '',
@@ -36,9 +48,14 @@ const INITIAL_DRAFT = {
 
 export default function CreateListing() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { isMobile } = useUI();
   const { user, isLoading } = useAuth();
-  
+  const [externalAllowance, setExternalAllowance] = useState({ enabled: false });
+  const [allowanceStatus, setAllowanceStatus] = useState('loading');
+  const [allowanceRequest, setAllowanceRequest] = useState(0);
+  const [platforms, setPlatforms] = useState([]);
+
   const [step, setStep] = useState(1);
   const [draft, setDraft] = useState(INITIAL_DRAFT);
   const [submitted, setSubmitted] = useState(false);
@@ -61,6 +78,14 @@ export default function CreateListing() {
   const optionalText = (value) => {
     const trimmed = value.trim();
     return trimmed ? trimmed : null;
+  };
+  const isExternal = draft.listingType === LISTING_TYPE.EXTERNAL;
+  const selectedPlatform = platforms.find(p => p.id === draft.externalPlatformId);
+  const chooseListingType = (listingType) => {
+    setError('');
+    update(listingType === LISTING_TYPE.EXTERNAL
+      ? { listingType, priceType: 'fixed', province_id: '', city_id: '', whatsappEnabled: false, whatsapp: '' }
+      : { listingType });
   };
   const setStepError = (message) => {
     setError(message);
@@ -89,7 +114,19 @@ export default function CreateListing() {
     if (stepToValidate === 3 && draft.priceType !== 'contact') {
       const parsedPrice = Number.parseFloat(draft.price);
       if (draft.price.trim() === '' || Number.isNaN(parsedPrice) || parsedPrice < 0) {
-        return setStepError('Enter a valid price, or choose contact for price.');
+        return setStepError(isExternal ? 'Enter the product price.' : 'Enter a valid price, or choose contact for price.');
+      }
+    }
+
+    if (stepToValidate === 4 && isExternal) {
+      if (!selectedPlatform) {
+        return setStepError('Choose the platform the product is sold on.');
+      }
+      if (selectedPlatform.is_other && !draft.externalPlatformOtherName.trim()) {
+        return setStepError('Enter the name of the platform.');
+      }
+      if (!isValidExternalUrl(draft.externalUrl)) {
+        return setStepError('Enter a valid product link that starts with https://');
       }
     }
 
@@ -114,6 +151,37 @@ export default function CreateListing() {
       setProvinces(provRes.data?.data || provRes.data || []);
     }).catch(console.error);
   }, []);
+
+  // External products are offered only when the seller's plan includes them.
+  const userId = user?.id;
+  useEffect(() => {
+    if (!userId) return;
+    let active = true;
+    usersApi.getSellingUsage()
+      .then(res => {
+        if (!active) return;
+        const allowance = externalProductAllowance(res.data?.data);
+        setExternalAllowance(allowance);
+        setAllowanceStatus('ready');
+        if (!allowance.enabled) return;
+        if (searchParams.get('type') === LISTING_TYPE.EXTERNAL && allowance.remaining > 0) {
+          setDraft(d => ({ ...d, listingType: LISTING_TYPE.EXTERNAL, priceType: 'fixed' }));
+        }
+        externalPlatformsApi.getPlatforms()
+          .then(platformRes => { if (active) setPlatforms(platformRes.data?.data || []); })
+          .catch(console.error);
+      })
+      .catch(err => {
+        console.error(err);
+        if (active) setAllowanceStatus('error');
+      });
+    return () => { active = false; };
+  }, [userId, searchParams, allowanceRequest]);
+
+  const retryAllowance = () => {
+    setAllowanceStatus('loading');
+    setAllowanceRequest(n => n + 1);
+  };
 
   useEffect(() => {
     if (draft.category_id) {
@@ -160,7 +228,7 @@ export default function CreateListing() {
       setStep(1);
       return;
     }
-    for (let stepToValidate = 1; stepToValidate <= 3; stepToValidate += 1) {
+    for (let stepToValidate = 1; stepToValidate <= 4; stepToValidate += 1) {
       if (!validateStep(stepToValidate)) {
         setStep(stepToValidate);
         return;
@@ -183,6 +251,17 @@ export default function CreateListing() {
         city_id: optionalUuid(draft.city_id),
         whatsapp_enabled: draft.whatsappEnabled,
         whatsapp_number_override: draft.whatsappEnabled ? optionalText(draft.whatsapp) : null,
+        ...(isExternal && {
+          listing_type: LISTING_TYPE.EXTERNAL,
+          price_type: 'fixed',
+          province_id: null,
+          city_id: null,
+          whatsapp_enabled: false,
+          whatsapp_number_override: null,
+          external_platform_id: draft.externalPlatformId,
+          external_platform_other_name: selectedPlatform?.is_other ? optionalText(draft.externalPlatformOtherName) : null,
+          external_url: draft.externalUrl.trim(),
+        }),
       };
       
       // Details and photos go in one request so the backend creates both or neither.
@@ -216,6 +295,11 @@ export default function CreateListing() {
       setError(errorMsg);
       if (IMAGE_ERROR_CODES.has(responseCode) || [413, 415].includes(err.response?.status)) {
         setStep(1);
+      } else if (
+        EXTERNAL_DETAIL_ERROR_CODES.has(responseCode)
+        || apiError.fieldErrors.some(fieldError => String(fieldError.field).includes('external_'))
+      ) {
+        setStep(4);
       }
     } finally {
       setSubmitting(false);
@@ -277,7 +361,7 @@ export default function CreateListing() {
     );
   }
 
-  const stepTitle = ['Add photos', 'Listing details', 'Set price', 'Location & contact', 'Review & submit'][step - 1];
+  const stepTitle = ['Add photos', 'Listing details', 'Set price', isExternal ? 'Store & link' : 'Location & contact', 'Review & submit'][step - 1];
 
   return (
     <div className={`create-listing-container ${isMobile ? 'create-listing-container--mobile' : 'create-listing-container--desktop'}`}>
@@ -304,7 +388,16 @@ export default function CreateListing() {
 
           {step === 1 && (
             <div className="cl-step">
-              <p className="cl-help-text">Add clear photos to help buyers trust your listing. You can add up to 10 images.</p>
+              <ListingTypePicker
+                value={draft.listingType}
+                onChange={chooseListingType}
+                allowanceStatus={allowanceStatus}
+                allowance={externalAllowance}
+                onRetry={retryAllowance}
+              />
+              <p className="cl-help-text">
+                Add clear photos to help buyers trust your listing. At least one photo is required; you can add up to 10.
+              </p>
               <div className="cl-photo-grid">
                 {draft.imageUrls.map((url, i) => (
                   <div key={i} className="cl-photo-box">
@@ -443,7 +536,17 @@ export default function CreateListing() {
             </div>
           )}
 
-          {step === 3 && (
+          {step === 3 && isExternal && (
+            <div className="cl-step">
+              <div className="form-group">
+                <label>Price (RWF) *</label>
+                <input type="number" min="0" placeholder="0" value={draft.price} onChange={e => update({ price: e.target.value })} />
+                <p className="cl-field-hint">Use the current price on the external store. Buyers see the final price there.</p>
+              </div>
+            </div>
+          )}
+
+          {step === 3 && !isExternal && (
             <div className="cl-step">
               <div className="form-group">
                 <label>Price type *</label>
@@ -469,7 +572,22 @@ export default function CreateListing() {
             </div>
           )}
 
-          {step === 4 && (
+          {step === 4 && isExternal && (
+            <div className="cl-step">
+              <p className="cl-help-text">Tell buyers where to buy this product. They will be sent to your link.</p>
+              <ExternalProductFields
+                platforms={platforms}
+                platformId={draft.externalPlatformId}
+                otherName={draft.externalPlatformOtherName}
+                url={draft.externalUrl}
+                onChange={update}
+                touched={touched}
+                onTouch={field => setTouched(t => ({ ...t, [field]: true }))}
+              />
+            </div>
+          )}
+
+          {step === 4 && !isExternal && (
             <div className="cl-step">
               <div className="form-group">
                 <label>Province</label>
@@ -544,6 +662,19 @@ export default function CreateListing() {
               <div className="cl-review-box">
                 <b>Price:</b> {draft.priceType} {draft.price && `(RWF ${draft.price})`}
               </div>
+              <div className="cl-review-box">
+                <b>Photos:</b> {draft.images.length}
+              </div>
+              {isExternal && (
+                <>
+                  <div className="cl-review-box">
+                    <b>Sold on:</b> {selectedPlatform?.is_other ? draft.externalPlatformOtherName.trim() : selectedPlatform?.name}
+                  </div>
+                  <div className="cl-review-box cl-review-box--wrap">
+                    <b>Product link:</b> {draft.externalUrl.trim()}
+                  </div>
+                </>
+              )}
             </div>
           )}
         </div>

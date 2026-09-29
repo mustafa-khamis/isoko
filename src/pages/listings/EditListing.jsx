@@ -14,6 +14,9 @@ import { normalizeApiError } from '../../services/apiClient';
 import { listingsApi } from '../../services/listingsApi';
 import { categoriesApi } from '../../services/categoriesApi';
 import { locationsApi } from '../../services/locationsApi';
+import { externalPlatformsApi } from '../../services/externalPlatformsApi';
+import ExternalProductFields from '../../components/listings/ExternalProductFields';
+import { LISTING_TYPE, isValidExternalUrl } from '../../utils/externalProducts';
 import './EditListing.css';
 
 /* ─── Helpers ─────────────────────────────────────────────────────────────── */
@@ -60,8 +63,14 @@ export default function EditListing() {
     city_id:        '',
     whatsappEnabled: false,
     whatsapp:       '',
+    listingType:    LISTING_TYPE.REGULAR,
+    externalPlatformId: '',
+    externalPlatformOtherName: '',
+    externalUrl:    '',
   });
   const [touched, setTouched] = useState({});
+  const [platforms, setPlatforms] = useState([]);
+  const isExternal = form.listingType === LISTING_TYPE.EXTERNAL;
 
   /* ── Image state ──────────────────────────────────────────────────────── */
   const [existingImages, setExistingImages] = useState([]);
@@ -124,6 +133,10 @@ export default function EditListing() {
           city_id:         l.city_id        || '',
           whatsappEnabled: Boolean(l.whatsapp_enabled),
           whatsapp:        l.whatsapp_number_override || '',
+          listingType:     l.listing_type || LISTING_TYPE.REGULAR,
+          externalPlatformId: l.external_platform_id || '',
+          externalPlatformOtherName: l.external_platform_other_name || '',
+          externalUrl:     l.external_url || '',
         });
 
         const imgs = (l.images || []).map(img =>
@@ -137,22 +150,51 @@ export default function EditListing() {
       .finally(() => setPageLoading(false));
   }, [id, user, authLoading, navigate]);
 
+  /* ── Load platforms for external products ────────────────────────────── */
+  useEffect(() => {
+    if (!isExternal) return;
+    externalPlatformsApi.getPlatforms()
+      .then(r => setPlatforms(r.data?.data || []))
+      .catch(console.error);
+  }, [isExternal]);
+
   /* ── Helpers ──────────────────────────────────────────────────────────── */
   const update = (partial) => setForm(f => ({ ...f, ...partial }));
   const touch  = (field)   => setTouched(t => ({ ...t, [field]: true }));
+  const selectedPlatform = platforms.find(p => p.id === form.externalPlatformId);
+  const tabs = isExternal
+    ? TABS.map(tab => (tab.key === 'location' ? { ...tab, label: 'Store & link' } : tab))
+    : TABS;
+
+  const fail = (message, tab) => {
+    setError(message);
+    if (tab) setActiveTab(tab);
+    return false;
+  };
 
   const validate = () => {
     const title = form.title.trim();
     const desc  = form.description.trim();
-    if (title.length < 5)  { setError('Title must be at least 5 characters.'); return false; }
-    if (!form.category_id) { setError('Please select a category.'); return false; }
-    if (desc.length < 20)  { setError('Description must be at least 20 characters.'); return false; }
+    if (title.length < 5)  return fail('Title must be at least 5 characters.', 'details');
+    if (!form.category_id) return fail('Please select a category.', 'details');
+    if (desc.length < 20)  return fail('Description must be at least 20 characters.', 'details');
     if (form.priceType !== 'contact') {
       const p = Number.parseFloat(form.price);
       if (form.price.trim() === '' || Number.isNaN(p) || p < 0) {
-        setError('Enter a valid price, or choose "Contact for price".');
-        return false;
+        return fail(isExternal ? 'Enter the product price.' : 'Enter a valid price, or choose "Contact for price".', 'pricing');
       }
+    }
+    if (isExternal) {
+      if (!form.externalPlatformId) return fail('Choose the platform the product is sold on.', 'location');
+      if (selectedPlatform?.is_other && !form.externalPlatformOtherName.trim()) {
+        return fail('Enter the name of the platform.', 'location');
+      }
+      if (!isValidExternalUrl(form.externalUrl)) {
+        return fail('Enter a valid product link that starts with https://', 'location');
+      }
+    }
+    if (existingImages.length + newImages.length === 0) {
+      return fail('Add at least one photo before saving.', 'photos');
     }
     return true;
   };
@@ -216,18 +258,30 @@ export default function EditListing() {
       const parsedPrice = Number.parseFloat(form.price);
       const priceVal    = Number.isNaN(parsedPrice) ? null : parsedPrice;
 
-      await listingsApi.updateListing(id, {
+      const common = {
         title:                    form.title.trim(),
         description:              form.description.trim(),
-        price:                    form.priceType !== 'contact' ? priceVal : null,
-        price_type:               form.priceType === 'contact' ? 'contact_for_price' : form.priceType,
         category_id:              form.category_id || undefined,
         subcategory_id:           optionalUuid(form.subcategory_id),
-        province_id:              optionalUuid(form.province_id),
-        city_id:                  optionalUuid(form.city_id),
-        whatsapp_enabled:         form.whatsappEnabled,
-        whatsapp_number_override: form.whatsappEnabled ? optionalText(form.whatsapp) : null,
-      });
+      };
+      await listingsApi.updateListing(id, isExternal
+        ? {
+            ...common,
+            price:                        priceVal,
+            price_type:                   'fixed',
+            external_platform_id:         form.externalPlatformId,
+            external_platform_other_name: selectedPlatform?.is_other ? optionalText(form.externalPlatformOtherName) : null,
+            external_url:                 form.externalUrl.trim(),
+          }
+        : {
+            ...common,
+            price:                    form.priceType !== 'contact' ? priceVal : null,
+            price_type:               form.priceType === 'contact' ? 'contact_for_price' : form.priceType,
+            province_id:              optionalUuid(form.province_id),
+            city_id:                  optionalUuid(form.city_id),
+            whatsapp_enabled:         form.whatsappEnabled,
+            whatsapp_number_override: form.whatsappEnabled ? optionalText(form.whatsapp) : null,
+          });
 
       if (newImages.length > 0) {
         const fd = new FormData();
@@ -298,7 +352,7 @@ export default function EditListing() {
 
         {/* ── Tab bar ─────────────────────────────────────────────────── */}
         <div className="el-tabs" role="tablist">
-          {TABS.map(tab => (
+          {tabs.map(tab => (
             <button
               key={tab.key}
               role="tab"
@@ -414,6 +468,7 @@ export default function EditListing() {
           {/* Pricing tab */}
           {activeTab === 'pricing' && (
             <div className="el-panel">
+              {!isExternal && (
               <div className="el-field">
                 <label>Price type *</label>
                 <div className="el-price-types">
@@ -439,6 +494,7 @@ export default function EditListing() {
                   ))}
                 </div>
               </div>
+              )}
 
               {form.priceType !== 'contact' && (
                 <div className="el-field">
@@ -455,13 +511,34 @@ export default function EditListing() {
                       className="el-price-input"
                     />
                   </div>
+                  {isExternal && (
+                    <p className="el-hint">Use the current price on the external store. Buyers see the final price there.</p>
+                  )}
                 </div>
               )}
             </div>
           )}
 
+          {/* Store & link tab (external products) */}
+          {activeTab === 'location' && isExternal && (
+            <div className="el-panel">
+              <ExternalProductFields
+                platforms={platforms}
+                platformId={form.externalPlatformId}
+                otherName={form.externalPlatformOtherName}
+                url={form.externalUrl}
+                onChange={update}
+                touched={touched}
+                onTouch={touch}
+                fieldClassName="el-field"
+                inputClassName="el-input"
+                selectClassName="el-select"
+              />
+            </div>
+          )}
+
           {/* Location tab */}
-          {activeTab === 'location' && (
+          {activeTab === 'location' && !isExternal && (
             <div className="el-panel">
               <div className="el-field">
                 <label htmlFor="el-province-select">Province</label>
@@ -543,7 +620,7 @@ export default function EditListing() {
           {activeTab === 'photos' && (
             <div className="el-panel">
               <p className="el-photos-help">
-                Up to 10 images. Removing an existing image is permanent.
+                At least one and up to 10 images. Removing an existing image is permanent.
               </p>
               <div className="el-photo-grid">
                 {existingImages.map((img, i) => (
